@@ -948,6 +948,10 @@ class PautaBridge:
         html_abs = str(Path(editor_html_path).resolve())
 
         class EditorHandler(http.server.BaseHTTPRequestHandler):
+            # Use HTTP/1.1 for keep-alive connections — reduces latency
+            # between Range requests and prevents AV desync
+            protocol_version = "HTTP/1.1"
+
             def _resolve_path(self):
                 clean = unquote(self.path).split('?')[0].split('#')[0]
                 if clean in ('/', '/subtitle-editor.html'):
@@ -990,6 +994,7 @@ class PautaBridge:
                         self.send_header('Content-Length', str(length))
                         self.send_header('Content-Range', f'bytes {start}-{end}/{file_size}')
                         self.send_header('Accept-Ranges', 'bytes')
+                        self.send_header('Cache-Control', 'public, max-age=3600')
                         self.end_headers()
 
                         if not head_only:
@@ -1009,6 +1014,7 @@ class PautaBridge:
                     self.send_header('Content-Type', ctype)
                     self.send_header('Content-Length', str(file_size))
                     self.send_header('Accept-Ranges', 'bytes')
+                    self.send_header('Cache-Control', 'public, max-age=3600')
                     self.end_headers()
 
                     if not head_only:
