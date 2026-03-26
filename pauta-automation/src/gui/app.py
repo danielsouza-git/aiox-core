@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import os
 import sys
 import threading
 from pathlib import Path
@@ -382,6 +383,23 @@ class PautaBridge:
             if not url:
                 return {"status": "error", "message": "URL vazia."}
 
+            # Detect local file path BEFORE spawning worker thread.
+            # Windows paths (D:\..., C:/..., \\server\...) must NOT be sent to yt-dlp.
+            # Check drive letter pattern (e.g. "D:\..." or "D:/...") without regex,
+            # since the pywebview bridge may alter backslashes during JSON serialization.
+            is_local_file = False
+            if len(url) >= 3 and url[0].isalpha() and url[1] == ':' and url[2] in ('\\', '/'):
+                is_local_file = True
+            elif url.startswith('\\\\') or url.startswith('//'):
+                # UNC path (\\server\share or //server/share)
+                is_local_file = True
+            elif os.path.isabs(url) and os.path.exists(url):
+                # Fallback: any absolute path that actually exists on disk
+                is_local_file = True
+            logger.info(
+                "download_video url=%r is_local_file=%s", url, is_local_file,
+            )
+
             # Determine output path
             output_dir = self.config.paths.output_dir or str(self._root_dir / "output")
             output_path = Path(output_dir)
@@ -412,21 +430,40 @@ class PautaBridge:
                             progress=pct,
                         ))
 
-                    # Download
-                    self._event_bus.emit(ProcessingEvent(
-                        type=EventType.PROGRESS,
-                        instruction_id=event_id,
-                        message="Baixando video...",
-                        progress=0.0,
-                    ))
+                    # Download (ou usar arquivo local)
+                    if is_local_file:
+                        # Arquivo local selecionado — pular download
+                        if not os.path.exists(url):
+                            raise RuntimeError(
+                                f"Arquivo local nao encontrado: {url}"
+                            )
+                        downloaded_path = url
+                        logger.info("Arquivo local detectado: %s", url)
+                        self._event_bus.emit(ProcessingEvent(
+                            type=EventType.PROGRESS,
+                            instruction_id=event_id,
+                            message="Usando arquivo local...",
+                            progress=0.1,
+                        ))
+                    else:
+                        self._event_bus.emit(ProcessingEvent(
+                            type=EventType.PROGRESS,
+                            instruction_id=event_id,
+                            message="Baixando video...",
+                            progress=0.0,
+                        ))
 
-                    downloaded_path = VideoDownloaderEngine.download(
-                        url=url,
-                        quality=quality,
-                        output_dir=str(output_path),
-                        filename=custom_name,
-                        progress_callback=on_progress,
-                    )
+                        dl_success, dl_message, downloaded_path = VideoDownloaderEngine.download(
+                            url=url,
+                            quality=quality,
+                            output_dir=str(output_path),
+                            filename=custom_name,
+                            progress_callback=on_progress,
+                        )
+                        if not dl_success:
+                            raise RuntimeError(f"Download falhou: {dl_message}")
+                        if not downloaded_path or not os.path.exists(downloaded_path):
+                            raise RuntimeError(f"Video nao encontrado apos download: {downloaded_path}")
 
                     # Clip if needed
                     if clips:
@@ -439,22 +476,24 @@ class PautaBridge:
 
                         clipped_paths = []
                         for i, clip in enumerate(clips):
-                            clip_output = output_path / f"{custom_name}_clip{i+1}.mp4"
-                            clipped = VideoDownloaderEngine.clip_video(
+                            clip_ok, clip_result = VideoDownloaderEngine.clip_video(
                                 video_path=downloaded_path,
                                 start_time=clip["start"],
                                 end_time=clip["end"],
-                                output_path=str(clip_output),
                             )
+                            if not clip_ok:
+                                raise RuntimeError(f"Clip {i+1} falhou: {clip_result}")
+                            clipped = clip_result
 
                             # Repeat if needed
                             if clip.get("repeat", 1) > 1:
-                                repeat_output = output_path / f"{custom_name}_clip{i+1}_repeat.mp4"
-                                clipped = VideoDownloaderEngine.repeat_clip(
+                                repeat_ok, repeat_result = VideoDownloaderEngine.repeat_clip(
                                     video_path=clipped,
-                                    repeat_count=clip["repeat"],
-                                    output_path=str(repeat_output),
+                                    count=clip["repeat"],
                                 )
+                                if not repeat_ok:
+                                    raise RuntimeError(f"Repeat clip {i+1} falhou: {repeat_result}")
+                                clipped = repeat_result
 
                             clipped_paths.append(clipped)
 
@@ -468,13 +507,13 @@ class PautaBridge:
                             ))
 
                             final_output = output_path / f"{custom_name}_merged.mp4"
-                            VideoDownloaderEngine.merge_clips(
+                            merge_ok, merge_result = VideoDownloaderEngine.merge_clips(
                                 clip_paths=clipped_paths,
                                 output_path=str(final_output),
-                                transition="fadewhite",
-                                transition_duration=1.0,
                             )
-                            final_path = str(final_output)
+                            if not merge_ok:
+                                raise RuntimeError(f"Merge falhou: {merge_result}")
+                            final_path = merge_result
                         else:
                             final_path = clipped_paths[0] if clipped_paths else downloaded_path
                     else:

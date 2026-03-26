@@ -1,6 +1,7 @@
 """Tests for PautaBridge integration methods (Story 6.5)."""
 
 import sys
+import time
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -153,6 +154,94 @@ class TestDownloadVideoWithInstructionId:
         }
         result = bridge.download_video(params)
         assert result["status"] == "ok"
+
+
+class TestDownloadVideoLocalFilePath:
+    """Verify that local file paths bypass yt-dlp and are used directly."""
+
+    def test_windows_backslash_path_detected(self, bridge, tmp_path):
+        """A Windows path like D:\\video.mp4 must be detected as local."""
+        # Create a real file so the worker can find it
+        video_file = tmp_path / "video.mp4"
+        video_file.write_bytes(b"\x00" * 100)
+
+        params = {
+            "url": str(video_file),  # e.g. C:\Users\...\video.mp4
+            "quality": "1080p",
+            "clips": [],
+            "merge": False,
+            "video_only": True,
+            "custom_name": "test_local",
+        }
+        result = bridge.download_video(params)
+        assert result["status"] == "ok"
+
+        # Give the worker thread time to process
+        time.sleep(0.5)
+
+        # The worker should have emitted a COMPLETED event, not an error.
+        # Check that no error was raised (no yt-dlp call attempted).
+        events = bridge.poll_events()
+        error_events = [e for e in events if e.get("type") == "error"]
+        assert len(error_events) == 0, (
+            f"Local file path should NOT be sent to yt-dlp. Errors: {error_events}"
+        )
+
+    def test_forward_slash_windows_path_detected(self, bridge, tmp_path):
+        """A Windows path with forward slashes (C:/...) must be detected as local."""
+        video_file = tmp_path / "video.mp4"
+        video_file.write_bytes(b"\x00" * 100)
+
+        # Convert to forward-slash form: C:/Users/.../video.mp4
+        forward_path = str(video_file).replace("\\", "/")
+        params = {
+            "url": forward_path,
+            "quality": "1080p",
+            "clips": [],
+            "merge": False,
+            "video_only": True,
+            "custom_name": "test_forward",
+        }
+        result = bridge.download_video(params)
+        assert result["status"] == "ok"
+
+        time.sleep(0.5)
+        events = bridge.poll_events()
+        error_events = [e for e in events if e.get("type") == "error"]
+        assert len(error_events) == 0
+
+    def test_url_not_detected_as_local(self, bridge):
+        """A normal URL must NOT be detected as local file."""
+        params = {
+            "url": "https://youtube.com/watch?v=test",
+            "quality": "1080p",
+            "clips": [],
+            "merge": False,
+            "video_only": True,
+            "custom_name": "test_url",
+        }
+        result = bridge.download_video(params)
+        # Should start ok (thread spawned), even though download will fail
+        assert result["status"] == "ok"
+
+    def test_nonexistent_local_file_raises_error(self, bridge):
+        """A drive-letter path to a non-existent file should emit an error event."""
+        params = {
+            "url": "Z:\\nonexistent\\fake_video.mp4",
+            "quality": "1080p",
+            "clips": [],
+            "merge": False,
+            "video_only": True,
+            "custom_name": "test_missing",
+        }
+        result = bridge.download_video(params)
+        assert result["status"] == "ok"  # Thread was spawned
+
+        time.sleep(0.5)
+        events = bridge.poll_events()
+        error_events = [e for e in events if e.get("type") == "error"]
+        assert len(error_events) == 1
+        assert "nao encontrado" in error_events[0]["message"]
 
 
 class TestSerializeResultVideoFields:

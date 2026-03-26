@@ -2,19 +2,36 @@
 
 import sys
 import os
+import traceback
 
 # Adiciona diretorio raiz ao path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
+# Crash log em local previsivel (Desktop do usuario)
+_CRASH_LOG = os.path.join(
+    os.path.expanduser("~"), "Desktop", "pauta-automation-crash.log"
+)
+
 
 def main():
     """Inicia a aplicacao."""
-    print("Pauta Automation System v2.0")
-
-    if len(sys.argv) > 1 and sys.argv[1] == "--test":
-        _run_test()
-    else:
-        _run_gui()
+    try:
+        if len(sys.argv) > 1 and sys.argv[1] == "--test":
+            _run_test()
+        else:
+            _run_gui()
+    except Exception as e:
+        msg = f"CRASH: {e}\n\n{traceback.format_exc()}"
+        print(msg, file=sys.stderr)
+        print(msg)
+        try:
+            with open(_CRASH_LOG, "w", encoding="utf-8") as f:
+                f.write(msg)
+            print(f"\nCrash log saved to: {_CRASH_LOG}")
+        except Exception:
+            pass
+        input("\nPress Enter to exit...")
+        sys.exit(1)
 
 
 def _run_gui():
