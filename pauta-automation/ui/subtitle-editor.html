@@ -584,11 +584,20 @@ function api() {
 }
 
 /* ── Initialization ── */
-window.addEventListener("pywebviewready", async () => {
-  // Data is passed by Python via evaluate_js setting window.subtitle_data, window.video_path, window.srt_path
+let editorInitialized = false;
+
+// Called by Python via evaluate_js after data injection, or by pywebviewready
+function initEditor() {
+  if (editorInitialized) return;
+
   subtitles = window.subtitle_data || [];
   videoPath = window.video_path || "";
   srtPath = window.srt_path || "";
+  const videoUrl = window.video_url || "";
+
+  // Need at least subtitles data to initialize
+  if (!subtitles.length && !videoUrl && !videoPath) return;
+  editorInitialized = true;
 
   // Set window title
   if (videoPath) {
@@ -596,12 +605,14 @@ window.addEventListener("pywebviewready", async () => {
     document.getElementById("editor-title").textContent = "Subtitle Editor \u2014 " + filename;
   }
 
-  // Load video
-  if (videoPath) {
+  // Load video (prefer HTTP URL over file:// for WebView2 compatibility)
+  const videoSrc = videoUrl || (videoPath ? "file:///" + videoPath.replace(/\\/g, "/") : "");
+
+  if (videoSrc) {
     const videoEl = document.getElementById("video-player");
     const sourceEl = document.getElementById("video-source");
-    const fileUrl = "file:///" + videoPath.replace(/\\/g, "/");
-    sourceEl.src = fileUrl;
+    sourceEl.src = videoSrc;
+    sourceEl.type = "video/mp4";
     videoEl.load();
 
     videoEl.addEventListener("timeupdate", onTimeUpdate);
@@ -613,7 +624,20 @@ window.addEventListener("pywebviewready", async () => {
 
   renderSubtitles();
   updateCount();
+}
+
+window.addEventListener("pywebviewready", () => {
+  initEditor();
 });
+
+// Fallback: retry after delay if data wasn't injected yet
+setTimeout(() => {
+  if (!editorInitialized) initEditor();
+}, 1000);
+
+setTimeout(() => {
+  if (!editorInitialized) initEditor();
+}, 3000);
 
 /* ── Render subtitles ── */
 function renderSubtitles() {

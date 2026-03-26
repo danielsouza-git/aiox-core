@@ -586,14 +586,7 @@ class PautaBridge:
                                 srt_result_path = None
                                 logger.warning("Transcricao falhou: %s", srt_result)
 
-                    # Open subtitle editor after transcription (Story 6.7)
-                    # instead of auto-embedding. User edits then triggers embed via Save.
-                    if srt_result_path and not video_only:
-                        self._editor_srt_path = srt_result_path
-                        self._editor_video_path = final_path
-                        self.open_subtitle_editor(srt_result_path, final_path)
-
-                    # Rename _work file to final name (same as original)
+                    # Rename _work file to final name BEFORE opening editor
                     base_name = Path(url if is_local_file else final_path).stem
                     final_name = custom_name if custom_name else base_name
                     # Remove _work suffix if present
@@ -602,6 +595,13 @@ class PautaBridge:
                         os.rename(final_path, renamed_path)
                         final_path = renamed_path
                         logger.info("Renomeado para: %s", final_path)
+
+                    # Open subtitle editor after transcription (Story 6.7)
+                    # instead of auto-embedding. User edits then triggers embed via Save.
+                    if srt_result_path and not video_only:
+                        self._editor_srt_path = srt_result_path
+                        self._editor_video_path = final_path
+                        self.open_subtitle_editor(srt_result_path, final_path)
 
                     # Update history entry
                     history_entry["status"] = "completed"
@@ -926,11 +926,134 @@ class PautaBridge:
 
     # ── Subtitle Editor Window (Story 6.7) ──
 
+    def _start_editor_server(
+        self, video_path: str, editor_html_path: str
+    ) -> tuple[str, str]:
+        """Start a local HTTP server for the subtitle editor.
+
+        Serves both the editor HTML and the video from the same origin
+        to avoid cross-origin issues (file:// to http:// is blocked
+        by WebView2/EdgeChromium). Supports HTTP Range requests which
+        are required by Chromium for video playback.
+
+        Returns:
+            Tuple of (editor_url, video_url).
+        """
+        import http.server
+        import mimetypes
+        from urllib.parse import quote, unquote
+
+        video_dir = str(Path(video_path).parent)
+        video_name = Path(video_path).name
+        html_abs = str(Path(editor_html_path).resolve())
+
+        class EditorHandler(http.server.BaseHTTPRequestHandler):
+            def _resolve_path(self):
+                clean = unquote(self.path).split('?')[0].split('#')[0]
+                if clean in ('/', '/subtitle-editor.html'):
+                    return html_abs
+                return os.path.join(video_dir, os.path.basename(clean))
+
+            def do_HEAD(self):
+                self._serve(head_only=True)
+
+            def do_GET(self):
+                self._serve(head_only=False)
+
+            def _serve(self, head_only=False):
+                fpath = self._resolve_path()
+                if not os.path.isfile(fpath):
+                    self.send_error(404)
+                    return
+
+                file_size = os.path.getsize(fpath)
+                ctype = mimetypes.guess_type(fpath)[0] or 'application/octet-stream'
+                range_header = self.headers.get('Range')
+
+                if range_header and range_header.startswith('bytes='):
+                    try:
+                        spec = range_header[6:]  # strip 'bytes='
+                        parts = spec.split('-', 1)
+                        start = int(parts[0]) if parts[0] else 0
+                        end = int(parts[1]) if parts[1] else file_size - 1
+                        end = min(end, file_size - 1)
+
+                        if start >= file_size or start > end:
+                            self.send_response(416)
+                            self.send_header('Content-Range', f'bytes */{file_size}')
+                            self.end_headers()
+                            return
+
+                        length = end - start + 1
+                        self.send_response(206)
+                        self.send_header('Content-Type', ctype)
+                        self.send_header('Content-Length', str(length))
+                        self.send_header('Content-Range', f'bytes {start}-{end}/{file_size}')
+                        self.send_header('Accept-Ranges', 'bytes')
+                        self.end_headers()
+
+                        if not head_only:
+                            with open(fpath, 'rb') as f:
+                                f.seek(start)
+                                remaining = length
+                                while remaining > 0:
+                                    chunk = f.read(min(65536, remaining))
+                                    if not chunk:
+                                        break
+                                    self.wfile.write(chunk)
+                                    remaining -= len(chunk)
+                    except (ValueError, IndexError):
+                        self.send_error(400)
+                else:
+                    self.send_response(200)
+                    self.send_header('Content-Type', ctype)
+                    self.send_header('Content-Length', str(file_size))
+                    self.send_header('Accept-Ranges', 'bytes')
+                    self.end_headers()
+
+                    if not head_only:
+                        with open(fpath, 'rb') as f:
+                            while True:
+                                chunk = f.read(65536)
+                                if not chunk:
+                                    break
+                                self.wfile.write(chunk)
+
+            def log_message(self, format, *args):
+                pass  # Suppress HTTP request logs
+
+        self._video_server = http.server.HTTPServer(
+            ('127.0.0.1', 0), EditorHandler
+        )
+        port = self._video_server.server_address[1]
+
+        server_thread = threading.Thread(
+            target=self._video_server.serve_forever, daemon=True
+        )
+        server_thread.start()
+        logger.info(
+            "Editor server started on port %d (html=%s, video=%s)",
+            port, html_abs, video_dir,
+        )
+
+        editor_url = f"http://127.0.0.1:{port}/subtitle-editor.html"
+        video_url = f"http://127.0.0.1:{port}/{quote(video_name)}"
+        return editor_url, video_url
+
+    def _stop_video_server(self) -> None:
+        """Stop the local video HTTP server if running."""
+        server = getattr(self, "_video_server", None)
+        if server:
+            server.shutdown()
+            self._video_server = None
+            logger.info("Video server stopped")
+
     def open_subtitle_editor(self, srt_path: str, video_path: str) -> dict[str, Any]:
         """Open subtitle editor in a new pywebview window.
 
-        Parses the SRT file and passes subtitle data + video path to JS
-        via evaluate_js on the new window.
+        Parses the SRT file and passes subtitle data + video URL to JS
+        via evaluate_js on the new window. Video is served via local HTTP
+        server because WebView2 blocks file:// protocol.
 
         Args:
             srt_path: Path to the SRT file to edit.
@@ -964,23 +1087,32 @@ class PautaBridge:
 
             video_filename = Path(video_path).name
 
+            # Serve HTML + video from same HTTP origin (WebView2 blocks
+            # file:// and cross-origin file-to-http requests)
+            editor_url, video_url = self._start_editor_server(
+                video_path, str(editor_html)
+            )
+
             def on_loaded() -> None:
                 """Inject data into the editor window after DOM is ready."""
                 try:
                     js_data = json.dumps(subtitle_data, ensure_ascii=False)
-                    js_video = json.dumps(str(video_path), ensure_ascii=False)
+                    js_video_url = json.dumps(video_url, ensure_ascii=False)
+                    js_video_path = json.dumps(str(video_path), ensure_ascii=False)
                     js_srt = json.dumps(str(srt_path), ensure_ascii=False)
                     self._editor_window.evaluate_js(
                         f"window.subtitle_data = {js_data};"
-                        f"window.video_path = {js_video};"
+                        f"window.video_url = {js_video_url};"
+                        f"window.video_path = {js_video_path};"
                         f"window.srt_path = {js_srt};"
+                        f"if (typeof initEditor === 'function') initEditor();"
                     )
                 except Exception as e:
                     logger.error("Erro ao injetar dados no editor: %s", e)
 
             self._editor_window = webview.create_window(
                 title=f"Subtitle Editor \u2014 {video_filename}",
-                url=str(editor_html),
+                url=editor_url,
                 js_api=self,
                 width=1200,
                 height=800,
@@ -1124,6 +1256,7 @@ class PautaBridge:
             if editor_window:
                 editor_window.destroy()
                 self._editor_window = None
+            self._stop_video_server()
         except Exception as e:
             logger.error("Erro ao fechar editor: %s", e)
         return {"status": "ok"}
