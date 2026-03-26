@@ -498,19 +498,23 @@ class PautaBridge:
                         else:
                             processor = SubtitleProcessor(api_key=api_key)
 
-                            srt_result_path = processor.transcribe(
+                            transcribe_ok, srt_result = processor.transcribe(
                                 video_path=final_path,
-                                output_path=str(output_path / f"{custom_name}.srt"),
-                                model=self.config.video.whisper_model,
+                                language="en",
                             )
 
-                            # Translate
-                            processor.translate(
-                                srt_path=srt_result_path,
-                                target_language="pt",
-                                output_path=str(output_path / f"{custom_name}_pt.srt"),
-                                model=self.config.video.translation_model,
-                            )
+                            if transcribe_ok:
+                                srt_result_path = srt_result
+                                # Translate
+                                translate_ok, translated_result = processor.translate(
+                                    srt_path=srt_result_path,
+                                    target_lang="pt-BR",
+                                )
+                                if not translate_ok:
+                                    logger.warning("Traducao falhou: %s", translated_result)
+                            else:
+                                srt_result_path = None
+                                logger.warning("Transcricao falhou: %s", srt_result)
 
                     # Update history entry
                     history_entry["status"] = "completed"
