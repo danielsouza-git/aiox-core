@@ -2,7 +2,7 @@
 
 Cobre os dois modos de operacao (VIDEO_SUBTITLE / VIDEO_ONLY),
 extracao de timecodes, download com timeout, merge de clips e error handling.
-Todas as chamadas externas (subprocess, VideoDownloader, filesystem) sao mockadas.
+Todas as chamadas externas (subprocess, VideoDownloaderEngine, SubtitleProcessor, filesystem) sao mockadas.
 """
 
 import os
@@ -21,6 +21,7 @@ from src.core.models import (
     VideoClip,
 )
 from src.core.config import AppConfig, GoogleConfig, OpenAIConfig, PathsConfig, VideoConfig
+from src.processors.video_processor import VideoProcessor
 
 
 # ---------------------------------------------------------------------------
@@ -74,18 +75,10 @@ def _make_instruction(
 
 
 def _make_video_processor(config=None):
-    """Cria VideoProcessor com downloader mockado."""
+    """Cria VideoProcessor."""
     if config is None:
         config = _make_config()
-
-    with patch("src.processors.video_processor._get_downloader_class") as mock_get:
-        mock_downloader_cls = MagicMock()
-        mock_get.return_value = mock_downloader_cls
-        from src.processors.video_processor import VideoProcessor
-        processor = VideoProcessor(config)
-        # Pre-set the downloader to the mock class
-        processor._downloader = mock_downloader_cls
-    return processor
+    return VideoProcessor(config)
 
 
 # ===========================================================================
@@ -98,43 +91,15 @@ class TestVideoProcessorInit:
     def test_init_stores_config(self):
         """VideoProcessor armazena a config recebida."""
         config = _make_config()
-        with patch("src.processors.video_processor._get_downloader_class"):
-            from src.processors.video_processor import VideoProcessor
-            processor = VideoProcessor(config)
+        processor = VideoProcessor(config)
         assert processor.config is config
 
-    def test_init_downloader_is_none(self):
-        """Downloader e None apos init (lazy loading)."""
+    def test_no_downloader_property(self):
+        """VideoProcessor nao tem mais propriedade downloader (usa engine estatica)."""
         config = _make_config()
-        with patch("src.processors.video_processor._get_downloader_class"):
-            from src.processors.video_processor import VideoProcessor
-            processor = VideoProcessor(config)
-        assert processor._downloader is None
-
-    def test_downloader_property_loads_lazily(self):
-        """Propriedade downloader carrega classe na primeira chamada."""
-        config = _make_config()
-        mock_cls = MagicMock()
-
-        with patch("src.processors.video_processor._get_downloader_class", return_value=mock_cls):
-            from src.processors.video_processor import VideoProcessor
-            processor = VideoProcessor(config)
-            result = processor.downloader
-
-        assert result is mock_cls
-
-    def test_downloader_property_caches(self):
-        """Propriedade downloader retorna mesma instancia na segunda chamada."""
-        config = _make_config()
-        mock_cls = MagicMock()
-
-        with patch("src.processors.video_processor._get_downloader_class", return_value=mock_cls):
-            from src.processors.video_processor import VideoProcessor
-            processor = VideoProcessor(config)
-            first = processor.downloader
-            second = processor.downloader
-
-        assert first is second
+        processor = VideoProcessor(config)
+        assert not hasattr(processor, '_downloader')
+        assert not hasattr(processor, 'downloader')
 
 
 # ===========================================================================
@@ -168,7 +133,8 @@ class TestUnsupportedType:
 class TestVideoOnly:
     """Testes para o modo VIDEO_ONLY."""
 
-    def test_video_only_success(self):
+    @patch("src.processors.video_processor.VideoDownloaderEngine")
+    def test_video_only_success(self, mock_engine):
         """VIDEO_ONLY com download bem-sucedido retorna path do video."""
         processor = _make_video_processor()
         instruction = _make_instruction(inst_type=InstructionType.VIDEO_ONLY)
@@ -178,12 +144,12 @@ class TestVideoOnly:
             f.write(b"fake video data")
 
         try:
-            processor._downloader.download.return_value = (True, "OK", temp_path, None)
+            mock_engine.download.return_value = (True, "OK", temp_path)
+            mock_engine.adjust_aspect_ratio.return_value = (True, temp_path)
 
             with patch("src.processors.video_processor.subprocess") as mock_sub:
-                # Mock _check_video_size subprocess call
                 mock_result = MagicMock()
-                mock_result.returncode = 1  # Fail check = skip size check
+                mock_result.returncode = 1
                 mock_sub.run.return_value = mock_result
 
                 result = processor.process(instruction)
@@ -209,12 +175,13 @@ class TestVideoOnly:
         with pytest.raises(ValueError, match="sem URL"):
             processor.process(instruction)
 
-    def test_video_only_download_failure_raises(self):
+    @patch("src.processors.video_processor.VideoDownloaderEngine")
+    def test_video_only_download_failure_raises(self, mock_engine):
         """VIDEO_ONLY com download falhado levanta RuntimeError."""
         processor = _make_video_processor()
         instruction = _make_instruction(inst_type=InstructionType.VIDEO_ONLY)
 
-        processor._downloader.download.return_value = (False, "Network error", None, None)
+        mock_engine.download.return_value = (False, "Network error", None)
 
         with patch("src.processors.video_processor.subprocess") as mock_sub:
             mock_result = MagicMock()
@@ -224,12 +191,14 @@ class TestVideoOnly:
             with pytest.raises(RuntimeError, match="Download falhou"):
                 processor.process(instruction)
 
-    def test_video_only_video_not_found_raises(self):
+    @patch("src.processors.video_processor.VideoDownloaderEngine")
+    def test_video_only_video_not_found_raises(self, mock_engine):
         """VIDEO_ONLY quando download retorna path inexistente levanta RuntimeError."""
         processor = _make_video_processor()
         instruction = _make_instruction(inst_type=InstructionType.VIDEO_ONLY)
 
-        processor._downloader.download.return_value = (True, "OK", "/nonexistent/video.mp4", None)
+        mock_engine.download.return_value = (True, "OK", "/nonexistent/video.mp4")
+        mock_engine.adjust_aspect_ratio.return_value = (True, "/nonexistent/video.mp4")
 
         with patch("src.processors.video_processor.subprocess") as mock_sub:
             mock_result = MagicMock()
@@ -239,8 +208,9 @@ class TestVideoOnly:
             with pytest.raises(RuntimeError, match="nao encontrado"):
                 processor.process(instruction)
 
-    def test_video_only_with_timecode(self):
-        """VIDEO_ONLY passa timecodes formatados para o downloader."""
+    @patch("src.processors.video_processor.VideoDownloaderEngine")
+    def test_video_only_with_timecode(self, mock_engine):
+        """VIDEO_ONLY passa timecodes para clip_video."""
         processor = _make_video_processor()
         instruction = _make_instruction(
             inst_type=InstructionType.VIDEO_ONLY,
@@ -252,7 +222,9 @@ class TestVideoOnly:
             f.write(b"fake")
 
         try:
-            processor._downloader.download.return_value = (True, "OK", temp_path, None)
+            mock_engine.download.return_value = (True, "OK", temp_path)
+            mock_engine.clip_video.return_value = (True, temp_path)
+            mock_engine.adjust_aspect_ratio.return_value = (True, temp_path)
 
             with patch("src.processors.video_processor.subprocess") as mock_sub:
                 mock_result = MagicMock()
@@ -261,15 +233,17 @@ class TestVideoOnly:
 
                 processor.process(instruction)
 
-            # Verifica que o download foi chamado com timecodes formatados
-            call_kwargs = processor._downloader.download.call_args[1]
+            # Verifica que clip_video foi chamado com timecodes formatados
+            mock_engine.clip_video.assert_called_once()
+            call_kwargs = mock_engine.clip_video.call_args[1]
             assert call_kwargs["start_time"] == "01:30"
             assert call_kwargs["end_time"] == "02:45"
         finally:
             if os.path.exists(temp_path):
                 os.remove(temp_path)
 
-    def test_video_only_calls_progress_callback(self):
+    @patch("src.processors.video_processor.VideoDownloaderEngine")
+    def test_video_only_calls_progress_callback(self, mock_engine):
         """VIDEO_ONLY invoca callback de progresso durante download."""
         processor = _make_video_processor()
         instruction = _make_instruction(inst_type=InstructionType.VIDEO_ONLY)
@@ -284,14 +258,14 @@ class TestVideoOnly:
 
         try:
             # Simula download que invoca o callback de progresso
-            def fake_download(**kwargs):
-                cb = kwargs.get("progress_callback")
-                if cb:
-                    cb(50, "Downloading...")
-                    cb(100, "Done")
-                return (True, "OK", temp_path, None)
+            def fake_download(url, output_dir, quality, progress_callback=None):
+                if progress_callback:
+                    progress_callback(50, "Downloading...")
+                    progress_callback(100, "Done")
+                return (True, "OK", temp_path)
 
-            processor._downloader.download.side_effect = fake_download
+            mock_engine.download.side_effect = fake_download
+            mock_engine.adjust_aspect_ratio.return_value = (True, temp_path)
 
             with patch("src.processors.video_processor.subprocess") as mock_sub:
                 mock_result = MagicMock()
@@ -315,7 +289,9 @@ class TestVideoOnly:
 class TestVideoSubtitle:
     """Testes para o modo VIDEO_SUBTITLE (com legenda)."""
 
-    def test_subtitle_success(self):
+    @patch("src.processors.video_processor.SubtitleProcessor")
+    @patch("src.processors.video_processor.VideoDownloaderEngine")
+    def test_subtitle_success(self, mock_engine, mock_subtitle_cls):
         """VIDEO_SUBTITLE com download+transcricao bem-sucedido retorna path."""
         processor = _make_video_processor()
         instruction = _make_instruction(inst_type=InstructionType.VIDEO_SUBTITLE)
@@ -325,7 +301,15 @@ class TestVideoSubtitle:
             f.write(b"fake video")
 
         try:
-            processor._downloader.download.return_value = (True, "OK", temp_path, "/tmp/sub.srt")
+            mock_engine.download.return_value = (True, "OK", temp_path)
+            mock_engine.adjust_aspect_ratio.return_value = (True, temp_path)
+
+            mock_proc = MagicMock()
+            mock_subtitle_cls.return_value = mock_proc
+            mock_proc.transcribe.return_value = (True, "/tmp/sub.srt")
+            mock_proc.translate.return_value = (True, "/tmp/sub_pt.srt")
+            mock_proc.generate_ass_file.return_value = (True, "/tmp/sub.ass")
+            mock_proc.embed_subtitles.return_value = (True, temp_path)
 
             with patch("src.processors.video_processor.subprocess") as mock_sub:
                 mock_result = MagicMock()
@@ -356,8 +340,10 @@ class TestVideoSubtitle:
         with pytest.raises(ValueError, match="API key"):
             processor.process(instruction)
 
-    def test_subtitle_passes_whisper_opts(self):
-        """VIDEO_SUBTITLE passa opcoes de Whisper ao downloader."""
+    @patch("src.processors.video_processor.SubtitleProcessor")
+    @patch("src.processors.video_processor.VideoDownloaderEngine")
+    def test_subtitle_calls_subtitle_processor(self, mock_engine, mock_subtitle_cls):
+        """VIDEO_SUBTITLE usa SubtitleProcessor para transcricao e traducao."""
         processor = _make_video_processor()
         instruction = _make_instruction(inst_type=InstructionType.VIDEO_SUBTITLE)
 
@@ -366,7 +352,15 @@ class TestVideoSubtitle:
             f.write(b"fake")
 
         try:
-            processor._downloader.download.return_value = (True, "OK", temp_path, "/tmp/sub.srt")
+            mock_engine.download.return_value = (True, "OK", temp_path)
+            mock_engine.adjust_aspect_ratio.return_value = (True, temp_path)
+
+            mock_proc = MagicMock()
+            mock_subtitle_cls.return_value = mock_proc
+            mock_proc.transcribe.return_value = (True, "/tmp/sub.srt")
+            mock_proc.translate.return_value = (True, "/tmp/sub_pt.srt")
+            mock_proc.generate_ass_file.return_value = (True, "/tmp/sub.ass")
+            mock_proc.embed_subtitles.return_value = (True, temp_path)
 
             with patch("src.processors.video_processor.subprocess") as mock_sub:
                 mock_result = MagicMock()
@@ -375,22 +369,22 @@ class TestVideoSubtitle:
 
                 processor.process(instruction)
 
-            call_kwargs = processor._downloader.download.call_args[1]
-            assert call_kwargs["whisper_transcribe"] is True
-            assert call_kwargs["whisper_embed"] is True
-            assert call_kwargs["translate_subtitles"] is True
-            assert call_kwargs["translate_target_lang"] == "Brazilian Portuguese"
-            assert call_kwargs["whisper_api_key"] == "sk-test-key-123"
+            mock_subtitle_cls.assert_called_once_with(api_key="sk-test-key-123")
+            mock_proc.transcribe.assert_called_once()
+            mock_proc.translate.assert_called_once()
+            mock_proc.generate_ass_file.assert_called_once()
+            mock_proc.embed_subtitles.assert_called_once()
         finally:
             if os.path.exists(temp_path):
                 os.remove(temp_path)
 
-    def test_subtitle_download_failure_raises(self):
+    @patch("src.processors.video_processor.VideoDownloaderEngine")
+    def test_subtitle_download_failure_raises(self, mock_engine):
         """VIDEO_SUBTITLE com processamento falhado levanta RuntimeError."""
         processor = _make_video_processor()
         instruction = _make_instruction(inst_type=InstructionType.VIDEO_SUBTITLE)
 
-        processor._downloader.download.return_value = (False, "Whisper timeout", None, None)
+        mock_engine.download.return_value = (False, "Whisper timeout", None)
 
         with patch("src.processors.video_processor.subprocess") as mock_sub:
             mock_result = MagicMock()
@@ -410,43 +404,36 @@ class TestTimecodes:
 
     def test_format_timecode_4digits(self):
         """Formata timecode MMSS de 4 digitos para MM:SS."""
-        from src.processors.video_processor import VideoProcessor
         assert VideoProcessor._format_timecode("0034") == "00:34"
         assert VideoProcessor._format_timecode("0130") == "01:30"
         assert VideoProcessor._format_timecode("3840") == "38:40"
 
     def test_format_timecode_3digits(self):
         """Formata timecode de 3 digitos (M:SS) para MM:SS."""
-        from src.processors.video_processor import VideoProcessor
         assert VideoProcessor._format_timecode("130") == "01:30"
         assert VideoProcessor._format_timecode("045") == "00:45"
 
     def test_format_timecode_2digits(self):
         """Formata timecode de 2 digitos (SS) para 00:SS."""
-        from src.processors.video_processor import VideoProcessor
         assert VideoProcessor._format_timecode("34") == "00:34"
         assert VideoProcessor._format_timecode("05") == "00:05"
 
     def test_format_timecode_already_formatted(self):
         """Retorna timecode inalterado se ja contem ':'."""
-        from src.processors.video_processor import VideoProcessor
         assert VideoProcessor._format_timecode("01:30") == "01:30"
         assert VideoProcessor._format_timecode("38:40") == "38:40"
 
     def test_format_timecode_with_whitespace(self):
         """Remove whitespace antes de formatar."""
-        from src.processors.video_processor import VideoProcessor
         assert VideoProcessor._format_timecode("  0130  ") == "01:30"
 
     def test_format_timecode_non_standard_passthrough(self):
         """Timecodes nao reconhecidos passam inalterados."""
-        from src.processors.video_processor import VideoProcessor
         assert VideoProcessor._format_timecode("abc") == "abc"
         assert VideoProcessor._format_timecode("12345") == "12345"
 
     def test_get_timecodes_from_instruction_timecode(self):
         """Extrai timecodes do campo timecode da instrucao."""
-        from src.processors.video_processor import VideoProcessor
         instruction = _make_instruction(
             timecode=TimeCode(start="0100", end="0230"),
         )
@@ -456,7 +443,6 @@ class TestTimecodes:
 
     def test_get_timecodes_from_first_clip(self):
         """Extrai timecodes do primeiro clip quando instrucao nao tem timecode."""
-        from src.processors.video_processor import VideoProcessor
         instruction = _make_instruction(
             clips=[
                 VideoClip(url="https://example.com/v1", timecode=TimeCode(start="0530", end="0645")),
@@ -469,7 +455,6 @@ class TestTimecodes:
 
     def test_get_timecodes_empty_when_no_timecode(self):
         """Retorna strings vazias quando nao ha timecode."""
-        from src.processors.video_processor import VideoProcessor
         instruction = _make_instruction()
         start, end = VideoProcessor._get_timecodes(instruction)
         assert start == ""
@@ -483,7 +468,8 @@ class TestTimecodes:
 class TestDownloadWithTimeout:
     """Testes para o mecanismo de download com timeout."""
 
-    def test_download_timeout_returns_error(self):
+    @patch("src.processors.video_processor.VideoDownloaderEngine")
+    def test_download_timeout_returns_error(self, mock_engine):
         """Download que excede timeout retorna erro."""
         processor = _make_video_processor()
 
@@ -491,9 +477,9 @@ class TestDownloadWithTimeout:
         def slow_download(**kwargs):
             import time
             time.sleep(10)
-            return (True, "OK", "/tmp/video.mp4", None)
+            return (True, "OK", "/tmp/video.mp4")
 
-        processor._downloader.download.side_effect = slow_download
+        mock_engine.download.side_effect = slow_download
 
         with patch("src.processors.video_processor.subprocess") as mock_sub:
             mock_result = MagicMock()
@@ -501,41 +487,44 @@ class TestDownloadWithTimeout:
             mock_sub.run.return_value = mock_result
 
             with patch("src.processors.video_processor.DOWNLOAD_TIMEOUT_SECONDS", 0.1):
-                success, message, video_path, srt_path = processor._download_with_timeout(
+                success, message, video_path = processor._download_with_timeout(
                     "https://example.com/video", None
                 )
 
         assert success is False
         assert "timeout" in message.lower()
 
-    def test_download_success_within_timeout(self):
+    @patch("src.processors.video_processor.VideoDownloaderEngine")
+    def test_download_success_within_timeout(self, mock_engine):
         """Download que completa dentro do timeout retorna sucesso."""
         processor = _make_video_processor()
-        processor._downloader.download.return_value = (True, "OK", "/tmp/video.mp4", "/tmp/sub.srt")
+        mock_engine.download.return_value = (True, "OK", "/tmp/video.mp4")
+        mock_engine.adjust_aspect_ratio.return_value = (True, "/tmp/video.mp4")
 
         with patch("src.processors.video_processor.subprocess") as mock_sub:
             mock_result = MagicMock()
             mock_result.returncode = 1
             mock_sub.run.return_value = mock_result
 
-            success, message, video_path, srt_path = processor._download_with_timeout(
+            success, message, video_path = processor._download_with_timeout(
                 "https://example.com/video", None
             )
 
         assert success is True
         assert video_path == "/tmp/video.mp4"
 
-    def test_download_exception_captured(self):
+    @patch("src.processors.video_processor.VideoDownloaderEngine")
+    def test_download_exception_captured(self, mock_engine):
         """Excecao durante download e capturada e retornada como mensagem."""
         processor = _make_video_processor()
-        processor._downloader.download.side_effect = Exception("Connection refused")
+        mock_engine.download.side_effect = Exception("Connection refused")
 
         with patch("src.processors.video_processor.subprocess") as mock_sub:
             mock_result = MagicMock()
             mock_result.returncode = 1
             mock_sub.run.return_value = mock_result
 
-            success, message, video_path, srt_path = processor._download_with_timeout(
+            success, message, video_path = processor._download_with_timeout(
                 "https://example.com/video", None
             )
 
@@ -605,19 +594,20 @@ class TestVideoSizeCheck:
 
         assert ok is False
 
-    def test_download_blocked_by_size_check(self):
+    @patch("src.processors.video_processor.VideoDownloaderEngine")
+    def test_download_blocked_by_size_check(self, mock_engine):
         """Download e bloqueado quando video excede limite de tamanho."""
         processor = _make_video_processor()
 
         with self._mock_yt_dlp({"filesize": 3000000000}):
-            success, msg, video_path, srt_path = processor._download_with_timeout(
+            success, msg, video_path = processor._download_with_timeout(
                 "https://example.com/huge.mp4", None
             )
 
         assert success is False
         assert "grande" in msg.lower()
-        # Downloader should NOT have been called
-        processor._downloader.download.assert_not_called()
+        # Engine should NOT have been called
+        mock_engine.download.assert_not_called()
 
 
 # ===========================================================================
@@ -629,7 +619,6 @@ class TestBuildMergeFilter:
 
     def test_merge_2_clips_with_audio(self):
         """Filter complex para 2 clips com audio inclui xfade + acrossfade."""
-        from src.processors.video_processor import VideoProcessor
         fc, maps = VideoProcessor._build_merge_filter(2, [10.0, 8.0], True)
 
         assert "xfade" in fc
@@ -640,7 +629,6 @@ class TestBuildMergeFilter:
 
     def test_merge_2_clips_no_audio(self):
         """Filter complex para 2 clips sem audio usa -an."""
-        from src.processors.video_processor import VideoProcessor
         fc, maps = VideoProcessor._build_merge_filter(2, [10.0, 8.0], False)
 
         assert "xfade" in fc
@@ -649,7 +637,6 @@ class TestBuildMergeFilter:
 
     def test_merge_3_clips_with_audio(self):
         """Filter complex para 3 clips com audio inclui encadeamento."""
-        from src.processors.video_processor import VideoProcessor
         fc, maps = VideoProcessor._build_merge_filter(3, [10.0, 8.0, 12.0], True)
 
         assert "vt1" in fc  # Intermediate label
@@ -659,7 +646,6 @@ class TestBuildMergeFilter:
 
     def test_merge_3_clips_no_audio(self):
         """Filter complex para 3 clips sem audio usa -an."""
-        from src.processors.video_processor import VideoProcessor
         fc, maps = VideoProcessor._build_merge_filter(3, [10.0, 8.0, 12.0], False)
 
         assert "xfade" in fc
@@ -668,7 +654,6 @@ class TestBuildMergeFilter:
 
     def test_merge_4_clips_fallback_concat(self):
         """Mais de 3 clips usa concat simples como fallback."""
-        from src.processors.video_processor import VideoProcessor
         fc, maps = VideoProcessor._build_merge_filter(4, [10.0, 8.0, 12.0, 6.0], True)
 
         assert "concat" in fc
@@ -676,7 +661,7 @@ class TestBuildMergeFilter:
 
     def test_merge_2_clips_correct_offset(self):
         """Offset para 2 clips e calculado como duracao[0] - transicao."""
-        from src.processors.video_processor import VideoProcessor, TRANSITION_DURATION
+        from src.processors.video_processor import TRANSITION_DURATION
         fc, _ = VideoProcessor._build_merge_filter(2, [15.0, 10.0], True)
 
         expected_offset = 15.0 - TRANSITION_DURATION
@@ -692,8 +677,6 @@ class TestMediaHelpers:
 
     def test_get_clip_duration_success(self):
         """Retorna duracao real do clip quando ffprobe funciona."""
-        from src.processors.video_processor import VideoProcessor
-
         mock_result = MagicMock()
         mock_result.returncode = 0
         mock_result.stdout = "12.345\n"
@@ -705,8 +688,6 @@ class TestMediaHelpers:
 
     def test_get_clip_duration_fallback(self):
         """Retorna 10.0 como fallback quando ffprobe falha."""
-        from src.processors.video_processor import VideoProcessor
-
         mock_result = MagicMock()
         mock_result.returncode = 1
         mock_result.stdout = ""
@@ -718,8 +699,6 @@ class TestMediaHelpers:
 
     def test_get_clip_duration_fallback_on_exception(self):
         """Retorna 10.0 como fallback quando ffprobe levanta excecao."""
-        from src.processors.video_processor import VideoProcessor
-
         with patch("src.processors.video_processor.subprocess.run", side_effect=Exception("ffprobe not found")):
             duration = VideoProcessor._get_clip_duration("/tmp/clip.mp4")
 
@@ -727,8 +706,6 @@ class TestMediaHelpers:
 
     def test_has_audio_stream_true(self):
         """Detecta stream de audio quando ffprobe retorna resultado."""
-        from src.processors.video_processor import VideoProcessor
-
         mock_result = MagicMock()
         mock_result.returncode = 0
         mock_result.stdout = "0\n"
@@ -740,8 +717,6 @@ class TestMediaHelpers:
 
     def test_has_audio_stream_false(self):
         """Retorna False quando nao ha stream de audio."""
-        from src.processors.video_processor import VideoProcessor
-
         mock_result = MagicMock()
         mock_result.returncode = 0
         mock_result.stdout = ""
@@ -753,8 +728,6 @@ class TestMediaHelpers:
 
     def test_has_audio_stream_false_on_exception(self):
         """Retorna False quando ffprobe levanta excecao."""
-        from src.processors.video_processor import VideoProcessor
-
         with patch("src.processors.video_processor.subprocess.run", side_effect=Exception("error")):
             has_audio = VideoProcessor._has_audio_stream("/tmp/clip.mp4")
 
@@ -776,18 +749,15 @@ class TestMultiClipProcessing:
             clips=[],
             merge=True,
         )
-        # Forcar len(clips) > 1 check a nao passar, porque clips esta vazio
-        # Na verdade, merge=True e clips=[] resulta em _process_with_subtitles chamar
-        # _process_multi_clip que verifica se clips esta vazio
-        # Mas instruction.merge and len(instruction.clips) > 1 e False, entao vai para
-        # single clip path. Precisamos testar _process_multi_clip diretamente.
         instruction.clips = []
         instruction.merge = True
 
         with pytest.raises(ValueError, match="sem clips"):
             processor._process_multi_clip(instruction, None)
 
-    def test_multi_clip_single_clip_returns_directly(self):
+    @patch("src.processors.video_processor.SubtitleProcessor")
+    @patch("src.processors.video_processor.VideoDownloaderEngine")
+    def test_multi_clip_single_clip_returns_directly(self, mock_engine, mock_subtitle_cls):
         """Multi-clip com apenas 1 clip retorna path sem merge."""
         processor = _make_video_processor()
 
@@ -802,13 +772,16 @@ class TestMultiClipProcessing:
                 merge=True,
             )
 
-            processor._downloader.download.return_value = (True, "OK", temp_path, "/tmp/sub.srt")
+            mock_engine.download.return_value = (True, "OK", temp_path)
+            mock_engine.clip_video.return_value = (True, temp_path)
+            mock_engine.adjust_aspect_ratio.return_value = (True, temp_path)
 
-            # Precisa de 2+ clips para entrar no merge path via process(),
-            # mas _process_multi_clip com 1 clip deve retornar o clip diretamente
-            instruction.clips = [
-                VideoClip(url="https://example.com/v1", timecode=TimeCode(start="0100", end="0200")),
-            ]
+            mock_proc = MagicMock()
+            mock_subtitle_cls.return_value = mock_proc
+            mock_proc.transcribe.return_value = (True, "/tmp/sub.srt")
+            mock_proc.translate.return_value = (True, "/tmp/sub_pt.srt")
+            mock_proc.generate_ass_file.return_value = (True, "/tmp/sub.ass")
+            mock_proc.embed_subtitles.return_value = (True, temp_path)
 
             result = processor._process_multi_clip(instruction, None)
             assert result == temp_path
@@ -816,7 +789,9 @@ class TestMultiClipProcessing:
             if os.path.exists(temp_path):
                 os.remove(temp_path)
 
-    def test_multi_clip_clip_failure_raises(self):
+    @patch("src.processors.video_processor.SubtitleProcessor")
+    @patch("src.processors.video_processor.VideoDownloaderEngine")
+    def test_multi_clip_clip_failure_raises(self, mock_engine, mock_subtitle_cls):
         """Multi-clip com falha em um clip levanta RuntimeError."""
         processor = _make_video_processor()
         instruction = _make_instruction(
@@ -828,12 +803,14 @@ class TestMultiClipProcessing:
             merge=True,
         )
 
-        processor._downloader.download.return_value = (False, "Clip download failed", None, None)
+        mock_engine.download.return_value = (False, "Clip download failed", None)
 
         with pytest.raises(RuntimeError, match="Clip 1 falhou"):
             processor._process_multi_clip(instruction, None)
 
-    def test_multi_clip_uses_instruction_url_as_fallback(self):
+    @patch("src.processors.video_processor.SubtitleProcessor")
+    @patch("src.processors.video_processor.VideoDownloaderEngine")
+    def test_multi_clip_uses_instruction_url_as_fallback(self, mock_engine, mock_subtitle_cls):
         """Multi-clip usa URL da instrucao quando clip nao tem URL propria."""
         processor = _make_video_processor()
         instruction = _make_instruction(
@@ -850,10 +827,20 @@ class TestMultiClipProcessing:
             f.write(b"fake")
 
         try:
-            processor._downloader.download.return_value = (True, "OK", temp_path, None)
+            mock_engine.download.return_value = (True, "OK", temp_path)
+            mock_engine.clip_video.return_value = (True, temp_path)
+            mock_engine.adjust_aspect_ratio.return_value = (True, temp_path)
+
+            mock_proc = MagicMock()
+            mock_subtitle_cls.return_value = mock_proc
+            mock_proc.transcribe.return_value = (True, "/tmp/sub.srt")
+            mock_proc.translate.return_value = (True, "/tmp/sub_pt.srt")
+            mock_proc.generate_ass_file.return_value = (True, "/tmp/sub.ass")
+            mock_proc.embed_subtitles.return_value = (True, temp_path)
+
             processor._process_multi_clip(instruction, None)
 
-            call_kwargs = processor._downloader.download.call_args[1]
+            call_kwargs = mock_engine.download.call_args[1]
             assert call_kwargs["url"] == "https://example.com/main-video"
         finally:
             if os.path.exists(temp_path):
@@ -1029,38 +1016,70 @@ class TestProcessRouting:
 
 
 # ===========================================================================
-# 13. _get_downloader_class (module-level)
+# 13. Internal module usage verification (Story 6.6 NEW)
 # ===========================================================================
 
-class TestGetDownloaderClass:
-    """Testes para a funcao _get_downloader_class."""
+class TestInternalModuleUsage:
+    """Testes que verificam uso de modulos internos e ausencia de paths externos."""
 
-    def test_get_downloader_adds_path_to_sys(self):
-        """_get_downloader_class adiciona VIDEO_DOWNLOADER_PATH ao sys.path."""
-        mock_module = MagicMock()
-        mock_module.VideoDownloader = MagicMock()
+    def test_video_processor_uses_internal_engine(self):
+        """VideoProcessor importa VideoDownloaderEngine do modulo interno."""
+        import inspect
+        from src.processors import video_processor as vp_module
 
-        with patch.dict("sys.modules", {"downloader": mock_module}):
-            with patch("src.processors.video_processor.VIDEO_DOWNLOADER_PATH", "/fake/path"):
-                from src.processors.video_processor import _get_downloader_class
-                # Only runs if the path exists, which it does not — but the import
-                # from sys.modules should work
-                result = _get_downloader_class()
+        source = inspect.getsource(vp_module)
+        assert "from src.processors.video_downloader.engine import VideoDownloaderEngine" in source
+        assert "from src.processors.video_downloader.subtitle_processor import SubtitleProcessor" in source
 
-        assert result is mock_module.VideoDownloader
+    def test_video_processor_no_external_path(self):
+        """VideoProcessor nao contem referencias a paths externos (D:\\EPOCH)."""
+        import inspect
+        from src.processors import video_processor as vp_module
 
-    def test_get_downloader_sets_utf8_env(self):
-        """_get_downloader_class configura PYTHONUTF8 e PYTHONIOENCODING."""
-        mock_module = MagicMock()
-        mock_module.VideoDownloader = MagicMock()
+        source = inspect.getsource(vp_module)
+        assert "D:\\EPOCH" not in source
+        assert "D:/EPOCH" not in source
+        assert "VIDEO_DOWNLOADER_PATH" not in source
+        assert "_get_downloader_class" not in source
+        assert "sys.path.insert" not in source
 
-        with patch.dict("sys.modules", {"downloader": mock_module}):
-            with patch("src.processors.video_processor.VIDEO_DOWNLOADER_PATH", "/fake/path"):
-                from src.processors.video_processor import _get_downloader_class
-                _get_downloader_class()
+    def test_video_processor_no_downloader_property(self):
+        """VideoProcessor nao tem propriedade downloader (usa engine estatica)."""
+        processor = _make_video_processor()
+        assert not hasattr(processor, '_downloader')
+        # Verifica que a classe nao define 'downloader' como property
+        assert not isinstance(
+            getattr(VideoProcessor, 'downloader', None),
+            property,
+        )
 
-        assert os.environ.get("PYTHONUTF8") == "1"
-        assert os.environ.get("PYTHONIOENCODING") == "utf-8"
+
+# ===========================================================================
+# 14. EventBus ProcessingEvent usage (Story 6.6 NEW)
+# ===========================================================================
+
+class TestEventBusProcessingEvent:
+    """Testes que verificam uso de ProcessingEvent no EventBus.emit()."""
+
+    def test_embed_subtitles_uses_processing_event(self):
+        """embed_subtitles_standalone emite ProcessingEvent (nao kwargs)."""
+        # Read source file directly to avoid importing pywebview dependency
+        app_path = os.path.join(
+            os.path.dirname(__file__), "..", "..", "src", "gui", "app.py"
+        )
+        with open(app_path, "r", encoding="utf-8") as f:
+            source = f.read()
+
+        # Deve ter ProcessingEvent calls
+        assert "ProcessingEvent(" in source
+        assert "EventType.PROGRESS" in source
+        assert "EventType.COMPLETED" in source
+        assert "EventType.ERROR" in source
+
+        # Nao deve ter kwargs-style emit
+        assert 'event_type="embed_progress"' not in source
+        assert 'event_type="embed_complete"' not in source
+        assert 'event_type="embed_error"' not in source
 
 
 # ===========================================================================

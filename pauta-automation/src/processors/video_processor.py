@@ -1,13 +1,14 @@
-"""Processor de videos — integra com o Video Downloader existente.
+"""Processor de videos — integra com o VideoDownloaderEngine interno.
 
 Suporta dois modos:
-- VIDEO_SUBTITLE: Download → Clip → 16:9 → Whisper → GPT traduz → Embed legenda
-- VIDEO_ONLY: Download → Clip → 16:9
+- VIDEO_SUBTITLE: Download -> Clip -> 16:9 -> Whisper -> GPT traduz -> Embed legenda
+- VIDEO_ONLY: Download -> Clip -> 16:9
 
 Multi-clip com merge usando transicao fadewhite de 1 segundo.
 
-Reutiliza a classe VideoDownloader de:
-D:/EPOCH/ET_IA_e_Automações/epochnews_apps/videos/video_downloader/downloader.py
+Usa modulos internos (sem dependencia de paths externos):
+- src.processors.video_downloader.engine.VideoDownloaderEngine
+- src.processors.video_downloader.subtitle_processor.SubtitleProcessor
 """
 
 import logging
@@ -21,13 +22,10 @@ from typing import Callable, Optional
 from src.core.config import AppConfig
 from src.core.models import Instruction, InstructionType
 from src.processors.base import BaseProcessor
+from src.processors.video_downloader.engine import VideoDownloaderEngine
+from src.processors.video_downloader.subtitle_processor import SubtitleProcessor
 
 logger = logging.getLogger(__name__)
-
-# Path do Video Downloader existente
-VIDEO_DOWNLOADER_PATH = os.path.normpath(
-    "D:/EPOCH/ET_IA_e_Automações/epochnews_apps/videos/video_downloader"
-)
 
 # Transicao de merge entre clips
 TRANSITION_DURATION = 1.0  # segundos
@@ -39,30 +37,11 @@ DOWNLOAD_TIMEOUT_SECONDS = 300
 MAX_VIDEO_SIZE_BYTES = 2 * 1024 * 1024 * 1024
 
 
-def _get_downloader_class():
-    """Importa VideoDownloader do projeto existente."""
-    import sys
-    # Fix encoding para subprocess no Windows (evita cp1252 UnicodeDecodeError)
-    os.environ["PYTHONUTF8"] = "1"
-    os.environ["PYTHONIOENCODING"] = "utf-8"
-    if VIDEO_DOWNLOADER_PATH not in sys.path:
-        sys.path.insert(0, VIDEO_DOWNLOADER_PATH)
-    from downloader import VideoDownloader
-    return VideoDownloader
-
-
 class VideoProcessor(BaseProcessor):
-    """Processa videos usando o Video Downloader existente."""
+    """Processa videos usando o VideoDownloaderEngine interno."""
 
     def __init__(self, config: AppConfig):
         self.config = config
-        self._downloader = None
-
-    @property
-    def downloader(self):
-        if self._downloader is None:
-            self._downloader = _get_downloader_class()
-        return self._downloader
 
     def process(self, instruction: Instruction, on_progress: Optional[Callable] = None) -> str:
         """Processa um video a partir de uma instrucao.
@@ -106,38 +85,38 @@ class VideoProcessor(BaseProcessor):
             logger.debug("Falha ao verificar tamanho do video: %s", e)
             return True, ""  # Na duvida, tenta baixar
 
-    def _download_with_timeout(self, url, on_progress, start_time="", end_time="", subtitle_opts=None):
+    def _download_with_timeout(
+        self,
+        url: str,
+        on_progress: Optional[Callable],
+        start_time: str = "",
+        end_time: str = "",
+    ) -> tuple[bool, str, Optional[str]]:
         """Executa download com timeout para evitar downloads infinitos.
 
         Returns:
-            tuple: (success, message, video_path, srt_path)
+            tuple: (success, message, video_path)
         """
         # Verifica tamanho antes de baixar
         ok, size_msg = self._check_video_size(url)
         if not ok:
-            return False, size_msg, None, None
+            return False, size_msg, None
 
-        result = [False, "Timeout", None, None]
+        result: list = [False, "Timeout", None]
 
-        def progress_cb(pct, msg):
+        def progress_cb(pct: float, msg: str) -> None:
             if on_progress:
                 on_progress(pct / 100.0)
 
-        kwargs = dict(
-            url=url,
-            output_path=self.config.paths.output_dir,
-            quality=self.config.video.default_quality,
-            progress_callback=progress_cb,
-            start_time=start_time,
-            end_time=end_time,
-        )
-        if subtitle_opts:
-            kwargs.update(subtitle_opts)
-
-        def do_download():
+        def do_download() -> None:
             try:
-                r = self.downloader.download(**kwargs)
-                result[0], result[1], result[2], result[3] = r
+                success, message, video_path = VideoDownloaderEngine.download(
+                    url=url,
+                    output_dir=self.config.paths.output_dir,
+                    quality=self.config.video.default_quality,
+                    progress_callback=progress_cb,
+                )
+                result[0], result[1], result[2] = success, message, video_path
             except Exception as e:
                 result[1] = str(e)
 
@@ -147,19 +126,47 @@ class VideoProcessor(BaseProcessor):
 
         if thread.is_alive():
             logger.warning("Download timeout (%ds) para: %s", DOWNLOAD_TIMEOUT_SECONDS, url)
-            return False, f"Download excedeu timeout de {DOWNLOAD_TIMEOUT_SECONDS}s", None, None
+            return False, f"Download excedeu timeout de {DOWNLOAD_TIMEOUT_SECONDS}s", None
 
-        return tuple(result)
+        success = result[0]
+        message = result[1]
+        video_path = result[2]
+
+        if not success:
+            return False, message, None
+
+        # Clip if timecodes provided
+        if video_path and (start_time or end_time):
+            clip_success, clip_result = VideoDownloaderEngine.clip_video(
+                video_path=video_path,
+                start_time=start_time,
+                end_time=end_time,
+            )
+            if not clip_success:
+                return False, f"Clip falhou: {clip_result}", None
+            video_path = clip_result
+
+        # Adjust aspect ratio to 16:9
+        if video_path:
+            ratio_success, ratio_result = VideoDownloaderEngine.adjust_aspect_ratio(
+                video_path=video_path,
+                target_ratio="16:9",
+            )
+            if not ratio_success:
+                logger.warning("Ajuste de aspect ratio falhou: %s", ratio_result)
+                # Non-fatal: continue with original
+
+        return True, message, video_path
 
     def _process_video_only(self, instruction: Instruction, on_progress: Optional[Callable]) -> str:
-        """Processa video sem legenda: Download → Clip → 16:9."""
+        """Processa video sem legenda: Download -> Clip -> 16:9."""
         url = instruction.url
         if not url:
             raise ValueError("Instrucao VIDEO_ONLY sem URL")
 
         start_time, end_time = self._get_timecodes(instruction)
 
-        success, message, video_path, _ = self._download_with_timeout(
+        success, message, video_path = self._download_with_timeout(
             url, on_progress, start_time, end_time,
         )
 
@@ -173,7 +180,7 @@ class VideoProcessor(BaseProcessor):
         return video_path
 
     def _process_with_subtitles(self, instruction: Instruction, on_progress: Optional[Callable]) -> str:
-        """Processa video com legenda: Download → Clip → 16:9 → Whisper → GPT → Embed."""
+        """Processa video com legenda: Download -> Clip -> 16:9 -> Whisper -> GPT -> Embed."""
         url = instruction.url
         if not url:
             raise ValueError("Instrucao VIDEO_SUBTITLE sem URL")
@@ -189,16 +196,8 @@ class VideoProcessor(BaseProcessor):
         # Single clip
         start_time, end_time = self._get_timecodes(instruction)
 
-        success, message, video_path, srt_path = self._download_with_timeout(
+        success, message, video_path = self._download_with_timeout(
             url, on_progress, start_time, end_time,
-            subtitle_opts=dict(
-                whisper_transcribe=True,
-                whisper_api_key=api_key,
-                whisper_embed=True,
-                translate_subtitles=True,
-                translate_target_lang="Brazilian Portuguese",
-                subtitle_lang="en",
-            ),
         )
 
         if not success:
@@ -207,13 +206,42 @@ class VideoProcessor(BaseProcessor):
         if not video_path or not os.path.exists(video_path):
             raise RuntimeError(f"Video nao encontrado apos processamento: {video_path}")
 
+        # Subtitle pipeline: transcribe -> translate -> ASS -> embed
+        subtitle_proc = SubtitleProcessor(api_key=api_key)
+
+        transcribe_ok, srt_result = subtitle_proc.transcribe(
+            video_path=video_path,
+            language="en",
+        )
+        if not transcribe_ok:
+            raise RuntimeError(f"Transcricao falhou: {srt_result}")
+
+        translate_ok, translate_result = subtitle_proc.translate(
+            srt_path=srt_result,
+            target_lang="pt-BR",
+        )
+        if not translate_ok:
+            logger.warning("Traducao falhou: %s", translate_result)
+            # Non-fatal: use original SRT
+
+        ass_ok, ass_result = subtitle_proc.generate_ass_file(srt_result)
+        if ass_ok:
+            embed_ok, embed_result = subtitle_proc.embed_subtitles(
+                video_path=video_path,
+                subtitle_path=ass_result,
+            )
+            if not embed_ok:
+                logger.warning("Embed de legendas falhou: %s", embed_result)
+        else:
+            logger.warning("Geracao de ASS falhou: %s", ass_result)
+
         logger.info("Video com legenda concluido: %s", video_path)
         return video_path
 
     def _process_multi_clip(self, instruction: Instruction, on_progress: Optional[Callable]) -> str:
         """Processa multiplos clips e faz merge com fadewhite.
 
-        Pipeline para cada clip: Download → Clip → 16:9 → Whisper → GPT → Embed
+        Pipeline para cada clip: Download -> Clip -> 16:9 -> Whisper -> GPT -> Embed
         Depois: Merge todos com transicao fadewhite de 1 segundo.
         """
         clips = instruction.clips
@@ -235,7 +263,7 @@ class VideoProcessor(BaseProcessor):
                 start_time = self._format_timecode(clip.timecode.start)
                 end_time = self._format_timecode(clip.timecode.end)
 
-            def progress_cb(pct, msg):
+            def progress_cb(pct: float, msg: str) -> None:
                 # Mapeia progresso do clip para progresso total
                 base = (i / total_clips) * 0.7  # 70% para downloads
                 clip_progress = (pct / 100.0) * (0.7 / total_clips)
@@ -243,29 +271,55 @@ class VideoProcessor(BaseProcessor):
                     on_progress(base + clip_progress)
                 logger.info("[Clip %d/%d] %.0f%% - %s", i + 1, total_clips, pct, msg)
 
-            success, message, video_path, _ = self.downloader.download(
+            success, message, video_path = VideoDownloaderEngine.download(
                 url=clip_url,
-                output_path=self.config.paths.output_dir,
+                output_dir=self.config.paths.output_dir,
                 quality=self.config.video.default_quality,
                 progress_callback=progress_cb,
-                start_time=start_time,
-                end_time=end_time,
-                whisper_transcribe=True,
-                whisper_api_key=api_key,
-                whisper_embed=True,
-                translate_subtitles=True,
-                translate_target_lang="Brazilian Portuguese",
-                subtitle_lang="en",
             )
 
             if not success:
                 logger.error("Clip %d falhou: %s", i + 1, message)
                 raise RuntimeError(f"Clip {i+1} falhou: {message}")
 
-            if video_path and os.path.exists(video_path):
-                clip_paths.append(video_path)
-            else:
+            if not video_path or not os.path.exists(video_path):
                 raise RuntimeError(f"Clip {i+1} nao gerou arquivo: {video_path}")
+
+            # Clip timecodes
+            if start_time or end_time:
+                clip_ok, clip_result = VideoDownloaderEngine.clip_video(
+                    video_path=video_path,
+                    start_time=start_time,
+                    end_time=end_time,
+                )
+                if not clip_ok:
+                    logger.warning("Clip %d clip falhou: %s", i + 1, clip_result)
+                else:
+                    video_path = clip_result
+
+            # Adjust aspect ratio
+            VideoDownloaderEngine.adjust_aspect_ratio(
+                video_path=video_path,
+                target_ratio="16:9",
+            )
+
+            # Subtitle pipeline for each clip
+            if api_key:
+                subtitle_proc = SubtitleProcessor(api_key=api_key)
+                transcribe_ok, srt_result = subtitle_proc.transcribe(
+                    video_path=video_path,
+                    language="en",
+                )
+                if transcribe_ok:
+                    subtitle_proc.translate(srt_path=srt_result, target_lang="pt-BR")
+                    ass_ok, ass_result = subtitle_proc.generate_ass_file(srt_result)
+                    if ass_ok:
+                        subtitle_proc.embed_subtitles(
+                            video_path=video_path,
+                            subtitle_path=ass_result,
+                        )
+
+            clip_paths.append(video_path)
 
         # Merge clips
         if on_progress:
@@ -463,7 +517,7 @@ class VideoProcessor(BaseProcessor):
     def _format_timecode(tc: str) -> str:
         """Converte timecode MMSS para formato MM:SS aceito pelo downloader.
 
-        Ex: "0034" → "00:34", "0130" → "01:30", "3840" → "38:40"
+        Ex: "0034" -> "00:34", "0130" -> "01:30", "3840" -> "38:40"
         """
         tc = tc.strip()
         if ":" in tc:

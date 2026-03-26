@@ -769,34 +769,34 @@ class PautaBridge:
                 try:
                     # Progress callback
                     def on_progress(pct: float, msg: str) -> None:
-                        self._event_bus.emit(
+                        self._event_bus.emit(ProcessingEvent(
+                            type=EventType.PROGRESS,
                             instruction_id="subtitle_embed",
-                            event_type="embed_progress",
                             message=msg,
                             progress=pct,
-                        )
+                        ))
 
                     api_key = self.config.openai.api_key
                     processor = SubtitleProcessor(api_key=api_key)
 
                     # Generate ASS
-                    self._event_bus.emit(
+                    self._event_bus.emit(ProcessingEvent(
+                        type=EventType.PROGRESS,
                         instruction_id="subtitle_embed",
-                        event_type="embed_progress",
                         message="Gerando arquivo ASS...",
                         progress=0.1,
-                    )
+                    ))
                     success, ass_path_or_error = processor.generate_ass_file(srt_path, subtitle_style)
                     if not success:
                         raise RuntimeError(f"Erro ao gerar ASS: {ass_path_or_error}")
 
                     # Embed subtitles
-                    self._event_bus.emit(
+                    self._event_bus.emit(ProcessingEvent(
+                        type=EventType.PROGRESS,
                         instruction_id="subtitle_embed",
-                        event_type="embed_progress",
                         message="Embutindo legendas...",
                         progress=0.3,
-                    )
+                    ))
                     success, result = processor.embed_subtitles(
                         video_path=video_path,
                         subtitle_path=ass_path_or_error,
@@ -807,20 +807,20 @@ class PautaBridge:
                         raise RuntimeError(f"Erro ao embutir legendas: {result}")
 
                     # Emit completion
-                    self._event_bus.emit(
+                    self._event_bus.emit(ProcessingEvent(
+                        type=EventType.COMPLETED,
                         instruction_id="subtitle_embed",
-                        event_type="embed_complete",
                         message=f"Legendas embutidas: {Path(output_path).name}",
                         output_path=output_path,
-                    )
+                    ))
 
                 except Exception as e:
                     logger.error("Erro ao embutir legendas: %s", e)
-                    self._event_bus.emit(
+                    self._event_bus.emit(ProcessingEvent(
+                        type=EventType.ERROR,
                         instruction_id="subtitle_embed",
-                        event_type="embed_error",
                         message=str(e),
-                    )
+                    ))
 
             # Start worker thread
             thread = threading.Thread(target=worker, daemon=True)
