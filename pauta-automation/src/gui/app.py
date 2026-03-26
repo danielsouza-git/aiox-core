@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import logging
 import os
 import sys
@@ -432,17 +433,34 @@ class PautaBridge:
 
                     # Download (ou usar arquivo local)
                     if is_local_file:
-                        # Arquivo local selecionado — pular download
+                        # Arquivo local selecionado — copiar para output_dir
+                        # (identico ao original: cria working copy, nunca altera o original)
+                        import shutil
+
                         if not os.path.exists(url):
                             raise RuntimeError(
                                 f"Arquivo local nao encontrado: {url}"
                             )
-                        downloaded_path = url
                         logger.info("Arquivo local detectado: %s", url)
                         self._event_bus.emit(ProcessingEvent(
                             type=EventType.PROGRESS,
                             instruction_id=event_id,
-                            message="Usando arquivo local...",
+                            message="Copiando arquivo local...",
+                            progress=0.05,
+                        ))
+
+                        # Criar copia de trabalho no output_dir
+                        base_name = Path(url).stem
+                        work_name = custom_name if custom_name else base_name
+                        work_path = output_path / f"{work_name}_work.mp4"
+                        shutil.copy2(url, str(work_path))
+                        downloaded_path = str(work_path)
+                        logger.info("Copia de trabalho criada: %s", downloaded_path)
+
+                        self._event_bus.emit(ProcessingEvent(
+                            type=EventType.PROGRESS,
+                            instruction_id=event_id,
+                            message="Arquivo local copiado.",
                             progress=0.1,
                         ))
                     else:
@@ -485,6 +503,13 @@ class PautaBridge:
                                 raise RuntimeError(f"Clip {i+1} falhou: {clip_result}")
                             clipped = clip_result
 
+                            # Adjust aspect ratio to 16:9 (same as original)
+                            ar_ok, ar_result = VideoDownloaderEngine.adjust_aspect_ratio(
+                                video_path=clipped,
+                            )
+                            if ar_ok:
+                                clipped = ar_result
+
                             # Repeat if needed
                             if clip.get("repeat", 1) > 1:
                                 repeat_ok, repeat_result = VideoDownloaderEngine.repeat_clip(
@@ -517,6 +542,12 @@ class PautaBridge:
                         else:
                             final_path = clipped_paths[0] if clipped_paths else downloaded_path
                     else:
+                        # No clips — adjust aspect ratio on full video
+                        ar_ok, ar_result = VideoDownloaderEngine.adjust_aspect_ratio(
+                            video_path=downloaded_path,
+                        )
+                        if ar_ok:
+                            downloaded_path = ar_result
                         final_path = downloaded_path
 
                     # Transcription/subtitle (if not video_only)
@@ -554,6 +585,23 @@ class PautaBridge:
                             else:
                                 srt_result_path = None
                                 logger.warning("Transcricao falhou: %s", srt_result)
+
+                    # Open subtitle editor after transcription (Story 6.7)
+                    # instead of auto-embedding. User edits then triggers embed via Save.
+                    if srt_result_path and not video_only:
+                        self._editor_srt_path = srt_result_path
+                        self._editor_video_path = final_path
+                        self.open_subtitle_editor(srt_result_path, final_path)
+
+                    # Rename _work file to final name (same as original)
+                    base_name = Path(url if is_local_file else final_path).stem
+                    final_name = custom_name if custom_name else base_name
+                    # Remove _work suffix if present
+                    if final_path.endswith("_work.mp4"):
+                        renamed_path = str(output_path / f"{final_name}.mp4")
+                        os.rename(final_path, renamed_path)
+                        final_path = renamed_path
+                        logger.info("Renomeado para: %s", final_path)
 
                     # Update history entry
                     history_entry["status"] = "completed"
@@ -874,6 +922,211 @@ class PautaBridge:
         except Exception as e:
             logger.error("Erro ao iniciar embed de legendas: %s", e)
             return {"status": "error", "message": str(e)}
+
+
+    # ── Subtitle Editor Window (Story 6.7) ──
+
+    def open_subtitle_editor(self, srt_path: str, video_path: str) -> dict[str, Any]:
+        """Open subtitle editor in a new pywebview window.
+
+        Parses the SRT file and passes subtitle data + video path to JS
+        via evaluate_js on the new window.
+
+        Args:
+            srt_path: Path to the SRT file to edit.
+            video_path: Path to the corresponding video file.
+
+        Returns:
+            Status dict.
+        """
+        try:
+            from src.processors.video_downloader.srt_utils import parse_srt
+
+            entries = parse_srt(srt_path)
+            subtitle_data = [
+                {
+                    "index": e.index,
+                    "start_seconds": e.start_seconds,
+                    "end_seconds": e.end_seconds,
+                    "text": e.text,
+                }
+                for e in entries
+            ]
+
+            if getattr(sys, 'frozen', False):
+                base_dir = Path(sys._MEIPASS)
+            else:
+                base_dir = self._root_dir
+
+            editor_html = base_dir / "ui" / "subtitle-editor.html"
+            if not editor_html.exists():
+                return {"status": "error", "message": f"Editor HTML nao encontrado: {editor_html}"}
+
+            video_filename = Path(video_path).name
+
+            def on_loaded() -> None:
+                """Inject data into the editor window after DOM is ready."""
+                try:
+                    js_data = json.dumps(subtitle_data, ensure_ascii=False)
+                    js_video = json.dumps(str(video_path), ensure_ascii=False)
+                    js_srt = json.dumps(str(srt_path), ensure_ascii=False)
+                    self._editor_window.evaluate_js(
+                        f"window.subtitle_data = {js_data};"
+                        f"window.video_path = {js_video};"
+                        f"window.srt_path = {js_srt};"
+                    )
+                except Exception as e:
+                    logger.error("Erro ao injetar dados no editor: %s", e)
+
+            self._editor_window = webview.create_window(
+                title=f"Subtitle Editor \u2014 {video_filename}",
+                url=str(editor_html),
+                js_api=self,
+                width=1200,
+                height=800,
+                min_size=(800, 600),
+                on_top=False,
+            )
+            self._editor_window.events.loaded += on_loaded
+
+            return {"status": "ok"}
+        except Exception as e:
+            logger.error("Erro ao abrir editor de legendas: %s", e)
+            return {"status": "error", "message": str(e)}
+
+    def save_subtitles(
+        self, subtitles: list[dict[str, Any]], style: dict[str, Any] | None = None
+    ) -> dict[str, Any]:
+        """Save edited subtitles, generate ASS, and embed into video.
+
+        Args:
+            subtitles: List of subtitle dicts with index, start_seconds, end_seconds, text.
+            style: Optional style dict with font_size, bold, color (ASS format),
+                   outline_width, position.
+
+        Returns:
+            Status dict.
+        """
+        try:
+            from src.processors.video_downloader.srt_utils import (
+                SubtitleEntry,
+                SubtitleStyle,
+                write_srt,
+            )
+
+            # Determine paths from the editor context
+            srt_path = getattr(self, "_editor_srt_path", None)
+            video_path = getattr(self, "_editor_video_path", None)
+            if not srt_path or not video_path:
+                return {"status": "error", "message": "Paths nao configurados para o editor."}
+
+            # Convert to SubtitleEntry objects
+            entries = [
+                SubtitleEntry(
+                    index=e["index"],
+                    start_seconds=e["start_seconds"],
+                    end_seconds=e["end_seconds"],
+                    text=e["text"],
+                )
+                for e in subtitles
+            ]
+
+            # Write SRT
+            write_srt(entries, srt_path)
+
+            # Build style
+            subtitle_style = SubtitleStyle(
+                font_name="Arial",
+                font_size=style.get("font_size", 21) if style else 21,
+                bold=style.get("bold", True) if style else True,
+                color=style.get("color", "&H00FFFFFF") if style else "&H00FFFFFF",
+                outline_width=style.get("outline_width", 2) if style else 2,
+                position=style.get("position", "bottom") if style else "bottom",
+            )
+
+            # Generate ASS and embed in background thread
+            def worker() -> None:
+                try:
+                    from src.processors.video_downloader.subtitle_processor import SubtitleProcessor
+
+                    api_key = self.config.openai.api_key
+                    processor = SubtitleProcessor(api_key=api_key)
+
+                    # Generate ASS
+                    self._event_bus.emit(ProcessingEvent(
+                        type=EventType.PROGRESS,
+                        instruction_id="subtitle_embed",
+                        message="Gerando arquivo ASS...",
+                        progress=0.1,
+                    ))
+                    success, ass_path_or_error = processor.generate_ass_file(
+                        srt_path, subtitle_style
+                    )
+                    if not success:
+                        raise RuntimeError(f"Erro ao gerar ASS: {ass_path_or_error}")
+
+                    # Embed
+                    output_path = video_path.replace(".mp4", "_subtitled.mp4")
+                    self._event_bus.emit(ProcessingEvent(
+                        type=EventType.PROGRESS,
+                        instruction_id="subtitle_embed",
+                        message="Embutindo legendas...",
+                        progress=0.3,
+                    ))
+
+                    def on_progress(pct: float, msg: str) -> None:
+                        self._event_bus.emit(ProcessingEvent(
+                            type=EventType.PROGRESS,
+                            instruction_id="subtitle_embed",
+                            message=msg,
+                            progress=pct,
+                        ))
+
+                    success, result = processor.embed_subtitles(
+                        video_path=video_path,
+                        subtitle_path=ass_path_or_error,
+                        output_path=output_path,
+                        progress_callback=on_progress,
+                    )
+                    if not success:
+                        raise RuntimeError(f"Erro ao embutir legendas: {result}")
+
+                    self._event_bus.emit(ProcessingEvent(
+                        type=EventType.COMPLETED,
+                        instruction_id="subtitle_embed",
+                        message=f"Legendas embutidas: {Path(output_path).name}",
+                        output_path=output_path,
+                    ))
+                except Exception as e:
+                    logger.error("Erro ao salvar legendas: %s", e)
+                    self._event_bus.emit(ProcessingEvent(
+                        type=EventType.ERROR,
+                        instruction_id="subtitle_embed",
+                        message=str(e),
+                    ))
+
+            thread = threading.Thread(target=worker, daemon=True)
+            thread.start()
+
+            return {"status": "ok"}
+        except Exception as e:
+            logger.error("Erro ao salvar legendas: %s", e)
+            return {"status": "error", "message": str(e)}
+
+    def cancel_editor(self) -> dict[str, Any]:
+        """Close the subtitle editor window without saving.
+
+        Returns:
+            Status dict.
+        """
+        try:
+            editor_window = getattr(self, "_editor_window", None)
+            if editor_window:
+                editor_window.destroy()
+                self._editor_window = None
+        except Exception as e:
+            logger.error("Erro ao fechar editor: %s", e)
+        return {"status": "ok"}
 
 
 def create_app() -> None:
