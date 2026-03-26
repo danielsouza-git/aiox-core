@@ -852,7 +852,7 @@ function drawTimeline() {
   // Playhead
   if (video && video.currentTime) {
     const px = (video.currentTime / duration) * w;
-    ctx.fillStyle = "var(--err, #fb7185)";
+    ctx.fillStyle = "#fb7185";
     ctx.fillRect(px - 1, 0, 2, h);
     // Playhead triangle
     ctx.beginPath();

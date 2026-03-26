@@ -581,6 +581,27 @@ def parse_srt(srt_path: str) -> list[dict[str, Any]]:
 
 ---
 
+## QA Results
+
+### Review Date: 2026-03-26
+
+### Reviewed By: Quinn (Test Architect)
+
+**Automated Checks:**
+- Tests: 489 passed, 1 warning (unrelated test_tarja_integration)
+- Ruff: 0 issues
+- All 11 acceptance criteria verified
+
+**Findings:**
+- COSMETIC-001 (low): Canvas fillStyle uses CSS var() — non-functional in Canvas API
+- TEST-001 (low): Manual tests pending (UI-heavy story, expected)
+
+### Gate Status
+
+Gate: PASS → docs/qa/gates/pauta-6.7-subtitle-editor-window.yml
+
+---
+
 ## Change Log
 
 - **2026-03-26:** Story created by @sm (River)
@@ -590,6 +611,7 @@ def parse_srt(srt_path: str) -> list[dict[str, Any]]:
   - Integrated editor into `download_video()` flow (auto-opens after transcription)
   - Created 29 tests in `tests/test_subtitle_editor.py` (all pass)
   - Full suite: 489 passed, ruff 0 issues
+- **2026-03-26:** QA Gate PASS by @qa (Quinn) — all ACs met, 2 low-severity findings
 
 ---
 
