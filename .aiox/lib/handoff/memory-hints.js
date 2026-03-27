@@ -14,7 +14,7 @@
  *
  * @module memory-hints
  * @see .claude/rules/unified-handoff.md
- * @see Story AIOX-HO-2.2
+ * @see Story AIOX-SBM-2.2
  */
 
 const fs = require('fs');
@@ -102,7 +102,7 @@ function parseMemoryFile(filePath) {
  * lowercases, and deduplicates.
  *
  * @param {object} storyContext - Story context object
- * @param {string} [storyContext.story_id] - Story ID (e.g., 'AIOX-HO-2.2')
+ * @param {string} [storyContext.story_id] - Story ID (e.g., 'AIOX-SBM-2.2')
  * @param {string} [storyContext.current_task] - Current task description
  * @returns {string[]} Array of unique lowercase keywords
  */

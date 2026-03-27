@@ -1,4 +1,4 @@
-# Story AIOX-HO-1: Unified Handoff System Redesign
+# Story AIOX-SBM-1: Unified Session and Branch Manager Redesign
 
 ## Status
 
@@ -202,10 +202,10 @@ Session Start → Tier 3 (auto recovery validation: handoff vs git status)
 .aiox/current-session/micro-handoff.json          # Tier 1 data (gitignored)
 .aiox/current-session/state.yaml                  # Tier 2 data (gitignored)
 .aiox/session-history/{project}/{timestamp}.md    # Tier 3 archives (gitignored)
-.claude/lib/handoff/micro-handoff.js              # Tier 1 module (tracked)
-.claude/lib/handoff/session-state.js              # Tier 2 module (tracked)
-.claude/lib/handoff/cross-session-handoff.js      # Tier 3 module (tracked)
-.claude/lib/handoff/migrate-handoffs.js           # Migration script (tracked)
+.aiox/lib/handoff/micro-handoff.js              # Tier 1 module (tracked)
+.aiox/lib/handoff/session-state.js              # Tier 2 module (tracked)
+.aiox/lib/handoff/cross-session-handoff.js      # Tier 3 module (tracked)
+.aiox/lib/handoff/migrate-handoffs.js           # Migration script (tracked)
 .claude/rules/unified-handoff.md                  # Unified rule
 .claude/hooks/handoff-saver.cjs                   # Hook integration
 ```
@@ -392,10 +392,10 @@ docs/session-handoff-pauta-automation.md          # Trim to ~200 lines
 - `.claude/rules/unified-handoff.md` -- Unified 3-tier handoff rule
 - `.claude/hooks/handoff-auto.cjs` -- UserPromptSubmit hook (Tier 1+2 automatic triggers)
 - `.claude/hooks/handoff-saver.cjs` -- PreCompact hook component (Tier 3 trigger)
-- `.claude/lib/handoff/micro-handoff.js` -- Tier 1 module (agent switch handoff)
-- `.claude/lib/handoff/session-state.js` -- Tier 2 module (session timeline)
-- `.claude/lib/handoff/cross-session-handoff.js` -- Tier 3 module (cross-session handoff)
-- `.claude/lib/handoff/migrate-handoffs.js` -- Migration script for existing handoff files
+- `.aiox/lib/handoff/micro-handoff.js` -- Tier 1 module (agent switch handoff)
+- `.aiox/lib/handoff/session-state.js` -- Tier 2 module (session timeline)
+- `.aiox/lib/handoff/cross-session-handoff.js` -- Tier 3 module (cross-session handoff)
+- `.aiox/lib/handoff/migrate-handoffs.js` -- Migration script for existing handoff files
 - `.aiox/current-session/README.md` -- Runtime artifacts documentation
 - `.aiox/docs/handoff-system.md` -- Detailed design document
 - `tests/handoff/micro-handoff.test.js` -- 18 unit tests
@@ -460,7 +460,7 @@ Claude Opus 4.6
 
 | Issue | Severity | Fix Applied | Verification | Status |
 |-------|----------|-------------|--------------|--------|
-| ARCH-001 | HIGH | Modules moved from `.aiox/lib/handoff/` (gitignored) to `.claude/lib/handoff/` (tracked). All `require()` paths in hooks updated. | `.claude/lib/handoff/` contains 4 files: `micro-handoff.js`, `session-state.js`, `cross-session-handoff.js`, `migrate-handoffs.js`. `.gitignore` has `!.claude/lib/` exception (line 350). All `require()` in `handoff-auto.cjs` (L128, L147, L161) and `handoff-saver.cjs` (L77) use `path.join(projectRoot, '.claude', 'lib', 'handoff', ...)`. Grep for `.aiox/lib/handoff` across `.claude/` returns zero matches. | FIXED |
+| ARCH-001 | HIGH | Modules moved from `.aiox/lib/handoff/` (gitignored) to `.aiox/lib/handoff/` (tracked). All `require()` paths in hooks updated. | `.aiox/lib/handoff/` contains 4 files: `micro-handoff.js`, `session-state.js`, `cross-session-handoff.js`, `migrate-handoffs.js`. `.gitignore` has `!.claude/lib/` exception (line 350). All `require()` in `handoff-auto.cjs` (L128, L147, L161) and `handoff-saver.cjs` (L77) use `path.join(projectRoot, '.claude', 'lib', 'handoff', ...)`. Grep for `.aiox/lib/handoff` across `.claude/` returns zero matches. | FIXED |
 | MNT-001 | LOW | Duplicate test directory `.aiox/lib/handoff/__tests__/` deleted. | `ls .aiox/lib/handoff/__tests__/` returns "No such file or directory". Canonical location `tests/handoff/` has 4 test files, all passing. | FIXED |
 | MNT-002 | LOW | Limitation comment added to `session-state.js`. | `session-state.js` L9-13: "LIMITATION (MNT-002): The YAML serializer/parser in this module is flat-only..." comment present. | FIXED |
 
@@ -480,27 +480,27 @@ Execution time: 7.16s, 4 suites, 0 failures.
 
 | AC | Description | Evidence | Verdict |
 |----|-------------|----------|---------|
-| 1 | Tier 1 Micro-Handoff on agent switch | `.claude/lib/handoff/micro-handoff.js`: saveMicroHandoff writes to `.aiox/current-session/micro-handoff.json` with schema validation (max 5 decisions, 10 files, 3 blockers). 18 unit tests pass. | PASS |
-| 2 | Tier 2 Session State milestones | `.claude/lib/handoff/session-state.js`: updateSessionState appends events to `state.yaml` with 6 event types. 17 unit tests pass. | PASS |
-| 3 | Tier 3 Cross-Session Handoff trimming + archive | `.claude/lib/handoff/cross-session-handoff.js`: trimHandoff enforces MAX_LINES=200, archives to `.aiox/session-history/{project}/`. 24 unit tests pass. | PASS |
-| 4 | Unified Rule replaces deprecated rules | `.claude/rules/unified-handoff.md`: complete 3-tier spec with updated `.claude/lib/handoff/` paths. `agent-handoff.md` L1-3 and `auto-session-handoff.md` L1-4: deprecation banners present. | PASS |
-| 5 | PreCompact hook chains handoff save | `precompact-wrapper.cjs` L29-43: chains `handoff-saver.cjs` before digest with 5000ms timeout, try/catch isolation, `fs.existsSync` guard. `handoff-saver.cjs` L77: requires from `.claude/lib/handoff/`. | PASS |
+| 1 | Tier 1 Micro-Handoff on agent switch | `.aiox/lib/handoff/micro-handoff.js`: saveMicroHandoff writes to `.aiox/current-session/micro-handoff.json` with schema validation (max 5 decisions, 10 files, 3 blockers). 18 unit tests pass. | PASS |
+| 2 | Tier 2 Session State milestones | `.aiox/lib/handoff/session-state.js`: updateSessionState appends events to `state.yaml` with 6 event types. 17 unit tests pass. | PASS |
+| 3 | Tier 3 Cross-Session Handoff trimming + archive | `.aiox/lib/handoff/cross-session-handoff.js`: trimHandoff enforces MAX_LINES=200, archives to `.aiox/session-history/{project}/`. 24 unit tests pass. | PASS |
+| 4 | Unified Rule replaces deprecated rules | `.claude/rules/unified-handoff.md`: complete 3-tier spec with updated `.aiox/lib/handoff/` paths. `agent-handoff.md` L1-3 and `auto-session-handoff.md` L1-4: deprecation banners present. | PASS |
+| 5 | PreCompact hook chains handoff save | `precompact-wrapper.cjs` L29-43: chains `handoff-saver.cjs` before digest with 5000ms timeout, try/catch isolation, `fs.existsSync` guard. `handoff-saver.cjs` L77: requires from `.aiox/lib/handoff/`. | PASS |
 | 6 | Recovery validation (drift detection) | `cross-session-handoff.js`: validateHandoff compares extractFilePaths vs `git status --short`, 20% drift threshold. 5 tests pass. | PASS |
-| 7 | Automatic triggers via hooks | `handoff-auto.cjs` registered in `.claude/settings.json` (L17). Detects `@agent` pattern (11 agents), periodic snapshot every 5 prompts. All require() paths updated to `.claude/lib/handoff/`. 3 integration tests pass. | PASS |
+| 7 | Automatic triggers via hooks | `handoff-auto.cjs` registered in `.claude/settings.json` (L17). Detects `@agent` pattern (11 agents), periodic snapshot every 5 prompts. All require() paths updated to `.aiox/lib/handoff/`. 3 integration tests pass. | PASS |
 | 8 | No L1/L2 changes | `git diff --name-only -- '.aiox-core/'` shows only pre-existing unrelated changes (config-cache.js, terminal-spawner.js, entity-registry.yaml). Zero handoff-related modifications in `.aiox-core/`. | PASS |
 | 9 | Zero external deps | All imports: `fs`, `path`, `os`, `child_process` only. CommonJS (`require`), `'use strict'` in all files. No npm dependencies. | PASS |
-| 10 | Backward compatible migration | BSS, Pauta, aios-core handoff files trimmed with archives preserved. Migration script at `.claude/lib/handoff/migrate-handoffs.js`. | PASS |
+| 10 | Backward compatible migration | BSS, Pauta, aios-core handoff files trimmed with archives preserved. Migration script at `.aiox/lib/handoff/migrate-handoffs.js`. | PASS |
 
 ### Additional Checks
 
 | Check | Result |
 |-------|--------|
-| `.claude/lib/handoff/` exists with 4 modules | PASS (micro-handoff.js, session-state.js, cross-session-handoff.js, migrate-handoffs.js) |
-| Hooks point to `.claude/lib/handoff/` (not `.aiox/lib/handoff/`) | PASS (grep returns zero stale references in `.claude/`) |
+| `.aiox/lib/handoff/` exists with 4 modules | PASS (micro-handoff.js, session-state.js, cross-session-handoff.js, migrate-handoffs.js) |
+| Hooks point to `.aiox/lib/handoff/` (not `.aiox/lib/handoff/`) | PASS (grep returns zero stale references in `.claude/`) |
 | `.aiox/lib/handoff/__tests__/` removed | PASS (directory does not exist) |
 | `.gitignore` has `!.claude/lib/` exception | PASS (line 350) |
 | L1/L2 boundary clean | PASS (zero `.aiox-core/` changes from this story) |
-| `unified-handoff.md` references `.claude/lib/handoff/` | PASS (L13, L196) |
+| `unified-handoff.md` references `.aiox/lib/handoff/` | PASS (L13, L196) |
 | `handoff-system.md` design doc updated | PASS (L20, L28, L37, L67-70) |
 
 ### Remaining Observations (non-blocking, cosmetic)
@@ -528,7 +528,7 @@ Gate: PASS -> docs/qa/gates/aiox-ho-1-unified-handoff-system.yml
 
 All three issues from Review 1 have been resolved:
 
-1. **ARCH-001 (HIGH) FIXED**: Modules now live at `.claude/lib/handoff/` which is git-tracked via `!.claude/lib/` exception in `.gitignore`. On fresh clone, hooks will find their targets and the handoff system will be fully functional. All require() paths confirmed updated. Zero stale references to `.aiox/lib/handoff/` in any hook, rule, or documentation file.
+1. **ARCH-001 (HIGH) FIXED**: Modules now live at `.aiox/lib/handoff/` which is git-tracked via `!.claude/lib/` exception in `.gitignore`. On fresh clone, hooks will find their targets and the handoff system will be fully functional. All require() paths confirmed updated. Zero stale references to `.aiox/lib/handoff/` in any hook, rule, or documentation file.
 
 2. **MNT-001 (LOW) FIXED**: Duplicate test directory deleted. Single canonical test location at `tests/handoff/`.
 
@@ -540,6 +540,6 @@ All 10 ACs pass, 71/71 tests pass, coding standards met, L1/L2 boundary clean. T
 
 **Story Author**: @sm (River the Facilitator)
 **Created**: 2026-03-25
-**Epic**: AIOX-HO (Handoff System Redesign)
+**Epic**: AIOX-SBM (Handoff System Redesign)
 **Estimated Effort**: 3-4 days
 **Complexity**: High

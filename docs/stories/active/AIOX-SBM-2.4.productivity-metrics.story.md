@@ -1,4 +1,4 @@
-# Story AIOX-HO-2.4: Productivity Metrics
+# Story AIOX-SBM-2.4: Productivity Metrics
 
 ## Status
 
@@ -25,7 +25,7 @@
 5. Historical metrics aggregated from archived state.yaml files (FR-11.3)
 6. Default `--last N` to 20 sessions if not specified (Architect Recommendation #8)
 7. Zero external dependencies (Node.js stdlib only)
-8. Module location at `.claude/lib/handoff/` is canonical (Architect Recommendation #1)
+8. Module location at `.aiox/lib/handoff/` is canonical (Architect Recommendation #1)
 
 ## Dependencies
 
@@ -51,8 +51,8 @@ All computation is on-demand (read-only, no continuous overhead). Metrics are de
 ## Tasks / Subtasks
 
 ### Task 1: Implement Metrics Computation Module (AC: 1, 4, 5, 7, 8)
-- [x] 1.1: Read `.claude/lib/handoff/session-state.js` to understand event schema
-- [x] 1.2: Create `.claude/lib/handoff/metrics.js` module at canonical location
+- [x] 1.1: Read `.aiox/lib/handoff/session-state.js` to understand event schema
+- [x] 1.2: Create `.aiox/lib/handoff/metrics.js` module at canonical location
   - `computeSessionMetrics(sessionState)` → returns metrics object
   - `aggregateHistoricalMetrics(archivedStates)` → returns aggregated metrics
   - `formatMetricsForCLI(metrics)` → returns formatted string
@@ -74,7 +74,7 @@ All computation is on-demand (read-only, no continuous overhead). Metrics are de
 - [x] 2.5: Add `readMetrics(projectRoot)` function to read cached metrics (graceful degradation if file missing)
 
 ### Task 3: Extend `*session-report` with Metrics Section (AC: 1)
-- [x] 3.1: Read `.claude/lib/handoff/commands/session-report.js` (from Story 2.3)
+- [x] 3.1: Read `.aiox/lib/handoff/commands/session-report.js` (from Story 2.3)
 - [x] 3.2: After displaying agent activity and story details, add "Metrics" section
 - [x] 3.3: Compute metrics from current session state using `computeSessionMetrics()`
 - [x] 3.4: Cache metrics using `saveMetrics()`
@@ -87,7 +87,7 @@ All computation is on-demand (read-only, no continuous overhead). Metrics are de
   - Average agent duration: Xh Ym
 
 ### Task 4: Implement `*metrics-trend` Command (AC: 3, 5, 6)
-- [x] 4.1: Create `.claude/lib/handoff/commands/metrics-trend.js` module at canonical location
+- [x] 4.1: Create `.aiox/lib/handoff/commands/metrics-trend.js` module at canonical location
 - [x] 4.2: Scan `.aiox/session-history/{project}/` for `state-*.yaml` files (reuse logic from Story 2.3)
 - [x] 4.3: Default to last 20 sessions if `--last N` not specified (Architect Recommendation #8)
 - [x] 4.4: Parse each archived state file and compute metrics using `computeSessionMetrics()`
@@ -140,8 +140,8 @@ All computation is on-demand (read-only, no continuous overhead). Metrics are de
 - **Story 2.4** (this story): **Requires Story 2.3** — extends `*session-report` and reuses archive scanning
 
 **Module Location** (Architect Recommendation #1):
-- Canonical location: `.claude/lib/handoff/`
-- Commands at: `.claude/lib/handoff/commands/`
+- Canonical location: `.aiox/lib/handoff/`
+- Commands at: `.aiox/lib/handoff/commands/`
 
 **Command Registration** (Architect Recommendation #2):
 - Use `*task` pattern: `*task metrics-trend {project} [--last N]`
@@ -238,15 +238,15 @@ All computation is on-demand (read-only, no continuous overhead). Metrics are de
 
 **New Files (L4 Project Runtime):**
 ```
-.claude/lib/handoff/metrics.js                    # Metrics computation module (tracked)
-.claude/lib/handoff/commands/metrics-trend.js     # Metrics trend command (tracked)
+.aiox/lib/handoff/metrics.js                    # Metrics computation module (tracked)
+.aiox/lib/handoff/commands/metrics-trend.js     # Metrics trend command (tracked)
 .aiox/current-session/metrics.json                # Metrics cache (gitignored)
 tests/handoff/metrics.test.js                     # Unit tests
 ```
 
 **Modified Files (L4 Project Runtime):**
 ```
-.claude/lib/handoff/commands/session-report.js    # Add metrics section
+.aiox/lib/handoff/commands/session-report.js    # Add metrics section
 .claude/rules/unified-handoff.md                  # Document `*task metrics-trend` command
 .gitignore                                        # Ensure .aiox/current-session/metrics.json is ignored
 ```
@@ -274,7 +274,7 @@ Session ID: a3f2b8c4
 Started: 2026-03-25 09:00
 Total Prompts: 42
 Agents Activated: 3 (@sm, @dev, @qa)
-Stories Touched: 2 (AIOX-HO-2.1, AIOX-HO-2.2)
+Stories Touched: 2 (AIOX-SBM-2.1, AIOX-SBM-2.2)
 Files Modified: 18
 
 Agent Activity:
@@ -290,8 +290,8 @@ Story Details:
 ┌─────────────┬────────────┬────────┬──────────────┐
 │ Story       │ Status     │ Events │ Agents       │
 ├─────────────┼────────────┼────────┼──────────────┤
-│ AIOX-HO-2.1 │ Done       │ 18     │ @sm, @dev    │
-│ AIOX-HO-2.2 │ InProgress │ 12     │ @dev, @qa    │
+│ AIOX-SBM-2.1 │ Done       │ 18     │ @sm, @dev    │
+│ AIOX-SBM-2.2 │ InProgress │ 12     │ @dev, @qa    │
 └─────────────┴────────────┴────────┴──────────────┘
 
 Metrics:
@@ -470,16 +470,16 @@ No debug log needed -- all 42 tests passed on first run. 217 total tests across 
 **New Files:**
 | File | Status |
 |------|--------|
-| `.claude/lib/handoff/metrics.js` | Created |
-| `.claude/lib/handoff/commands/metrics-trend.js` | Created |
+| `.aiox/lib/handoff/metrics.js` | Created |
+| `.aiox/lib/handoff/commands/metrics-trend.js` | Created |
 | `tests/handoff/metrics.test.js` | Created |
 
 **Modified Files:**
 | File | Status |
 |------|--------|
-| `.claude/lib/handoff/commands/session-report.js` | Modified (added metrics section) |
+| `.aiox/lib/handoff/commands/session-report.js` | Modified (added metrics section) |
 | `.claude/rules/unified-handoff.md` | Modified (v1.4 -> v1.5, added metrics docs) |
-| `docs/stories/active/AIOX-HO-2.4.productivity-metrics.story.md` | Modified (checkboxes, dev record) |
+| `docs/stories/active/AIOX-SBM-2.4.productivity-metrics.story.md` | Modified (checkboxes, dev record) |
 
 ## QA Results
 
@@ -504,11 +504,11 @@ Gate: PASS --> docs/qa/gates/aiox-ho-2.4-productivity-metrics.yml
 | AC-5 | Historical metrics aggregated from archived state.yaml files | PASS | `metrics.js` L176-273: `aggregateHistoricalMetrics(archivedStates)`. `metrics-trend.js` L116-155: `scanAndParseArchives()` reads `state-*.yaml` from `.aiox/session-history/{project}/`, parses via `sessionState.parseState()`, filters by size >10 bytes. |
 | AC-6 | Default `--last N` to 20 sessions | PASS | `metrics-trend.js` L26: `const DEFAULT_SESSIONS = 20`. L69: ternary defaults to `DEFAULT_SESSIONS`. Test at metrics.test.js L677-682 asserts constant value. |
 | AC-7 | Zero external dependencies (Node.js stdlib only) | PASS | `metrics.js` L21-22: `require('fs')`, `require('path')` only. `metrics-trend.js` L23: `require('path')` only. Dynamic `require()` loads sibling handoff modules only. No `package.json` changes. |
-| AC-8 | Module at `.claude/lib/handoff/` canonical location | PASS | Files at `.claude/lib/handoff/metrics.js` and `.claude/lib/handoff/commands/metrics-trend.js`. Both `session-report.js` L71 and `metrics-trend.js` L72 resolve via `path.join(root, '.claude', 'lib', 'handoff', ...)`. |
+| AC-8 | Module at `.aiox/lib/handoff/` canonical location | PASS | Files at `.aiox/lib/handoff/metrics.js` and `.aiox/lib/handoff/commands/metrics-trend.js`. Both `session-report.js` L71 and `metrics-trend.js` L72 resolve via `path.join(root, '.claude', 'lib', 'handoff', ...)`. |
 
 ### L1/L2 Boundary Check
 
-Verified via `git show --name-only 90013b31 | grep .aiox-core/` -- no matches. All new files in `.claude/lib/handoff/` (L4) and `tests/handoff/` (L4). No constitutional violations detected.
+Verified via `git show --name-only 90013b31 | grep .aiox-core/` -- no matches. All new files in `.aiox/lib/handoff/` (L4) and `tests/handoff/` (L4). No constitutional violations detected.
 
 ### Test Execution (Independent)
 

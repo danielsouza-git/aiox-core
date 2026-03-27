@@ -1,4 +1,4 @@
-# Session Handoff — Unified Handoff System (AIOX-HO)
+# Session Handoff — Unified Session and Branch Manager (AIOX-SBM)
 
 **Data:** 2026-03-26
 **Ultima sessao:** Epic 2 implementado — 4 stories, 217 tests, todas Ready for Review
@@ -14,37 +14,37 @@
 |----------|--------|------|
 | PRD | CRIADO | `docs/prd-unified-handoff-system.md` |
 | Architect Review | GO (4 recomendacoes) | `docs/reviews/prd-unified-handoff-review.md` |
-| Story AIOX-HO-1 | QA PASSED (71 tests) | `docs/stories/active/AIOX-HO-1.unified-handoff-system.story.md` |
-| Story AIOX-HO-2.1 | Ready for Review (90 tests) | `docs/stories/active/AIOX-HO-2.1.agent-activity-summaries.story.md` |
-| Story AIOX-HO-2.2 | Ready for Review (121 tests) | `docs/stories/active/AIOX-HO-2.2.agent-memory-integration.story.md` |
-| Story AIOX-HO-2.3 | Ready for Review (175 tests) | `docs/stories/active/AIOX-HO-2.3.session-observability-cli.story.md` |
-| Story AIOX-HO-2.4 | Ready for Review (217 tests) | `docs/stories/active/AIOX-HO-2.4.productivity-metrics.story.md` |
+| Story AIOX-SBM-1 | QA PASSED (71 tests) | `docs/stories/active/AIOX-SBM-1.unified-handoff-system.story.md` |
+| Story AIOX-SBM-2.1 | Ready for Review (90 tests) | `docs/stories/active/AIOX-SBM-2.1.agent-activity-summaries.story.md` |
+| Story AIOX-SBM-2.2 | Ready for Review (121 tests) | `docs/stories/active/AIOX-SBM-2.2.agent-memory-integration.story.md` |
+| Story AIOX-SBM-2.3 | Ready for Review (175 tests) | `docs/stories/active/AIOX-SBM-2.3.session-observability-cli.story.md` |
+| Story AIOX-SBM-2.4 | Ready for Review (217 tests) | `docs/stories/active/AIOX-SBM-2.4.productivity-metrics.story.md` |
 | Commit v1.0 | Local, branch `feat/unified-handoff` | `953502bc` — NAO pushado |
 | Commit v2.0 | NAO commitado ainda | Aguardando QA gate |
 
 ## Epic 2 Stories — Implementadas
 
 1. **2.1** Agent Activity Summaries — **DONE** (19 new tests, 90 total)
-   - `.claude/lib/handoff/agent-activity.js` (~9KB)
-   - `.claude/lib/handoff/commands/session-report.js` (~2KB)
+   - `.aiox/lib/handoff/agent-activity.js` (~9KB)
+   - `.aiox/lib/handoff/commands/session-report.js` (~2KB)
    - `tests/handoff/agent-activity.test.js`
 
 2. **2.2** Agent Memory Integration — **DONE** (31 new tests, 121 total)
-   - `.claude/lib/handoff/memory-hints.js` (~180 LOC, token overlap scoring)
+   - `.aiox/lib/handoff/memory-hints.js` (~180 LOC, token overlap scoring)
    - Extended `micro-handoff.js` schema with `memory_hints` field
    - Integrated into `handoff-auto.cjs` hook
    - `tests/handoff/memory-hints.test.js`
 
 3. **2.3** Session Observability CLI — **DONE** (54 new tests, 175 total)
-   - `.claude/lib/handoff/commands/session-history.js` (archive scanning)
-   - `.claude/lib/handoff/formatters/event-timeline.js` (compact timeline)
-   - `.claude/lib/handoff/aggregators/story-details.js` (per-story breakdown)
+   - `.aiox/lib/handoff/commands/session-history.js` (archive scanning)
+   - `.aiox/lib/handoff/formatters/event-timeline.js` (compact timeline)
+   - `.aiox/lib/handoff/aggregators/story-details.js` (per-story breakdown)
    - Extended `session-report.js` with timeline + story details
    - Performance: 50 sessions in 29ms (target <2s)
 
 4. **2.4** Productivity Metrics — **DONE** (42 new tests, 217 total)
-   - `.claude/lib/handoff/metrics.js` (compute, aggregate, trend, cache)
-   - `.claude/lib/handoff/commands/metrics-trend.js` (`*metrics-trend {project} [--last N]`)
+   - `.aiox/lib/handoff/metrics.js` (compute, aggregate, trend, cache)
+   - `.aiox/lib/handoff/commands/metrics-trend.js` (`*metrics-trend {project} [--last N]`)
    - Extended `session-report.js` with metrics section
    - Trend arrows: ↑ improving, ↓ declining, → stable
 
@@ -73,10 +73,10 @@
 
 ## Key Files
 
-- Modulos: `.claude/lib/handoff/` (micro-handoff.js, session-state.js, cross-session-handoff.js, agent-activity.js, memory-hints.js, metrics.js, migrate-handoffs.js)
-- Formatters: `.claude/lib/handoff/formatters/event-timeline.js`
-- Aggregators: `.claude/lib/handoff/aggregators/story-details.js`
-- Commands: `.claude/lib/handoff/commands/` (session-report.js, session-history.js, metrics-trend.js)
+- Modulos: `.aiox/lib/handoff/` (micro-handoff.js, session-state.js, cross-session-handoff.js, agent-activity.js, memory-hints.js, metrics.js, migrate-handoffs.js)
+- Formatters: `.aiox/lib/handoff/formatters/event-timeline.js`
+- Aggregators: `.aiox/lib/handoff/aggregators/story-details.js`
+- Commands: `.aiox/lib/handoff/commands/` (session-report.js, session-history.js, metrics-trend.js)
 - Hooks: `.claude/hooks/handoff-auto.cjs`, `.claude/hooks/handoff-saver.cjs`
 - Rule: `.claude/rules/unified-handoff.md` (v1.4)
 - Tests: `tests/handoff/` (217 tests, 11 suites)
@@ -85,7 +85,7 @@
 
 - PRD: `docs/prd-unified-handoff-system.md`
 - Architect Review: `docs/reviews/prd-unified-handoff-review.md`
-- Stories: `docs/stories/active/AIOX-HO-2.*.story.md`
+- Stories: `docs/stories/active/AIOX-SBM-2.*.story.md`
 
 ## Notas Tecnicas
 
@@ -100,7 +100,7 @@
 ## Como Continuar
 
 ```
-Leia docs/session-handoff-unified-handoff-system.md. Projeto Unified Handoff System.
+Leia docs/session-handoff-unified-handoff-system.md. Projeto Unified Session and Branch Manager.
 
 Epic 2 (v2.0) IMPLEMENTADO: 4 stories, 217 tests passando, todas Ready for Review.
 Proximo: @qa rodar QA gate em todas as 4 stories, depois commit e push.

@@ -8,7 +8,7 @@
  *
  * @module micro-handoff
  * @see .claude/rules/unified-handoff.md
- * @see Story AIOX-HO-1
+ * @see Story AIOX-SBM-1
  */
 
 const fs = require('fs');

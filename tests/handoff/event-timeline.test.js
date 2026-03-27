@@ -5,7 +5,7 @@
  *
  * Tests formatCompactTimeline(), formatEvent(), extractTime().
  *
- * @see Story AIOX-HO-2.3
+ * @see Story AIOX-SBM-2.3
  */
 
 const {
@@ -13,9 +13,9 @@ const {
   formatEvent,
   extractTime,
   DEFAULT_LIMIT,
-} = require('../../.claude/lib/handoff/formatters/event-timeline');
+} = require('../../.aiox/lib/handoff/formatters/event-timeline');
 
-describe('Event Timeline Formatter (Story AIOX-HO-2.3)', () => {
+describe('Event Timeline Formatter (Story AIOX-SBM-2.3)', () => {
   // --- extractTime ---
 
   describe('extractTime()', () => {
@@ -51,9 +51,9 @@ describe('Event Timeline Formatter (Story AIOX-HO-2.3)', () => {
         timestamp: '2026-03-25T14:30:00Z',
         agent: 'dev',
         type: 'story_start',
-        story: 'AIOX-HO-2.3',
+        story: 'AIOX-SBM-2.3',
       };
-      expect(formatEvent(event)).toBe('[14:30] @dev story_start AIOX-HO-2.3');
+      expect(formatEvent(event)).toBe('[14:30] @dev story_start AIOX-SBM-2.3');
     });
 
     test('formats periodic event with prompt count', () => {

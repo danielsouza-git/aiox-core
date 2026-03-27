@@ -15,8 +15,8 @@
  * Timeout: 5000ms max.
  *
  * @module handoff-auto
- * @see .claude/rules/unified-handoff.md
- * @see Story AIOX-HO-1
+ * @see .claude/rules/session-branch-manager.md
+ * @see Story AIOX-SBM-1
  */
 
 const path = require('path');
@@ -126,7 +126,7 @@ function main() {
     // Determine the outgoing agent from session state (last known agent_switch)
     let fromAgent = 'unknown';
     try {
-      const sessionState = require(path.join(projectRoot, '.claude', 'lib', 'handoff', 'session-state'));
+      const sessionState = require(path.join(projectRoot, '.aiox', 'lib', 'handoff', 'session-state'));
       const state = sessionState.getSessionState(projectRoot);
       const agentEvents = (state.events || []).filter((e) => e.type === 'agent_switch' && e.agent);
       if (agentEvents.length > 0) {
@@ -136,10 +136,10 @@ function main() {
       // Session state not available -- use 'unknown'
     }
 
-    // Extract memory hints from the outgoing agent's MEMORY.md (Story AIOX-HO-2.2)
+    // Extract memory hints from the outgoing agent's MEMORY.md (Story AIOX-SBM-2.2)
     let memoryHints = [];
     try {
-      const memHints = require(path.join(projectRoot, '.claude', 'lib', 'handoff', 'memory-hints'));
+      const memHints = require(path.join(projectRoot, '.aiox', 'lib', 'handoff', 'memory-hints'));
       memoryHints = memHints.extractMemoryHints(fromAgent, {
         story_id: '',
         current_task: '',
@@ -150,7 +150,7 @@ function main() {
 
     // Tier 1: Save micro-handoff
     try {
-      const microHandoff = require(path.join(projectRoot, '.claude', 'lib', 'handoff', 'micro-handoff'));
+      const microHandoff = require(path.join(projectRoot, '.aiox', 'lib', 'handoff', 'micro-handoff'));
       microHandoff.saveMicroHandoff(fromAgent, agent, {
         story_context: {
           story_id: '',
@@ -168,7 +168,7 @@ function main() {
 
     // Tier 2: Log agent_switch event
     try {
-      const sessionState = require(path.join(projectRoot, '.claude', 'lib', 'handoff', 'session-state'));
+      const sessionState = require(path.join(projectRoot, '.aiox', 'lib', 'handoff', 'session-state'));
       sessionState.updateSessionState('agent_switch', {
         agent: agent,
         details: `Agent switch to @${agent} detected in prompt`,
@@ -182,7 +182,7 @@ function main() {
   // 2. Periodic snapshot every PERIODIC_INTERVAL prompts
   if (promptCount > 0 && promptCount % PERIODIC_INTERVAL === 0) {
     try {
-      const sessionState = require(path.join(projectRoot, '.claude', 'lib', 'handoff', 'session-state'));
+      const sessionState = require(path.join(projectRoot, '.aiox', 'lib', 'handoff', 'session-state'));
       sessionState.updateSessionState('periodic', {
         prompt_count: promptCount,
       }, projectRoot);

@@ -13,7 +13,7 @@ const {
   MAX_HINTS,
   MAX_CONTENT_CHARS,
   MAX_HINT_LENGTH,
-} = require('../../.claude/lib/handoff/memory-hints');
+} = require('../../.aiox/lib/handoff/memory-hints');
 
 describe('Memory Hints — Agent Memory Integration', () => {
   let tmpDir;
@@ -109,12 +109,12 @@ describe('Memory Hints — Agent Memory Integration', () => {
   describe('extractKeywords', () => {
     test('extracts tokens from story_id and current_task', () => {
       const keywords = extractKeywords({
-        story_id: 'AIOX-HO-2.2',
+        story_id: 'AIOX-SBM-2.2',
         current_task: 'Implement memory hints',
       });
 
       expect(keywords).toContain('aiox');
-      expect(keywords).toContain('ho');
+      expect(keywords).toContain('sbm');
       expect(keywords).toContain('implement');
       expect(keywords).toContain('memory');
       expect(keywords).toContain('hints');
@@ -208,7 +208,7 @@ describe('Memory Hints — Agent Memory Integration', () => {
         '## Memory Hints Algorithm',
         'Token overlap scoring chosen for handoff system.',
         '',
-        '## AIOX-HO Implementation Notes',
+        '## AIOX-SBM Implementation Notes',
         'Handoff system uses micro-handoff artifacts.',
         '',
         '## General TypeScript Patterns',
@@ -222,14 +222,14 @@ describe('Memory Hints — Agent Memory Integration', () => {
       ].join('\n'));
 
       const hints = extractMemoryHints('dev', {
-        story_id: 'AIOX-HO-2.2',
+        story_id: 'AIOX-SBM-2.2',
         current_task: 'Implement memory hints',
       }, tmpDir);
 
       expect(hints.length).toBeLessThanOrEqual(MAX_HINTS);
       expect(hints.length).toBeGreaterThan(0);
       // The top hints should be the sections with most keyword overlap
-      // "Memory Hints Algorithm" and "AIOX-HO Implementation Notes" should score high
+      // "Memory Hints Algorithm" and "AIOX-SBM Implementation Notes" should score high
     });
 
     test('returns empty array when MEMORY.md does not exist', () => {
@@ -311,7 +311,7 @@ describe('Memory Hints — Agent Memory Integration', () => {
 
   describe('read-only enforcement', () => {
     test('module source contains no fs.writeFileSync or fs.writeFile calls', () => {
-      const modulePath = path.resolve(__dirname, '../../.claude/lib/handoff/memory-hints.js');
+      const modulePath = path.resolve(__dirname, '../../.aiox/lib/handoff/memory-hints.js');
       const source = fs.readFileSync(modulePath, 'utf8');
 
       expect(source).not.toMatch(/fs\.writeFileSync/);

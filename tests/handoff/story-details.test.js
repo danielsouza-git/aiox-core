@@ -5,15 +5,15 @@
  *
  * Tests aggregateStoryDetails() and formatStoryDetailsTable().
  *
- * @see Story AIOX-HO-2.3
+ * @see Story AIOX-SBM-2.3
  */
 
 const {
   aggregateStoryDetails,
   formatStoryDetailsTable,
-} = require('../../.claude/lib/handoff/aggregators/story-details');
+} = require('../../.aiox/lib/handoff/aggregators/story-details');
 
-describe('Story Details Aggregator (Story AIOX-HO-2.3)', () => {
+describe('Story Details Aggregator (Story AIOX-SBM-2.3)', () => {
   // --- aggregateStoryDetails ---
 
   describe('aggregateStoryDetails()', () => {
@@ -137,17 +137,17 @@ describe('Story Details Aggregator (Story AIOX-HO-2.3)', () => {
 
     test('formats multiple stories with proper alignment', () => {
       const stories = [
-        { storyId: 'AIOX-HO-2.1', status: 'Done', events: 18, agents: ['@sm', '@dev'] },
-        { storyId: 'AIOX-HO-2.2', status: 'InProgress', events: 12, agents: ['@dev', '@qa'] },
+        { storyId: 'AIOX-SBM-2.1', status: 'Done', events: 18, agents: ['@sm', '@dev'] },
+        { storyId: 'AIOX-SBM-2.2', status: 'InProgress', events: 12, agents: ['@dev', '@qa'] },
       ];
 
       const result = formatStoryDetailsTable(stories);
       const lines = result.split('\n');
 
       expect(lines).toHaveLength(4); // header + separator + 2 rows
-      expect(lines[2]).toContain('AIOX-HO-2.1');
+      expect(lines[2]).toContain('AIOX-SBM-2.1');
       expect(lines[2]).toContain('Done');
-      expect(lines[3]).toContain('AIOX-HO-2.2');
+      expect(lines[3]).toContain('AIOX-SBM-2.2');
       expect(lines[3]).toContain('InProgress');
     });
   });

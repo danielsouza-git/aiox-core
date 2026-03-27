@@ -17,7 +17,7 @@ const {
   MAX_BLOCKERS,
   MAX_UNCONSUMED,
   MAX_MEMORY_HINTS,
-} = require('../../.claude/lib/handoff/micro-handoff');
+} = require('../../.aiox/lib/handoff/micro-handoff');
 
 describe('Tier 1: Micro-Handoff', () => {
   let tmpDir;
@@ -35,8 +35,8 @@ describe('Tier 1: Micro-Handoff', () => {
     test('creates a handoff file with correct structure', () => {
       const result = saveMicroHandoff('dev', 'qa', {
         story_context: {
-          story_id: 'AIOX-HO-1',
-          story_path: 'docs/stories/active/AIOX-HO-1.story.md',
+          story_id: 'AIOX-SBM-1',
+          story_path: 'docs/stories/active/AIOX-SBM-1.story.md',
           story_status: 'In Progress',
           current_task: 'Task 4',
           branch: 'main',
@@ -50,7 +50,7 @@ describe('Tier 1: Micro-Handoff', () => {
       expect(result.from_agent).toBe('dev');
       expect(result.to_agent).toBe('qa');
       expect(result.consumed).toBe(false);
-      expect(result.story_context.story_id).toBe('AIOX-HO-1');
+      expect(result.story_context.story_id).toBe('AIOX-SBM-1');
       expect(result.decisions).toEqual(['Used CommonJS']);
       expect(result.version).toBe('1.0');
     });
@@ -83,7 +83,7 @@ describe('Tier 1: Micro-Handoff', () => {
       expect(h.id).toMatch(/^handoff-dev-to-qa-/);
     });
 
-    test('saves handoff with memory_hints field (Story AIOX-HO-2.2)', () => {
+    test('saves handoff with memory_hints field (Story AIOX-SBM-2.2)', () => {
       const result = saveMicroHandoff('dev', 'qa', {
         memory_hints: ['Greeting System Architecture', 'Test Mocking Pattern'],
         next_action: 'Review code',

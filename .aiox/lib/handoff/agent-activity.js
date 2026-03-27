@@ -14,7 +14,7 @@
  *
  * @module agent-activity
  * @see .claude/rules/unified-handoff.md
- * @see Story AIOX-HO-2.1
+ * @see Story AIOX-SBM-2.1
  */
 
 /** Max lines for the Agent Activity section in Tier 3 handoff */
@@ -153,7 +153,7 @@ function generateAgentSummary(sessionState) {
  *
  * Total Prompts: 42
  * Agents Activated: 3 (@sm, @dev, @qa)
- * Stories Touched: 2 (AIOX-HO-2.1, AIOX-HO-2.2)
+ * Stories Touched: 2 (AIOX-SBM-2.1, AIOX-SBM-2.2)
  * Files Modified: 18
  *
  * Agent Activity:
@@ -241,7 +241,7 @@ function formatSummaryForCLI(summaries, options = {}) {
  * ## Agent Activity
  *
  * Last session (2026-03-25):
- * - **@dev**: 1 story, 12 files, ~2h 15m -- Implemented AIOX-HO-2.1
+ * - **@dev**: 1 story, 12 files, ~2h 15m -- Implemented AIOX-SBM-2.1
  * - **@qa**: 1 story, 3 files, ~45m -- QA review
  * ```
  *

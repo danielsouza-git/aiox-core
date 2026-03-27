@@ -14,7 +14,7 @@
  *
  * @module session-state
  * @see .claude/rules/unified-handoff.md
- * @see Story AIOX-HO-1
+ * @see Story AIOX-SBM-1
  */
 
 const fs = require('fs');
@@ -75,6 +75,7 @@ function serializeState(state) {
       lines.push(`    type: "${evt.type || ''}"`);
       if (evt.agent) lines.push(`    agent: "${evt.agent}"`);
       if (evt.story) lines.push(`    story: "${evt.story}"`);
+      if (evt.project) lines.push(`    project: "${evt.project}"`);
       if (evt.branch) lines.push(`    branch: "${evt.branch}"`);
       if (evt.files_modified !== undefined) lines.push(`    files_modified: ${evt.files_modified}`);
       if (evt.prompt_count !== undefined) lines.push(`    prompt_count: ${evt.prompt_count}`);

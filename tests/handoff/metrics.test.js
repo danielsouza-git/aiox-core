@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * Tests for Productivity Metrics Module (Story AIOX-HO-2.4)
+ * Tests for Productivity Metrics Module (Story AIOX-SBM-2.4)
  *
  * Tests:
  * - computeSessionMetrics(): prompts per agent, stories, QA, commits, agent duration
@@ -13,7 +13,7 @@
  * - session-report integration: metrics section appended
  * - Performance: <1s for 20 sessions
  *
- * @see Story AIOX-HO-2.4
+ * @see Story AIOX-SBM-2.4
  */
 
 const fs = require('fs');
@@ -29,11 +29,11 @@ const {
   saveMetrics,
   readMetrics,
   getMetricsPath,
-} = require('../../.claude/lib/handoff/metrics');
+} = require('../../.aiox/lib/handoff/metrics');
 
-const { serializeState } = require('../../.claude/lib/handoff/session-state');
+const { serializeState } = require('../../.aiox/lib/handoff/session-state');
 
-describe('Productivity Metrics (Story AIOX-HO-2.4)', () => {
+describe('Productivity Metrics (Story AIOX-SBM-2.4)', () => {
   let tmpDir;
 
   beforeEach(() => {
@@ -500,7 +500,7 @@ describe('Productivity Metrics (Story AIOX-HO-2.4)', () => {
 
 // --- metrics-trend command ---
 
-describe('Metrics Trend Command (Story AIOX-HO-2.4)', () => {
+describe('Metrics Trend Command (Story AIOX-SBM-2.4)', () => {
   let tmpDir;
 
   beforeEach(() => {
@@ -511,11 +511,11 @@ describe('Metrics Trend Command (Story AIOX-HO-2.4)', () => {
     fs.mkdirSync(tmpDir, { recursive: true });
 
     // Create the module directory structure and copy all required modules
-    const handoffDir = path.join(tmpDir, '.claude', 'lib', 'handoff');
+    const handoffDir = path.join(tmpDir, '.aiox', 'lib', 'handoff');
     const commandsDir = path.join(handoffDir, 'commands');
     fs.mkdirSync(commandsDir, { recursive: true });
 
-    const srcBase = path.resolve(__dirname, '../../.claude/lib/handoff');
+    const srcBase = path.resolve(__dirname, '../../.aiox/lib/handoff');
 
     fs.copyFileSync(
       path.join(srcBase, 'session-state.js'),
@@ -562,14 +562,14 @@ describe('Metrics Trend Command (Story AIOX-HO-2.4)', () => {
     const ssPath = path.join(tmpDir, '.aiox', 'current-session');
     fs.mkdirSync(ssPath, { recursive: true });
 
-    const ssModule = require(path.join(tmpDir, '.claude', 'lib', 'handoff', 'session-state'));
+    const ssModule = require(path.join(tmpDir, '.aiox', 'lib', 'handoff', 'session-state'));
     const yaml = ssModule.serializeState(state);
     fs.writeFileSync(path.join(ssPath, 'state.yaml'), yaml, 'utf8');
   }
 
   test('returns usage message when project is missing', () => {
     const { generateMetricsTrend } = require(
-      path.join(tmpDir, '.claude', 'lib', 'handoff', 'commands', 'metrics-trend'),
+      path.join(tmpDir, '.aiox', 'lib', 'handoff', 'commands', 'metrics-trend'),
     );
 
     const result = generateMetricsTrend('');
@@ -586,7 +586,7 @@ describe('Metrics Trend Command (Story AIOX-HO-2.4)', () => {
     });
 
     const { generateMetricsTrend } = require(
-      path.join(tmpDir, '.claude', 'lib', 'handoff', 'commands', 'metrics-trend'),
+      path.join(tmpDir, '.aiox', 'lib', 'handoff', 'commands', 'metrics-trend'),
     );
 
     const result = generateMetricsTrend('test-project', { projectRoot: tmpDir });
@@ -621,7 +621,7 @@ describe('Metrics Trend Command (Story AIOX-HO-2.4)', () => {
     });
 
     const { generateMetricsTrend } = require(
-      path.join(tmpDir, '.claude', 'lib', 'handoff', 'commands', 'metrics-trend'),
+      path.join(tmpDir, '.aiox', 'lib', 'handoff', 'commands', 'metrics-trend'),
     );
 
     const result = generateMetricsTrend('aios-core', { projectRoot: tmpDir });
@@ -665,7 +665,7 @@ describe('Metrics Trend Command (Story AIOX-HO-2.4)', () => {
     });
 
     const { generateMetricsTrend } = require(
-      path.join(tmpDir, '.claude', 'lib', 'handoff', 'commands', 'metrics-trend'),
+      path.join(tmpDir, '.aiox', 'lib', 'handoff', 'commands', 'metrics-trend'),
     );
 
     // Only last 3
@@ -676,7 +676,7 @@ describe('Metrics Trend Command (Story AIOX-HO-2.4)', () => {
 
   test('DEFAULT_SESSIONS is 20', () => {
     const { DEFAULT_SESSIONS } = require(
-      path.join(tmpDir, '.claude', 'lib', 'handoff', 'commands', 'metrics-trend'),
+      path.join(tmpDir, '.aiox', 'lib', 'handoff', 'commands', 'metrics-trend'),
     );
     expect(DEFAULT_SESSIONS).toBe(20);
   });
@@ -684,7 +684,7 @@ describe('Metrics Trend Command (Story AIOX-HO-2.4)', () => {
 
 // --- session-report metrics integration ---
 
-describe('Session Report Metrics Integration (Story AIOX-HO-2.4)', () => {
+describe('Session Report Metrics Integration (Story AIOX-SBM-2.4)', () => {
   let tmpDir;
 
   beforeEach(() => {
@@ -695,7 +695,7 @@ describe('Session Report Metrics Integration (Story AIOX-HO-2.4)', () => {
     fs.mkdirSync(tmpDir, { recursive: true });
 
     // Create the module directory structure
-    const handoffDir = path.join(tmpDir, '.claude', 'lib', 'handoff');
+    const handoffDir = path.join(tmpDir, '.aiox', 'lib', 'handoff');
     const commandsDir = path.join(handoffDir, 'commands');
     const formattersDir = path.join(handoffDir, 'formatters');
     const aggregatorsDir = path.join(handoffDir, 'aggregators');
@@ -703,7 +703,7 @@ describe('Session Report Metrics Integration (Story AIOX-HO-2.4)', () => {
     fs.mkdirSync(formattersDir, { recursive: true });
     fs.mkdirSync(aggregatorsDir, { recursive: true });
 
-    const srcBase = path.resolve(__dirname, '../../.claude/lib/handoff');
+    const srcBase = path.resolve(__dirname, '../../.aiox/lib/handoff');
 
     fs.copyFileSync(
       path.join(srcBase, 'session-state.js'),
@@ -749,7 +749,7 @@ describe('Session Report Metrics Integration (Story AIOX-HO-2.4)', () => {
     const ssPath = path.join(tmpDir, '.aiox', 'current-session');
     fs.mkdirSync(ssPath, { recursive: true });
 
-    const ssModule = require(path.join(tmpDir, '.claude', 'lib', 'handoff', 'session-state'));
+    const ssModule = require(path.join(tmpDir, '.aiox', 'lib', 'handoff', 'session-state'));
     const yaml = ssModule.serializeState(state);
     fs.writeFileSync(path.join(ssPath, 'state.yaml'), yaml, 'utf8');
   }
@@ -769,7 +769,7 @@ describe('Session Report Metrics Integration (Story AIOX-HO-2.4)', () => {
     setupSessionState(state);
 
     const { generateReport } = require(
-      path.join(tmpDir, '.claude', 'lib', 'handoff', 'commands', 'session-report'),
+      path.join(tmpDir, '.aiox', 'lib', 'handoff', 'commands', 'session-report'),
     );
     const report = generateReport(tmpDir);
 
@@ -787,7 +787,7 @@ describe('Session Report Metrics Integration (Story AIOX-HO-2.4)', () => {
 
   test('session report works without metrics module (graceful fallback)', () => {
     // Create a state but do NOT copy the metrics module -- should still generate base report
-    const handoffDir = path.join(tmpDir, '.claude', 'lib', 'handoff');
+    const handoffDir = path.join(tmpDir, '.aiox', 'lib', 'handoff');
     // Remove the metrics.js if it was copied
     try {
       fs.unlinkSync(path.join(handoffDir, 'metrics.js'));
@@ -811,7 +811,7 @@ describe('Session Report Metrics Integration (Story AIOX-HO-2.4)', () => {
     });
 
     const { generateReport } = require(
-      path.join(tmpDir, '.claude', 'lib', 'handoff', 'commands', 'session-report'),
+      path.join(tmpDir, '.aiox', 'lib', 'handoff', 'commands', 'session-report'),
     );
     const report = generateReport(tmpDir);
 
@@ -824,7 +824,7 @@ describe('Session Report Metrics Integration (Story AIOX-HO-2.4)', () => {
 
 // --- Performance ---
 
-describe('Metrics Performance (Story AIOX-HO-2.4)', () => {
+describe('Metrics Performance (Story AIOX-SBM-2.4)', () => {
   let tmpDir;
 
   beforeEach(() => {
@@ -835,11 +835,11 @@ describe('Metrics Performance (Story AIOX-HO-2.4)', () => {
     fs.mkdirSync(tmpDir, { recursive: true });
 
     // Copy modules for metrics-trend command
-    const handoffDir = path.join(tmpDir, '.claude', 'lib', 'handoff');
+    const handoffDir = path.join(tmpDir, '.aiox', 'lib', 'handoff');
     const commandsDir = path.join(handoffDir, 'commands');
     fs.mkdirSync(commandsDir, { recursive: true });
 
-    const srcBase = path.resolve(__dirname, '../../.claude/lib/handoff');
+    const srcBase = path.resolve(__dirname, '../../.aiox/lib/handoff');
     fs.copyFileSync(
       path.join(srcBase, 'session-state.js'),
       path.join(handoffDir, 'session-state.js'),
@@ -873,7 +873,7 @@ describe('Metrics Performance (Story AIOX-HO-2.4)', () => {
   });
 
   test('computes metrics for 20 archived sessions in under 1 second', () => {
-    const ssModule = require(path.join(tmpDir, '.claude', 'lib', 'handoff', 'session-state'));
+    const ssModule = require(path.join(tmpDir, '.aiox', 'lib', 'handoff', 'session-state'));
 
     // Create 20 archived sessions with realistic event counts
     for (let i = 0; i < 20; i++) {
@@ -921,7 +921,7 @@ describe('Metrics Performance (Story AIOX-HO-2.4)', () => {
     );
 
     const { generateMetricsTrend } = require(
-      path.join(tmpDir, '.claude', 'lib', 'handoff', 'commands', 'metrics-trend'),
+      path.join(tmpDir, '.aiox', 'lib', 'handoff', 'commands', 'metrics-trend'),
     );
 
     const start = Date.now();

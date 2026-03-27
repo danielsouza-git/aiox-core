@@ -17,7 +17,7 @@ const {
   extractFilePaths,
   MAX_LINES,
   DRIFT_THRESHOLD,
-} = require('../../.claude/lib/handoff/cross-session-handoff');
+} = require('../../.aiox/lib/handoff/cross-session-handoff');
 
 // Mock child_process.execSync for git status tests
 jest.mock('child_process', () => ({
@@ -45,7 +45,7 @@ describe('Tier 3: Cross-Session Handoff', () => {
         lastSession: 'Implemented Task 4',
         next: 'Continue Task 5',
         activeStories: [
-          { story: 'AIOX-HO-1', status: 'In Progress', notes: 'Task 4 done' },
+          { story: 'AIOX-SBM-1', status: 'In Progress', notes: 'Task 4 done' },
         ],
         recentWork: ['Implemented micro-handoff module'],
         keyDocs: { PRD: 'docs/prd.md' },
@@ -57,7 +57,7 @@ describe('Tier 3: Cross-Session Handoff', () => {
 
       expect(content).toContain('# Session Handoff -- test-project');
       expect(content).toContain('**Date:** 2026-03-25');
-      expect(content).toContain('AIOX-HO-1');
+      expect(content).toContain('AIOX-SBM-1');
       expect(content).toContain('Implemented micro-handoff module');
       expect(content).toContain('docs/prd.md');
     });

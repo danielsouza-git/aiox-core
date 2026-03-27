@@ -14,8 +14,8 @@
  * Timeout: 5000ms max.
  *
  * @module handoff-saver
- * @see .claude/rules/unified-handoff.md
- * @see Story AIOX-HO-1
+ * @see .claude/rules/session-branch-manager.md
+ * @see Story AIOX-SBM-1
  */
 
 const path = require('path');
@@ -74,17 +74,17 @@ async function main() {
   // Load Tier 3 module
   let crossSession;
   try {
-    crossSession = require(path.join(projectRoot, '.claude', 'lib', 'handoff', 'cross-session-handoff'));
+    crossSession = require(path.join(projectRoot, '.aiox', 'lib', 'handoff', 'cross-session-handoff'));
   } catch (_) {
     // Module not available -- exit silently
     return;
   }
 
-  // Generate agent activity summaries from Tier 2 session state (Story AIOX-HO-2.1)
+  // Generate agent activity summaries from Tier 2 session state (Story AIOX-SBM-2.1)
   let agentActivitySection = '';
   try {
-    const sessionStateModule = require(path.join(projectRoot, '.claude', 'lib', 'handoff', 'session-state'));
-    const agentActivity = require(path.join(projectRoot, '.claude', 'lib', 'handoff', 'agent-activity'));
+    const sessionStateModule = require(path.join(projectRoot, '.aiox', 'lib', 'handoff', 'session-state'));
+    const agentActivity = require(path.join(projectRoot, '.aiox', 'lib', 'handoff', 'agent-activity'));
     const sessionState = sessionStateModule.getSessionState(projectRoot);
     if (sessionState && sessionState.events && sessionState.events.length > 0) {
       const summaries = agentActivity.generateAgentSummary(sessionState);

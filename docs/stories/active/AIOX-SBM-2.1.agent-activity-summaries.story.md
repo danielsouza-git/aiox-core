@@ -1,4 +1,4 @@
-# Story AIOX-HO-2.1: Agent Activity Summaries
+# Story AIOX-SBM-2.1: Agent Activity Summaries
 
 ## Status
 
@@ -25,7 +25,7 @@
 5. Time metrics labeled as "approximate active span" not "time spent" (Architect Recommendation #6)
 6. `trimHandoff()` function updated to recognize "## Agent Activity" as a preserved section with max 30 lines (Architect Recommendation #5, Gap 4.2)
 7. Zero external dependencies (Node.js stdlib only) (FR-8.3)
-8. Module location at `.claude/lib/handoff/` is canonical (Architect Recommendation #1)
+8. Module location at `.aiox/lib/handoff/` is canonical (Architect Recommendation #1)
 
 ## Problem Statement
 
@@ -47,8 +47,8 @@ Time metrics are labeled as "approximate active span" (inferred from timestamp d
 ## Tasks / Subtasks
 
 ### Task 1: Create Agent Activity Module (AC: 1, 2, 4, 7, 8)
-- [x] 1.1: Read `.claude/lib/handoff/session-state.js` to understand event schema
-- [x] 1.2: Create `.claude/lib/handoff/agent-activity.js` module at canonical location
+- [x] 1.1: Read `.aiox/lib/handoff/session-state.js` to understand event schema
+- [x] 1.2: Create `.aiox/lib/handoff/agent-activity.js` module at canonical location
   - `generateAgentSummary(sessionState)` → returns array of agent summaries
   - `formatSummaryForCLI(summaries)` → returns formatted table string
   - `formatSummaryForHandoff(summaries)` → returns markdown section string (max 30 lines)
@@ -63,7 +63,7 @@ Time metrics are labeled as "approximate active span" (inferred from timestamp d
 - [x] 1.6: Create `tests/handoff/agent-activity.test.js` (10-12 tests estimated)
 
 ### Task 2: Implement `*session-report` Command (AC: 1, 2)
-- [x] 2.1: Create command handler in `.claude/lib/handoff/commands/session-report.js`
+- [x] 2.1: Create command handler in `.aiox/lib/handoff/commands/session-report.js`
 - [x] 2.2: Read current session state using `session-state.js` module
 - [x] 2.3: Call `generateAgentSummary()` to compute summaries
 - [x] 2.4: Call `formatSummaryForCLI()` to format output
@@ -77,7 +77,7 @@ Time metrics are labeled as "approximate active span" (inferred from timestamp d
 - [x] 2.7: Add command documentation to `.claude/rules/unified-handoff.md`
 
 ### Task 3: Integrate Agent Activity into Tier 3 Handoff (AC: 3, 6)
-- [x] 3.1: Read `.claude/lib/handoff/cross-session-handoff.js` module
+- [x] 3.1: Read `.aiox/lib/handoff/cross-session-handoff.js` module
 - [x] 3.2: Update `saveHandoff()` function to accept optional agent summaries parameter
 - [x] 3.3: If summaries provided, inject "## Agent Activity" section before "## Key Docs"
 - [x] 3.4: Update `trimHandoff()` section patterns to recognize "Agent Activity" section
@@ -117,7 +117,7 @@ Time metrics are labeled as "approximate active span" (inferred from timestamp d
 - **Story 2.4**: Requires 2.3 (adds metrics to session report)
 
 **Module Location** (Architect Recommendation #1):
-- Canonical location: `.claude/lib/handoff/`
+- Canonical location: `.aiox/lib/handoff/`
 - Remove or document any duplicates in `.aiox/lib/handoff/`
 - Tests use canonical location
 - Hooks use canonical location
@@ -156,14 +156,14 @@ Time metrics are labeled as "approximate active span" (inferred from timestamp d
 
 **New Files (L4 Project Runtime):**
 ```
-.claude/lib/handoff/agent-activity.js          # Agent activity module (tracked)
-.claude/lib/handoff/commands/session-report.js # Command handler (tracked)
+.aiox/lib/handoff/agent-activity.js          # Agent activity module (tracked)
+.aiox/lib/handoff/commands/session-report.js # Command handler (tracked)
 tests/handoff/agent-activity.test.js           # Unit tests
 ```
 
 **Modified Files (L4 Project Runtime):**
 ```
-.claude/lib/handoff/cross-session-handoff.js   # Add "Agent Activity" section support
+.aiox/lib/handoff/cross-session-handoff.js   # Add "Agent Activity" section support
 .claude/hooks/handoff-saver.cjs                # Call agent summary generation
 .claude/rules/unified-handoff.md               # Document `*task session-report` command
 ```
@@ -186,7 +186,7 @@ tests/handoff/agent-activity.test.js           # Unit tests
 ```javascript
 {
   agent: 'dev',
-  stories: ['AIOX-HO-2.1', 'AIOX-HO-2.2'],
+  stories: ['AIOX-SBM-2.1', 'AIOX-SBM-2.2'],
   filesModified: 12,
   decisions: ['Use token overlap for memory hints', 'Defer Story 2.5'],
   activeSpan: '2h 15m',  // Approximate (inferred from event timestamps)
@@ -201,7 +201,7 @@ Session Report — aios-core
 
 Total Prompts: 42
 Agents Activated: 3 (@sm, @dev, @qa)
-Stories Touched: 2 (AIOX-HO-2.1, AIOX-HO-2.2)
+Stories Touched: 2 (AIOX-SBM-2.1, AIOX-SBM-2.2)
 Files Modified: 18
 
 Agent Activity:
@@ -221,7 +221,7 @@ Agent Activity:
 
 Last session (2026-03-25):
 - **@sm**: 2 stories, 3 files, ~1h 5m — Story creation for Epic 2
-- **@dev**: 1 story, 12 files, ~2h 15m — Implemented AIOX-HO-2.1
+- **@dev**: 1 story, 12 files, ~2h 15m — Implemented AIOX-SBM-2.1
 - **@qa**: 1 story, 3 files, ~45m — QA review passed with minor notes
 ```
 
@@ -327,15 +327,15 @@ No debug issues encountered. All 19 new tests passed on first run after a single
 ### File List
 
 **New Files:**
-- `.claude/lib/handoff/agent-activity.js` -- Agent activity aggregation module
-- `.claude/lib/handoff/commands/session-report.js` -- *task session-report command handler
+- `.aiox/lib/handoff/agent-activity.js` -- Agent activity aggregation module
+- `.aiox/lib/handoff/commands/session-report.js` -- *task session-report command handler
 - `tests/handoff/agent-activity.test.js` -- 19 tests for agent activity module
 
 **Modified Files:**
-- `.claude/lib/handoff/cross-session-handoff.js` -- Added agentActivitySection to saveHandoff(), Agent Activity section in trimHandoff()
+- `.aiox/lib/handoff/cross-session-handoff.js` -- Added agentActivitySection to saveHandoff(), Agent Activity section in trimHandoff()
 - `.claude/hooks/handoff-saver.cjs` -- Added Tier 2 summary generation before Tier 3 trim
 - `.claude/rules/unified-handoff.md` -- Documented *task session-report, updated module listing, bumped to v1.2
-- `docs/stories/active/AIOX-HO-2.1.agent-activity-summaries.story.md` -- Task checkboxes, Dev Agent Record
+- `docs/stories/active/AIOX-SBM-2.1.agent-activity-summaries.story.md` -- Task checkboxes, Dev Agent Record
 
 ## QA Results
 
@@ -358,7 +358,7 @@ Gate: PASS --> docs/qa/gates/aiox-ho-2.1-agent-activity-summaries.yml
 | AC-5 | Time metrics labeled "approximate active span" | PASS | `agent-activity.js` L10-13 doc comment: "labeled approximate active span". L204: CLI header is `'Approx. Active Span'`. `formatSpan()` L30-45 returns `~Xh Ym` prefix consistently. |
 | AC-6 | `trimHandoff()` recognizes "Agent Activity" as preserved section with max 30 lines | PASS | `cross-session-handoff.js` L184: `ACTIVITY_PATTERNS = ['Agent Activity', 'Atividade dos Agentes']`. L246-254: finds and preserves activity section capped at 30 lines. `agent-activity.js` L21: `MAX_HANDOFF_LINES = 30`. Integration test confirms preservation after trim. |
 | AC-7 | Zero external dependencies (Node.js stdlib only) | PASS | `agent-activity.js` has zero `require()` calls (pure computation). `session-report.js` imports only `path` (stdlib). No `package.json` dependency additions. |
-| AC-8 | Module at `.claude/lib/handoff/` canonical location | PASS | Files confirmed at `.claude/lib/handoff/agent-activity.js` and `.claude/lib/handoff/commands/session-report.js`. All imports reference this canonical path. |
+| AC-8 | Module at `.aiox/lib/handoff/` canonical location | PASS | Files confirmed at `.aiox/lib/handoff/agent-activity.js` and `.aiox/lib/handoff/commands/session-report.js`. All imports reference this canonical path. |
 
 ### L1/L2 Boundary Check
 

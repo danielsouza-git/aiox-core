@@ -10,7 +10,7 @@
  * - Recovery validation
  * - PreCompact hook chaining
  *
- * @see Story AIOX-HO-1, Task 9
+ * @see Story AIOX-SBM-1, Task 9
  */
 
 const fs = require('fs');
@@ -18,9 +18,9 @@ const path = require('path');
 const os = require('os');
 const { execSync } = require('child_process');
 
-const microHandoff = require('../../.claude/lib/handoff/micro-handoff');
-const sessionState = require('../../.claude/lib/handoff/session-state');
-const crossSession = require('../../.claude/lib/handoff/cross-session-handoff');
+const microHandoff = require('../../.aiox/lib/handoff/micro-handoff');
+const sessionState = require('../../.aiox/lib/handoff/session-state');
+const crossSession = require('../../.aiox/lib/handoff/cross-session-handoff');
 
 // Mock child_process for git-dependent tests
 jest.mock('child_process', () => ({
@@ -47,14 +47,14 @@ describe('Integration: Unified Handoff System', () => {
       // @sm -> @dev switch
       microHandoff.saveMicroHandoff('sm', 'dev', {
         story_context: {
-          story_id: 'AIOX-HO-1',
-          story_path: 'docs/stories/active/AIOX-HO-1.story.md',
+          story_id: 'AIOX-SBM-1',
+          story_path: 'docs/stories/active/AIOX-SBM-1.story.md',
           story_status: 'Ready',
           current_task: 'Story created',
           branch: 'main',
         },
         decisions: ['Created story from epic'],
-        files_modified: ['docs/stories/active/AIOX-HO-1.story.md'],
+        files_modified: ['docs/stories/active/AIOX-SBM-1.story.md'],
         next_action: 'Implement story tasks',
       }, tmpDir);
 
@@ -68,8 +68,8 @@ describe('Integration: Unified Handoff System', () => {
       microHandoff.markConsumed(h1.id, tmpDir);
       microHandoff.saveMicroHandoff('dev', 'qa', {
         story_context: {
-          story_id: 'AIOX-HO-1',
-          story_path: 'docs/stories/active/AIOX-HO-1.story.md',
+          story_id: 'AIOX-SBM-1',
+          story_path: 'docs/stories/active/AIOX-SBM-1.story.md',
           story_status: 'Ready for Review',
           current_task: 'All tasks complete',
           branch: 'main',
@@ -80,7 +80,7 @@ describe('Integration: Unified Handoff System', () => {
           '.aiox/lib/handoff/session-state.js',
           '.aiox/lib/handoff/cross-session-handoff.js',
         ],
-        next_action: 'Run QA gate on AIOX-HO-1',
+        next_action: 'Run QA gate on AIOX-SBM-1',
       }, tmpDir);
 
       // Verify latest handoff is dev->qa
@@ -96,19 +96,19 @@ describe('Integration: Unified Handoff System', () => {
       // Simulate 3 agent switches
       sessionState.updateSessionState('agent_switch', {
         agent: 'sm',
-        story: 'AIOX-HO-1',
+        story: 'AIOX-SBM-1',
         details: 'Initial agent',
       }, tmpDir);
 
       sessionState.updateSessionState('agent_switch', {
         agent: 'dev',
-        story: 'AIOX-HO-1',
+        story: 'AIOX-SBM-1',
         details: 'Switch from @sm to @dev',
       }, tmpDir);
 
       sessionState.updateSessionState('agent_switch', {
         agent: 'qa',
-        story: 'AIOX-HO-1',
+        story: 'AIOX-SBM-1',
         details: 'Switch from @dev to @qa',
       }, tmpDir);
 
@@ -124,20 +124,20 @@ describe('Integration: Unified Handoff System', () => {
 
       sessionState.updateSessionState('story_start', {
         agent: 'dev',
-        story: 'AIOX-HO-1',
+        story: 'AIOX-SBM-1',
         branch: 'main',
       }, tmpDir);
 
       sessionState.updateSessionState('story_complete', {
         agent: 'dev',
-        story: 'AIOX-HO-1',
+        story: 'AIOX-SBM-1',
         branch: 'main',
         files_modified: 15,
       }, tmpDir);
 
       sessionState.updateSessionState('qa_gate', {
         agent: 'qa',
-        story: 'AIOX-HO-1',
+        story: 'AIOX-SBM-1',
         verdict: 'PASS',
       }, tmpDir);
 

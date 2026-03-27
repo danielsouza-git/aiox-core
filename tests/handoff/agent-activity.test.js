@@ -6,7 +6,7 @@
  * Tests generateAgentSummary(), formatSummaryForCLI(),
  * formatSummaryForHandoff(), and formatSpan().
  *
- * @see Story AIOX-HO-2.1
+ * @see Story AIOX-SBM-2.1
  */
 
 const fs = require('fs');
@@ -19,16 +19,16 @@ const {
   formatSummaryForHandoff,
   formatSpan,
   MAX_HANDOFF_LINES,
-} = require('../../.claude/lib/handoff/agent-activity');
+} = require('../../.aiox/lib/handoff/agent-activity');
 
-const crossSession = require('../../.claude/lib/handoff/cross-session-handoff');
+const crossSession = require('../../.aiox/lib/handoff/cross-session-handoff');
 
 // Mock child_process for cross-session-handoff (it requires execSync)
 jest.mock('child_process', () => ({
   execSync: jest.fn(),
 }));
 
-describe('Agent Activity Module (Story AIOX-HO-2.1)', () => {
+describe('Agent Activity Module (Story AIOX-SBM-2.1)', () => {
   // --- formatSpan ---
 
   describe('formatSpan()', () => {

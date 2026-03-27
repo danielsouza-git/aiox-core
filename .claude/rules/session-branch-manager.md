@@ -1,4 +1,4 @@
-# Unified Handoff System -- 3-Tier Context Persistence
+# Unified Session and Branch Manager -- 3-Tier Context Persistence
 
 > **Supersedes**: `agent-handoff.md` (Tier 1 only) and `auto-session-handoff.md` (Tier 3 only).
 > Both old rules are DEPRECATED. This is the single source of truth for all handoff behavior.
@@ -10,7 +10,7 @@ TIER 1: Micro-Handoff (Agent Switch)     --> .aiox/current-session/micro-handoff
 TIER 2: Session State (In-Session)        --> .aiox/current-session/state.yaml         (data)
 TIER 3: Session Handoff (Cross-Session)   --> docs/session-handoff-{project}.md        (data)
 
-Modules: .claude/lib/handoff/  (tracked in git)
+Modules: .aiox/lib/handoff/  (tracked in git)
 ```
 
 All tiers enforce **automatic** persistence via hooks. Zero manual intervention required.
@@ -34,8 +34,8 @@ All tiers enforce **automatic** persistence via hooks. Zero manual intervention 
   "to_agent": "qa",
   "consumed": false,
   "story_context": {
-    "story_id": "AIOX-HO-1",
-    "story_path": "docs/stories/active/AIOX-HO-1.unified-handoff-system.story.md",
+    "story_id": "AIOX-SBM-1",
+    "story_path": "docs/stories/active/AIOX-SBM-1.unified-handoff-system.story.md",
     "story_status": "In Progress",
     "current_task": "Task 4: Implement Tier 1",
     "branch": "main"
@@ -58,7 +58,7 @@ All tiers enforce **automatic** persistence via hooks. Zero manual intervention 
 | memory_hints | 3 entries |
 | retained unconsumed | 3 (oldest auto-rotated) |
 
-### Memory Hints (Story AIOX-HO-2.2)
+### Memory Hints (Story AIOX-SBM-2.2)
 
 On agent switch, the hook extracts relevant knowledge from the outgoing agent's
 persistent memory (`.claude/agent-memory/{agent-id}/MEMORY.md`) using token overlap
@@ -66,7 +66,7 @@ scoring against the active story context. Up to 3 hints are included as the
 `memory_hints` field. This is READ-ONLY -- the handoff system never writes to
 agent memory files.
 
-Module: `.claude/lib/handoff/memory-hints.js`
+Module: `.aiox/lib/handoff/memory-hints.js`
 
 ### Incoming Agent Behavior
 
@@ -107,7 +107,7 @@ events:
   - timestamp: "ISO 8601"
     type: "agent_switch"
     agent: "dev"
-    story: "AIOX-HO-1"
+    story: "AIOX-SBM-1"
     branch: "main"
     files_modified: 5
     details: "Switched from @sm to @dev"
@@ -116,7 +116,7 @@ events:
     type: "periodic"
     agent: "dev"
     prompt_count: 10
-    story: "AIOX-HO-1"
+    story: "AIOX-SBM-1"
     branch: "main"
     files_modified: 8
 ```
@@ -207,11 +207,11 @@ The Agent Activity section is also injected into Tier 3 handoff files during Pre
 Metrics are cached at `.aiox/current-session/metrics.json` (gitignored) after each report.
 
 Modules:
-- `.claude/lib/handoff/agent-activity.js` (agent summaries)
-- `.claude/lib/handoff/metrics.js` (productivity metrics computation, Story 2.4)
-- `.claude/lib/handoff/formatters/event-timeline.js` (timeline formatter)
-- `.claude/lib/handoff/aggregators/story-details.js` (story aggregator)
-- `.claude/lib/handoff/commands/session-report.js` (command handler)
+- `.aiox/lib/handoff/agent-activity.js` (agent summaries)
+- `.aiox/lib/handoff/metrics.js` (productivity metrics computation, Story 2.4)
+- `.aiox/lib/handoff/formatters/event-timeline.js` (timeline formatter)
+- `.aiox/lib/handoff/aggregators/story-details.js` (story aggregator)
+- `.aiox/lib/handoff/commands/session-report.js` (command handler)
 
 ---
 
@@ -231,7 +231,7 @@ Usage:
 *task session-history aios-core --last 5     # Last 5 sessions
 ```
 
-Module: `.claude/lib/handoff/commands/session-history.js`
+Module: `.aiox/lib/handoff/commands/session-history.js`
 
 ---
 
@@ -265,7 +265,7 @@ Usage:
 *task metrics-trend aios-core --last 10    # Last 10 sessions
 ```
 
-Module: `.claude/lib/handoff/commands/metrics-trend.js`
+Module: `.aiox/lib/handoff/commands/metrics-trend.js`
 
 ---
 
@@ -283,7 +283,7 @@ This is a **fallback only**. The primary mechanism is fully automatic via hooks.
 ## Module Locations (tracked in git)
 
 ```
-.claude/lib/handoff/                    # Core modules (committed to git)
+.aiox/lib/handoff/                    # Core modules (committed to git)
   micro-handoff.js                      # Tier 1 module
   session-state.js                      # Tier 2 module
   cross-session-handoff.js              # Tier 3 module
@@ -321,4 +321,4 @@ docs/session-handoff-{project}.md       # Tier 3 active (committed to git)
 
 ---
 
-*Unified Handoff System v1.5 -- Stories AIOX-HO-1, AIOX-HO-2.1, AIOX-HO-2.2, AIOX-HO-2.3, AIOX-HO-2.4*
+*Unified Session and Branch Manager v1.5 -- Stories AIOX-SBM-1, AIOX-SBM-2.1, AIOX-SBM-2.2, AIOX-SBM-2.3, AIOX-SBM-2.4*

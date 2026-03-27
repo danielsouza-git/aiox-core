@@ -8,7 +8,7 @@
  * Used by the `*task session-report` command.
  *
  * @module aggregators/story-details
- * @see Story AIOX-HO-2.3
+ * @see Story AIOX-SBM-2.3
  */
 
 /**

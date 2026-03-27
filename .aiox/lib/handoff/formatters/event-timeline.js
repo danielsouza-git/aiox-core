@@ -7,10 +7,10 @@
  * Used by the `*task session-report` command to display recent events.
  *
  * Format: `[HH:MM] @agent type story`
- * Example: `[10:30] @dev story_start AIOX-HO-2.3`
+ * Example: `[10:30] @dev story_start AIOX-SBM-2.3`
  *
  * @module formatters/event-timeline
- * @see Story AIOX-HO-2.3
+ * @see Story AIOX-SBM-2.3
  */
 
 /** Default number of events to show */

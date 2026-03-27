@@ -1,4 +1,4 @@
-# Unified Handoff System - Product Requirements Document (PRD)
+# Unified Session and Branch Manager - Product Requirements Document (PRD)
 
 **Version:** 1.0
 **Date:** 2026-03-25
@@ -12,7 +12,7 @@
 
 | Date | Version | Description | Author |
 |------|---------|-------------|--------|
-| 2026-03-25 | 1.0 | Initial PRD created retroactively after v1.0 implementation (Story AIOX-HO-1). Documents existing system and defines v2.0 roadmap for identified gaps (agent activity summaries, agent memory integration, observability dashboard, productivity metrics). | Morgan (AIOX PM) |
+| 2026-03-25 | 1.0 | Initial PRD created retroactively after v1.0 implementation (Story AIOX-SBM-1). Documents existing system and defines v2.0 roadmap for identified gaps (agent activity summaries, agent memory integration, observability dashboard, productivity metrics). | Morgan (AIOX PM) |
 
 ---
 
@@ -33,7 +33,7 @@ The AIOX framework orchestrates multiple specialized AI agents (@dev, @qa, @arch
 
 Prior to this system, AIOX had two separate, unreliable mechanisms. First, an "agent handoff" described in `.claude/rules/agent-handoff.md` that instructed the LLM to "mentally generate" a handoff artifact -- which never actually persisted to disk. Second, a "session handoff" in `.claude/rules/auto-session-handoff.md` that depended on a heuristic context bracket percentage trigger -- unreliable since Claude Code does not expose real token usage metrics. Session handoff files grew without limit (the brand-system-service handoff reached 430+ lines) and there was zero integration between the two systems.
 
-The Unified Handoff System replaces both with a deterministic 3-tier architecture enforced by hooks (UserPromptSubmit and PreCompact), requiring zero manual intervention. Story AIOX-HO-1 delivered the v1.0 implementation with 71 tests passing. This PRD retroactively documents that work and defines the v2.0 roadmap to address remaining gaps.
+The Unified Session and Branch Manager replaces both with a deterministic 3-tier architecture enforced by hooks (UserPromptSubmit and PreCompact), requiring zero manual intervention. Story AIOX-SBM-1 delivered the v1.0 implementation with 71 tests passing. This PRD retroactively documents that work and defines the v2.0 roadmap to address remaining gaps.
 
 ---
 
@@ -179,10 +179,10 @@ The Unified Handoff System replaces both with a deterministic 3-tier architectur
 
 | Module | Location | Tier | Responsibility |
 |--------|----------|------|---------------|
-| `micro-handoff.js` | `.claude/lib/handoff/` | 1 | Agent switch context persistence |
-| `session-state.js` | `.claude/lib/handoff/` | 2 | In-session event timeline |
-| `cross-session-handoff.js` | `.claude/lib/handoff/` | 3 | Cross-session markdown handoff |
-| `migrate-handoffs.js` | `.claude/lib/handoff/` | 3 | Legacy file migration |
+| `micro-handoff.js` | `.aiox/lib/handoff/` | 1 | Agent switch context persistence |
+| `session-state.js` | `.aiox/lib/handoff/` | 2 | In-session event timeline |
+| `cross-session-handoff.js` | `.aiox/lib/handoff/` | 3 | Cross-session markdown handoff |
+| `migrate-handoffs.js` | `.aiox/lib/handoff/` | 3 | Legacy file migration |
 | `handoff-auto.cjs` | `.claude/hooks/` | 1+2 | UserPromptSubmit hook (agent detection + periodic) |
 | `handoff-saver.cjs` | `.claude/hooks/` | 3 | PreCompact hook component (trim + archive) |
 
@@ -215,7 +215,7 @@ Session Start (Recovery Validation)
 
 ```
 TRACKED (git)
-  .claude/lib/handoff/
+  .aiox/lib/handoff/
     micro-handoff.js              # Tier 1 module (235 LOC)
     session-state.js              # Tier 2 module (308 LOC)
     cross-session-handoff.js      # Tier 3 module (462 LOC)
@@ -307,11 +307,11 @@ GITIGNORED (runtime)
 
 **Goal:** Replace unreliable manual handoff mechanisms with a deterministic, hook-enforced 3-tier persistence system that eliminates context loss during agent switches and session boundaries.
 
-**Status:** IMPLEMENTED (Story AIOX-HO-1, 71 tests, QA PASS)
+**Status:** IMPLEMENTED (Story AIOX-SBM-1, 71 tests, QA PASS)
 
 **Stories:**
 
-- **Story 1.1 (AIOX-HO-1):** Unified Handoff System Redesign -- Full implementation of Tier 1, Tier 2, Tier 3, hooks, migration, and recovery validation. 10 tasks, 40 subtasks, all complete.
+- **Story 1.1 (AIOX-SBM-1):** Unified Session and Branch Manager Redesign -- Full implementation of Tier 1, Tier 2, Tier 3, hooks, migration, and recovery validation. 10 tasks, 40 subtasks, all complete.
 
 ### Epic 2: Agent Activity & Observability (v2.0) -- PLANNED
 
@@ -462,13 +462,13 @@ Acceptance Criteria:
 
 **Prompt:**
 
-River, please create development stories for Epic 2 (Agent Activity & Observability v2.0) of the Unified Handoff System. The PRD is at `docs/prd-unified-handoff-system.md`. Start with Story 2.1 (Agent Activity Summaries) as it has the highest user impact and builds directly on existing Tier 2 data. All stories must follow the same constraints as AIOX-HO-1: zero L1/L2 changes, zero external deps, Node.js stdlib only, CommonJS format. Reference the existing implementation at `.claude/lib/handoff/` for code patterns and test structure.
+River, please create development stories for Epic 2 (Agent Activity & Observability v2.0) of the Unified Session and Branch Manager. The PRD is at `docs/prd-unified-handoff-system.md`. Start with Story 2.1 (Agent Activity Summaries) as it has the highest user impact and builds directly on existing Tier 2 data. All stories must follow the same constraints as AIOX-SBM-1: zero L1/L2 changes, zero external deps, Node.js stdlib only, CommonJS format. Reference the existing implementation at `.aiox/lib/handoff/` for code patterns and test structure.
 
 ### For Architect (@architect / Aria)
 
 **Prompt:**
 
-Aria, please review the PRD at `docs/prd-unified-handoff-system.md` and provide a technical assessment for Epic 2. Key questions: (1) Is the flat YAML serializer limitation (MNT-002) worth resolving now or can v2.0 features work with scalar-only event fields? (2) What is the best approach for keyword-based memory hint extraction (FR-9.2) without external NLP dependencies? (3) Should metrics aggregation from archived sessions use streaming or batch processing given the constraint of <2s for 50 sessions? Reference existing architecture at `.claude/lib/handoff/` and `.claude/hooks/`.
+Aria, please review the PRD at `docs/prd-unified-handoff-system.md` and provide a technical assessment for Epic 2. Key questions: (1) Is the flat YAML serializer limitation (MNT-002) worth resolving now or can v2.0 features work with scalar-only event fields? (2) What is the best approach for keyword-based memory hint extraction (FR-9.2) without external NLP dependencies? (3) Should metrics aggregation from archived sessions use streaming or batch processing given the constraint of <2s for 50 sessions? Reference existing architecture at `.aiox/lib/handoff/` and `.claude/hooks/`.
 
 ---
 
@@ -492,7 +492,7 @@ Aria, please review the PRD at `docs/prd-unified-handoff-system.md` and provide 
 
 ### Decision: READY FOR ARCHITECT
 
-The PRD covers the complete Unified Handoff System: retroactive documentation of the implemented v1.0 (Epic 1) and forward-looking requirements for v2.0 (Epic 2). All functional requirements are traceable, all constraints are documented, and all risks have mitigations.
+The PRD covers the complete Unified Session and Branch Manager: retroactive documentation of the implemented v1.0 (Epic 1) and forward-looking requirements for v2.0 (Epic 2). All functional requirements are traceable, all constraints are documented, and all risks have mitigations.
 
 ---
 

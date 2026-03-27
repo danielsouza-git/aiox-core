@@ -11,7 +11,7 @@
  *
  * @module commands/session-report
  * @see .claude/rules/unified-handoff.md
- * @see Story AIOX-HO-2.1 (agent activity), AIOX-HO-2.3 (timeline + story details), AIOX-HO-2.4 (metrics)
+ * @see Story AIOX-SBM-2.1 (agent activity), AIOX-SBM-2.3 (timeline + story details), AIOX-SBM-2.4 (metrics)
  */
 
 const path = require('path');
@@ -45,7 +45,7 @@ function generateReport(projectRoot) {
   const root = projectRoot || process.cwd();
 
   // Load Tier 2 session state
-  const ssModule = safeRequire(path.join(root, '.claude', 'lib', 'handoff', 'session-state'));
+  const ssModule = safeRequire(path.join(root, '.aiox', 'lib', 'handoff', 'session-state'));
   if (!ssModule) {
     return 'No session state available. Session state is recorded in .aiox/current-session/state.yaml.';
   }
@@ -62,22 +62,22 @@ function generateReport(projectRoot) {
   }
 
   // Load agent activity module (Story 2.1)
-  const agentActivity = safeRequire(path.join(root, '.claude', 'lib', 'handoff', 'agent-activity'));
+  const agentActivity = safeRequire(path.join(root, '.aiox', 'lib', 'handoff', 'agent-activity'));
   if (!agentActivity) {
     return 'Agent activity module not available.';
   }
 
   // Load metrics module (Story 2.4)
-  const metricsModule = safeRequire(path.join(root, '.claude', 'lib', 'handoff', 'metrics'));
+  const metricsModule = safeRequire(path.join(root, '.aiox', 'lib', 'handoff', 'metrics'));
 
   // Load event timeline formatter (Story 2.3)
   const eventTimeline = safeRequire(
-    path.join(root, '.claude', 'lib', 'handoff', 'formatters', 'event-timeline'),
+    path.join(root, '.aiox', 'lib', 'handoff', 'formatters', 'event-timeline'),
   );
 
   // Load story details aggregator (Story 2.3)
   const storyDetails = safeRequire(
-    path.join(root, '.claude', 'lib', 'handoff', 'aggregators', 'story-details'),
+    path.join(root, '.aiox', 'lib', 'handoff', 'aggregators', 'story-details'),
   );
 
   // Generate agent summaries

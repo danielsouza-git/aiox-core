@@ -6,7 +6,7 @@
  * Tests scanArchives(), parseSessionMetadata(), formatHistoryTable(),
  * generateHistory(), formatDuration(), extractDate().
  *
- * @see Story AIOX-HO-2.3
+ * @see Story AIOX-SBM-2.3
  */
 
 const fs = require('fs');
@@ -21,11 +21,11 @@ const {
   formatDuration,
   extractDate,
   DEFAULT_LIMIT,
-} = require('../../.claude/lib/handoff/commands/session-history');
+} = require('../../.aiox/lib/handoff/commands/session-history');
 
-const { serializeState } = require('../../.claude/lib/handoff/session-state');
+const { serializeState } = require('../../.aiox/lib/handoff/session-state');
 
-describe('Session History Command (Story AIOX-HO-2.3)', () => {
+describe('Session History Command (Story AIOX-SBM-2.3)', () => {
   let tmpDir;
 
   beforeEach(() => {

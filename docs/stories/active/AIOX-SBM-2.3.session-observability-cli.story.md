@@ -1,4 +1,4 @@
-# Story AIOX-HO-2.3: Session Observability CLI
+# Story AIOX-SBM-2.3: Session Observability CLI
 
 ## Status
 
@@ -25,7 +25,7 @@
 5. CLI First principle enforced — no web dashboard or UI component (FR-10.4, CON-8)
 6. Commands use `*task` pattern (L4) instead of registering in L2 agent definitions (Architect Recommendation #2)
 7. Zero external dependencies (Node.js stdlib only)
-8. Module location at `.claude/lib/handoff/` is canonical (Architect Recommendation #1)
+8. Module location at `.aiox/lib/handoff/` is canonical (Architect Recommendation #1)
 
 ## Dependencies
 
@@ -56,7 +56,7 @@ Both commands use on-demand computation (read-only, no continuous overhead) and 
 ## Tasks / Subtasks
 
 ### Task 1: Extend `*session-report` Command (AC: 1, 4, 5, 6, 7, 8)
-- [x] 1.1: Read `.claude/lib/handoff/commands/session-report.js` (created in Story 2.1)
+- [x] 1.1: Read `.aiox/lib/handoff/commands/session-report.js` (created in Story 2.1)
 - [x] 1.2: Extend command to include additional sections:
   - **Event Timeline (Compact)**: Last 10 events with timestamp, type, agent, story
   - **Story Details**: Per-story breakdown (story ID, status, events count, agents involved)
@@ -71,7 +71,7 @@ Both commands use on-demand computation (read-only, no continuous overhead) and 
 - [x] 1.7: Ensure output respects CLI First principle (no HTML, no UI components)
 
 ### Task 2: Implement `*session-history` Command (AC: 2, 3, 4, 5, 6, 7, 8)
-- [x] 2.1: Create `.claude/lib/handoff/commands/session-history.js` module at canonical location
+- [x] 2.1: Create `.aiox/lib/handoff/commands/session-history.js` module at canonical location
 - [x] 2.2: Scan `.aiox/session-history/{project}/` for `state-*.yaml` files
 - [x] 2.3: Parse each archived state file:
   - Extract session ID, started date, project name
@@ -88,17 +88,17 @@ Both commands use on-demand computation (read-only, no continuous overhead) and 
 - [x] 2.10: Ensure <2s performance for 50 sessions (batch processing, no streaming needed per Architect Q3)
 
 ### Task 3: Add Event Timeline Formatter (AC: 1, 4)
-- [x] 3.1: Create `.claude/lib/handoff/formatters/event-timeline.js` module
+- [x] 3.1: Create `.aiox/lib/handoff/formatters/event-timeline.js` module
 - [x] 3.2: Implement `formatCompactTimeline(events, limit)` function:
   - Input: array of events from state.yaml
   - Output: string with last N events formatted compactly
   - Format: `[HH:MM] agent type story` (one line per event)
-  - Example: `[10:30] @dev story_start AIOX-HO-2.3`
+  - Example: `[10:30] @dev story_start AIOX-SBM-2.3`
 - [x] 3.3: Support limit parameter (default: 10 last events)
 - [x] 3.4: Handle edge cases (no events, empty timeline)
 
 ### Task 4: Add Story Details Aggregator (AC: 1)
-- [x] 4.1: Create `.claude/lib/handoff/aggregators/story-details.js` module
+- [x] 4.1: Create `.aiox/lib/handoff/aggregators/story-details.js` module
 - [x] 4.2: Implement `aggregateStoryDetails(events)` function:
   - Input: array of events from state.yaml
   - Output: array of story summaries
@@ -142,10 +142,10 @@ Both commands use on-demand computation (read-only, no continuous overhead) and 
 - **Story 2.4**: Requires 2.3 — adds metrics to session report
 
 **Module Location** (Architect Recommendation #1):
-- Canonical location: `.claude/lib/handoff/`
-- Commands at: `.claude/lib/handoff/commands/`
-- Formatters at: `.claude/lib/handoff/formatters/`
-- Aggregators at: `.claude/lib/handoff/aggregators/`
+- Canonical location: `.aiox/lib/handoff/`
+- Commands at: `.aiox/lib/handoff/commands/`
+- Formatters at: `.aiox/lib/handoff/formatters/`
+- Aggregators at: `.aiox/lib/handoff/aggregators/`
 
 **Command Registration** (Architect Recommendation #2):
 - Use `*task` pattern: `*task session-report`, `*task session-history {project}`
@@ -182,9 +182,9 @@ Both commands use on-demand computation (read-only, no continuous overhead) and 
 
 **New Files (L4 Project Runtime):**
 ```
-.claude/lib/handoff/commands/session-history.js   # Session history command (tracked)
-.claude/lib/handoff/formatters/event-timeline.js  # Event timeline formatter (tracked)
-.claude/lib/handoff/aggregators/story-details.js  # Story details aggregator (tracked)
+.aiox/lib/handoff/commands/session-history.js   # Session history command (tracked)
+.aiox/lib/handoff/formatters/event-timeline.js  # Event timeline formatter (tracked)
+.aiox/lib/handoff/aggregators/story-details.js  # Story details aggregator (tracked)
 tests/handoff/session-history.test.js             # Unit tests
 tests/handoff/event-timeline.test.js              # Unit tests
 tests/handoff/story-details.test.js               # Unit tests
@@ -192,7 +192,7 @@ tests/handoff/story-details.test.js               # Unit tests
 
 **Modified Files (L4 Project Runtime):**
 ```
-.claude/lib/handoff/commands/session-report.js    # Extend with timeline and story details
+.aiox/lib/handoff/commands/session-report.js    # Extend with timeline and story details
 .claude/rules/unified-handoff.md                  # Document new commands
 ```
 
@@ -219,7 +219,7 @@ Session ID: a3f2b8c4
 Started: 2026-03-25 09:00
 Total Prompts: 42
 Agents Activated: 3 (@sm, @dev, @qa)
-Stories Touched: 2 (AIOX-HO-2.1, AIOX-HO-2.2)
+Stories Touched: 2 (AIOX-SBM-2.1, AIOX-SBM-2.2)
 Files Modified: 18
 
 Agent Activity:
@@ -235,20 +235,20 @@ Story Details:
 ┌─────────────┬────────────┬────────┬──────────────┐
 │ Story       │ Status     │ Events │ Agents       │
 ├─────────────┼────────────┼────────┼──────────────┤
-│ AIOX-HO-2.1 │ Done       │ 18     │ @sm, @dev    │
-│ AIOX-HO-2.2 │ InProgress │ 12     │ @dev, @qa    │
+│ AIOX-SBM-2.1 │ Done       │ 18     │ @sm, @dev    │
+│ AIOX-SBM-2.2 │ InProgress │ 12     │ @dev, @qa    │
 └─────────────┴────────────┴────────┴──────────────┘
 
 Recent Events (Last 10):
-[14:45] @qa qa_gate AIOX-HO-2.2
-[14:30] @dev story_complete AIOX-HO-2.1
-[14:15] @dev commit AIOX-HO-2.1
+[14:45] @qa qa_gate AIOX-SBM-2.2
+[14:30] @dev story_complete AIOX-SBM-2.1
+[14:15] @dev commit AIOX-SBM-2.1
 [14:00] @dev periodic (prompt 40)
 [13:45] @dev periodic (prompt 35)
 [13:30] @dev periodic (prompt 30)
-[13:15] @qa agent_switch AIOX-HO-2.2
-[13:00] @dev story_start AIOX-HO-2.2
-[12:45] @dev commit AIOX-HO-2.1
+[13:15] @qa agent_switch AIOX-SBM-2.2
+[13:00] @dev story_start AIOX-SBM-2.2
+[12:45] @dev commit AIOX-SBM-2.1
 [12:30] @dev periodic (prompt 20)
 ```
 
@@ -399,18 +399,18 @@ No debug issues encountered. All implementations were clean on first pass.
 ### File List
 
 **New Files:**
-- `.claude/lib/handoff/formatters/event-timeline.js` -- Compact event timeline formatter
-- `.claude/lib/handoff/aggregators/story-details.js` -- Per-story event aggregator
-- `.claude/lib/handoff/commands/session-history.js` -- Session history command handler
+- `.aiox/lib/handoff/formatters/event-timeline.js` -- Compact event timeline formatter
+- `.aiox/lib/handoff/aggregators/story-details.js` -- Per-story event aggregator
+- `.aiox/lib/handoff/commands/session-history.js` -- Session history command handler
 - `tests/handoff/event-timeline.test.js` -- 15 unit tests
 - `tests/handoff/story-details.test.js` -- 10 unit tests
 - `tests/handoff/session-history.test.js` -- 26 unit tests (incl. performance)
 - `tests/handoff/session-report-extended.test.js` -- 3 integration tests
 
 **Modified Files:**
-- `.claude/lib/handoff/commands/session-report.js` -- Extended with timeline + story details
+- `.aiox/lib/handoff/commands/session-report.js` -- Extended with timeline + story details
 - `.claude/rules/unified-handoff.md` -- Documented new commands, updated module locations
-- `docs/stories/active/AIOX-HO-2.3.session-observability-cli.story.md` -- Story file updates
+- `docs/stories/active/AIOX-SBM-2.3.session-observability-cli.story.md` -- Story file updates
 
 ## QA Results
 
@@ -431,11 +431,11 @@ No debug issues encountered. All implementations were clean on first pass.
 | AC-5 | CLI First -- no web dashboard or UI component | PASS | All output modules return plain strings. No HTML, no React components, no browser dependencies. `event-timeline.js`, `story-details.js`, `session-history.js` all produce terminal-only text. |
 | AC-6 | Commands use `*task` pattern (L4), no L2 registration | PASS | `session-report.js` L10: documented as `*task session-report`. `session-history.js` L6: documented as `*task session-history {project}`. No modifications to `.aiox-core/development/agents/`. Documented in `unified-handoff.md`. |
 | AC-7 | Zero external dependencies (Node.js stdlib only) | PASS | `session-history.js` L19-20: only `require('fs')` and `require('path')`. `event-timeline.js`: no imports at all (pure functions). `story-details.js`: no imports. No `package.json` additions. |
-| AC-8 | Module at `.claude/lib/handoff/` canonical location | PASS | Files at `.claude/lib/handoff/commands/session-history.js`, `.claude/lib/handoff/formatters/event-timeline.js`, `.claude/lib/handoff/aggregators/story-details.js`. All resolved via canonical paths. |
+| AC-8 | Module at `.aiox/lib/handoff/` canonical location | PASS | Files at `.aiox/lib/handoff/commands/session-history.js`, `.aiox/lib/handoff/formatters/event-timeline.js`, `.aiox/lib/handoff/aggregators/story-details.js`. All resolved via canonical paths. |
 
 ### L1/L2 Boundary Check
 
-No modifications to `.aiox-core/` directories. All new files are in `.claude/lib/handoff/` (L4) and `tests/handoff/` (L4).
+No modifications to `.aiox-core/` directories. All new files are in `.aiox/lib/handoff/` (L4) and `tests/handoff/` (L4).
 
 ### Test Coverage
 

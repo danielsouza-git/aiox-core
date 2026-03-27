@@ -9,7 +9,7 @@
  *
  * @module cross-session-handoff
  * @see .claude/rules/unified-handoff.md
- * @see Story AIOX-HO-1
+ * @see Story AIOX-SBM-1
  */
 
 const fs = require('fs');
@@ -99,7 +99,7 @@ function saveHandoff(project, data, projectRoot) {
     lines.push('');
   }
 
-  // Agent Activity section (from Tier 2 summaries, Story AIOX-HO-2.1)
+  // Agent Activity section (from Tier 2 summaries, Story AIOX-SBM-2.1)
   if (data.agentActivitySection) {
     lines.push(data.agentActivitySection.trim());
     lines.push('');
@@ -243,7 +243,7 @@ function trimHandoff(filePath, projectRoot) {
     trimmedLines.push('');
   }
 
-  // 5. Agent Activity section (keep, max 30 lines -- Story AIOX-HO-2.1)
+  // 5. Agent Activity section (keep, max 30 lines -- Story AIOX-SBM-2.1)
   const activitySection = sections.sections.find((s) => matchSection(s.title, ACTIVITY_PATTERNS));
   if (activitySection) {
     const activityLines = activitySection.content.split('\n').filter((l) => l.trim()).slice(0, 30);

@@ -8,10 +8,10 @@
  * archiving excess content to .aiox/session-history/{project}/.
  *
  * Usage:
- *   node .claude/lib/handoff/migrate-handoffs.js [projectRoot]
+ *   node .aiox/lib/handoff/migrate-handoffs.js [projectRoot]
  *
  * @module migrate-handoffs
- * @see Story AIOX-HO-1, Task 7
+ * @see Story AIOX-SBM-1, Task 7
  */
 
 const fs = require('fs');
@@ -49,7 +49,7 @@ function discoverHandoffs(projectRoot) {
  * @returns {{ trimmed: boolean, originalLines: number, newLines: number, archivePath: string|null }}
  */
 function migrateHandoff(filePath, project, projectRoot) {
-  const crossSession = require(path.join(projectRoot, '.claude', 'lib', 'handoff', 'cross-session-handoff'));
+  const crossSession = require(path.join(projectRoot, '.aiox', 'lib', 'handoff', 'cross-session-handoff'));
   return crossSession.trimHandoff(filePath, projectRoot);
 }
 

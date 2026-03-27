@@ -1,4 +1,4 @@
-# Story AIOX-HO-2.2: Agent Memory Integration
+# Story AIOX-SBM-2.2: Agent Memory Integration
 
 ## Status
 
@@ -24,7 +24,7 @@
 4. Incoming agent displays memory hints alongside standard handoff context (FR-9.2)
 5. Graceful degradation if MEMORY.md does not exist or is empty (FR-9.2)
 6. Zero external dependencies (Node.js stdlib only) (FR-9.4)
-7. Module location at `.claude/lib/handoff/` is canonical (Architect Recommendation #1)
+7. Module location at `.aiox/lib/handoff/` is canonical (Architect Recommendation #1)
 
 ## Problem Statement
 
@@ -52,13 +52,13 @@ Token overlap scoring is simple (~30 lines of code), requires no external NLP de
 ## Tasks / Subtasks
 
 ### Task 1: Implement Memory Hint Extraction Module (AC: 1, 2, 3, 5, 6, 7)
-- [x] 1.1: Read `.claude/lib/handoff/micro-handoff.js` to understand schema
-- [x] 1.2: Create `.claude/lib/handoff/memory-hints.js` module at canonical location
+- [x] 1.1: Read `.aiox/lib/handoff/micro-handoff.js` to understand schema
+- [x] 1.2: Create `.aiox/lib/handoff/memory-hints.js` module at canonical location
   - `extractMemoryHints(agentId, storyContext)` → returns array of max 3 hint strings
   - `scoreMemorySection(section, keywords)` → returns relevance score (integer)
   - `parseMemoryFile(filePath)` → returns array of sections (## headers split)
 - [x] 1.3: Implement token overlap scoring algorithm (Architect Recommendation #7):
-  - Input: story ID (e.g., "AIOX-HO-2.2") + current_task (e.g., "Implement memory hints")
+  - Input: story ID (e.g., "AIOX-SBM-2.2") + current_task (e.g., "Implement memory hints")
   - Tokenize: split on non-alphanumeric, lowercase, deduplicate
   - Keywords: `['aiox', 'ho', '2', '2', 'implement', 'memory', 'hints']`
   - Score each MEMORY.md section: count keyword overlaps
@@ -72,7 +72,7 @@ Token overlap scoring is simple (~30 lines of code), requires no external NLP de
 - [x] 1.7: Create `tests/handoff/memory-hints.test.js` (8-10 tests estimated)
 
 ### Task 2: Extend Micro-Handoff Schema (AC: 1)
-- [x] 2.1: Read `.claude/lib/handoff/micro-handoff.js` module
+- [x] 2.1: Read `.aiox/lib/handoff/micro-handoff.js` module
 - [x] 2.2: Update `validateSchema()` function to support `memory_hints` field (array of strings, max 3 entries)
 - [x] 2.3: Update micro-handoff JSON structure to include `memory_hints` field (default to empty array if not present)
 - [x] 2.4: Ensure backward compatibility: older handoffs without `memory_hints` field continue to work
@@ -118,7 +118,7 @@ Token overlap scoring is simple (~30 lines of code), requires no external NLP de
 - **Story 2.4**: Requires 2.3 (not 2.2)
 
 **Module Location** (Architect Recommendation #1):
-- Canonical location: `.claude/lib/handoff/`
+- Canonical location: `.aiox/lib/handoff/`
 - Remove or document any duplicates in `.aiox/lib/handoff/`
 - Tests use canonical location
 - Hooks use canonical location
@@ -166,7 +166,7 @@ Token overlap scoring is the sweet spot:
 ### Token Overlap Scoring Algorithm
 
 **Input:**
-- Story context: `{ story_id: 'AIOX-HO-2.2', current_task: 'Implement memory hints' }`
+- Story context: `{ story_id: 'AIOX-SBM-2.2', current_task: 'Implement memory hints' }`
 - MEMORY.md sections: Array of `{ header: '## Topic', content: 'text...' }`
 
 **Steps:**
@@ -183,7 +183,7 @@ Token overlap scoring is the sweet spot:
 
 MEMORY.md:
 ```markdown
-## AIOX-HO-1 Implementation Notes
+## AIOX-SBM-1 Implementation Notes
 Token overlap used for hint extraction. Works well.
 
 ## General TypeScript Patterns
@@ -206,13 +206,13 @@ Result: Return Section 3, Section 1 (top 2, skip Section 2)
 
 **New Files (L4 Project Runtime):**
 ```
-.claude/lib/handoff/memory-hints.js            # Memory hint extraction module (tracked)
+.aiox/lib/handoff/memory-hints.js            # Memory hint extraction module (tracked)
 tests/handoff/memory-hints.test.js             # Unit tests
 ```
 
 **Modified Files (L4 Project Runtime):**
 ```
-.claude/lib/handoff/micro-handoff.js           # Extend schema with memory_hints field
+.aiox/lib/handoff/micro-handoff.js           # Extend schema with memory_hints field
 .claude/hooks/handoff-auto.cjs                 # Call memory hint extraction on agent switch
 .claude/rules/unified-handoff.md               # Document memory_hints field
 ```
@@ -243,8 +243,8 @@ tests/handoff/memory-hints.test.js             # Unit tests
   "to_agent": "dev",
   "consumed": false,
   "story_context": {
-    "story_id": "AIOX-HO-2.2",
-    "story_path": "docs/stories/active/AIOX-HO-2.2.agent-memory-integration.story.md",
+    "story_id": "AIOX-SBM-2.2",
+    "story_path": "docs/stories/active/AIOX-SBM-2.2.agent-memory-integration.story.md",
     "story_status": "Draft",
     "current_task": "Task 1: Implement memory hint extraction",
     "branch": "feat/unified-handoff"
@@ -255,7 +255,7 @@ tests/handoff/memory-hints.test.js             # Unit tests
   "next_action": "Implement memory-hints.js module with token overlap scoring",
   "memory_hints": [
     "## Token Overlap Scoring — Simple keyword matching for relevance",
-    "## AIOX-HO-1 Implementation — Read-only enforcement pattern used",
+    "## AIOX-SBM-1 Implementation — Read-only enforcement pattern used",
     "## Test Patterns — Use Jest with fs mocking for file operations"
   ]
 }
@@ -266,7 +266,7 @@ tests/handoff/memory-hints.test.js             # Unit tests
 ```
 Micro-Handoff from @sm:
 
-Story: AIOX-HO-2.2 (Agent Memory Integration)
+Story: AIOX-SBM-2.2 (Agent Memory Integration)
 Status: Draft
 Current Task: Task 1: Implement memory hint extraction
 Branch: feat/unified-handoff
@@ -275,7 +275,7 @@ Next Action: Implement memory-hints.js module with token overlap scoring
 
 Memory hints from @sm:
 - Token Overlap Scoring — Simple keyword matching for relevance
-- AIOX-HO-1 Implementation — Read-only enforcement pattern used
+- AIOX-SBM-1 Implementation — Read-only enforcement pattern used
 - Test Patterns — Use Jest with fs mocking for file operations
 ```
 
@@ -382,15 +382,15 @@ No debug issues encountered. All 121 handoff tests pass (26 new + 5 schema exten
 ### File List
 
 **New Files:**
-- `.claude/lib/handoff/memory-hints.js` -- Memory hint extraction module (token overlap scoring)
+- `.aiox/lib/handoff/memory-hints.js` -- Memory hint extraction module (token overlap scoring)
 - `tests/handoff/memory-hints.test.js` -- 26 unit tests for memory-hints module
 
 **Modified Files:**
-- `.claude/lib/handoff/micro-handoff.js` -- Added `memory_hints` field to schema validation + MAX_MEMORY_HINTS constant
+- `.aiox/lib/handoff/micro-handoff.js` -- Added `memory_hints` field to schema validation + MAX_MEMORY_HINTS constant
 - `.claude/hooks/handoff-auto.cjs` -- Integrated memory hint extraction on agent switch
 - `.claude/rules/unified-handoff.md` -- Documented memory_hints field, incoming agent display, module location (v1.3)
 - `tests/handoff/micro-handoff.test.js` -- Added 5 tests for memory_hints schema extension + backward compatibility
-- `docs/stories/active/AIOX-HO-2.2.agent-memory-integration.story.md` -- Story updates
+- `docs/stories/active/AIOX-SBM-2.2.agent-memory-integration.story.md` -- Story updates
 
 ## QA Results
 
@@ -410,7 +410,7 @@ No debug issues encountered. All 121 handoff tests pass (26 new + 5 schema exten
 | AC-4 | Incoming agent displays memory hints alongside standard handoff context | PASS | `handoff-auto.cjs` L162: `memory_hints` field included in `saveMicroHandoff()` call. `micro-handoff.js` L61-66: persists to JSON. Display behavior documented in `unified-handoff.md` incoming agent section. |
 | AC-5 | Graceful degradation if MEMORY.md missing or empty | PASS | `memory-hints.js` L180: returns `[]` if no agentId. L58-60: `parseMemoryFile()` returns `[]` on fs error (file missing). L62-64: returns `[]` if content empty. L188: returns `[]` if no keywords. L198-200: returns `[]` if no sections score > 0. `handoff-auto.cjs` L141-149: entire extraction wrapped in try/catch with `memoryHints = []` default. |
 | AC-6 | Zero external dependencies (Node.js stdlib only) | PASS | `memory-hints.js` L20-21: only `require('fs')` and `require('path')`. No external package imports. No `package.json` additions. |
-| AC-7 | Module at `.claude/lib/handoff/` canonical location | PASS | File at `.claude/lib/handoff/memory-hints.js`. `handoff-auto.cjs` L142 resolves via canonical path: `path.join(projectRoot, '.claude', 'lib', 'handoff', 'memory-hints')`. |
+| AC-7 | Module at `.aiox/lib/handoff/` canonical location | PASS | File at `.aiox/lib/handoff/memory-hints.js`. `handoff-auto.cjs` L142 resolves via canonical path: `path.join(projectRoot, '.claude', 'lib', 'handoff', 'memory-hints')`. |
 
 ### L1/L2 Boundary Check
 

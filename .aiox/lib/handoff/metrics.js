@@ -15,7 +15,7 @@
  *
  * @module metrics
  * @see .claude/rules/unified-handoff.md
- * @see Story AIOX-HO-2.4
+ * @see Story AIOX-SBM-2.4
  */
 
 const fs = require('fs');

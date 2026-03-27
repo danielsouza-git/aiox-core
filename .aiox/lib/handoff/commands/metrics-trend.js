@@ -17,7 +17,7 @@
  *
  * @module commands/metrics-trend
  * @see .claude/rules/unified-handoff.md
- * @see Story AIOX-HO-2.4
+ * @see Story AIOX-SBM-2.4
  */
 
 const path = require('path');
@@ -69,19 +69,19 @@ function generateMetricsTrend(project, options = {}) {
   const lastN = (typeof options.last === 'number' && options.last > 0) ? options.last : DEFAULT_SESSIONS;
 
   // Load required modules
-  const metricsModule = safeRequire(path.join(root, '.claude', 'lib', 'handoff', 'metrics'));
+  const metricsModule = safeRequire(path.join(root, '.aiox', 'lib', 'handoff', 'metrics'));
   if (!metricsModule) {
-    return 'Metrics module not available at .claude/lib/handoff/metrics.js';
+    return 'Metrics module not available at .aiox/lib/handoff/metrics.js';
   }
 
-  const sessionHistory = safeRequire(path.join(root, '.claude', 'lib', 'handoff', 'commands', 'session-history'));
+  const sessionHistory = safeRequire(path.join(root, '.aiox', 'lib', 'handoff', 'commands', 'session-history'));
   if (!sessionHistory) {
-    return 'Session history module not available at .claude/lib/handoff/commands/session-history.js';
+    return 'Session history module not available at .aiox/lib/handoff/commands/session-history.js';
   }
 
-  const sessionState = safeRequire(path.join(root, '.claude', 'lib', 'handoff', 'session-state'));
+  const sessionState = safeRequire(path.join(root, '.aiox', 'lib', 'handoff', 'session-state'));
   if (!sessionState) {
-    return 'Session state module not available at .claude/lib/handoff/session-state.js';
+    return 'Session state module not available at .aiox/lib/handoff/session-state.js';
   }
 
   // Get current session metrics

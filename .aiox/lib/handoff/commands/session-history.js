@@ -13,7 +13,7 @@
  *
  * @module commands/session-history
  * @see .claude/rules/unified-handoff.md
- * @see Story AIOX-HO-2.3
+ * @see Story AIOX-SBM-2.3
  */
 
 const fs = require('fs');

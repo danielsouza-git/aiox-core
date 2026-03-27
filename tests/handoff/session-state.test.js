@@ -13,7 +13,7 @@ const {
   serializeState,
   parseState,
   EVENT_TYPES,
-} = require('../../.claude/lib/handoff/session-state');
+} = require('../../.aiox/lib/handoff/session-state');
 
 describe('Tier 2: Session State', () => {
   let tmpDir;
@@ -60,7 +60,7 @@ describe('Tier 2: Session State', () => {
 
       const evt = updateSessionState('agent_switch', {
         agent: 'dev',
-        story: 'AIOX-HO-1',
+        story: 'AIOX-SBM-1',
         branch: 'main',
         details: 'Switched from @sm to @dev',
       }, tmpDir);
@@ -78,7 +78,7 @@ describe('Tier 2: Session State', () => {
       updateSessionState('periodic', {
         agent: 'dev',
         prompt_count: 5,
-        story: 'AIOX-HO-1',
+        story: 'AIOX-SBM-1',
         branch: 'main',
         files_modified: 3,
       }, tmpDir);

@@ -1,21 +1,21 @@
 'use strict';
 
 /**
- * Integration Tests for Extended Session Report (Story AIOX-HO-2.3)
+ * Integration Tests for Extended Session Report (Story AIOX-SBM-2.3)
  *
  * Tests that session-report.js correctly integrates:
  * - Agent Activity table (Story 2.1)
  * - Story Details table (Story 2.3)
  * - Event Timeline (Story 2.3)
  *
- * @see Story AIOX-HO-2.3
+ * @see Story AIOX-SBM-2.3
  */
 
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
 
-describe('Extended Session Report Integration (Story AIOX-HO-2.3)', () => {
+describe('Extended Session Report Integration (Story AIOX-SBM-2.3)', () => {
   let tmpDir;
 
   beforeEach(() => {
@@ -23,7 +23,7 @@ describe('Extended Session Report Integration (Story AIOX-HO-2.3)', () => {
     fs.mkdirSync(tmpDir, { recursive: true });
 
     // Create the module directory structure
-    const handoffDir = path.join(tmpDir, '.claude', 'lib', 'handoff');
+    const handoffDir = path.join(tmpDir, '.aiox', 'lib', 'handoff');
     const commandsDir = path.join(handoffDir, 'commands');
     const formattersDir = path.join(handoffDir, 'formatters');
     const aggregatorsDir = path.join(handoffDir, 'aggregators');
@@ -32,7 +32,7 @@ describe('Extended Session Report Integration (Story AIOX-HO-2.3)', () => {
     fs.mkdirSync(aggregatorsDir, { recursive: true });
 
     // Copy the actual modules to the temp directory
-    const srcBase = path.resolve(__dirname, '../../.claude/lib/handoff');
+    const srcBase = path.resolve(__dirname, '../../.aiox/lib/handoff');
 
     fs.copyFileSync(
       path.join(srcBase, 'session-state.js'),
@@ -75,7 +75,7 @@ describe('Extended Session Report Integration (Story AIOX-HO-2.3)', () => {
     const ssPath = path.join(tmpDir, '.aiox', 'current-session');
     fs.mkdirSync(ssPath, { recursive: true });
 
-    const ssModule = require(path.join(tmpDir, '.claude', 'lib', 'handoff', 'session-state'));
+    const ssModule = require(path.join(tmpDir, '.aiox', 'lib', 'handoff', 'session-state'));
     const yaml = ssModule.serializeState(state);
     fs.writeFileSync(path.join(ssPath, 'state.yaml'), yaml, 'utf8');
   }
@@ -84,19 +84,19 @@ describe('Extended Session Report Integration (Story AIOX-HO-2.3)', () => {
     const state = {
       session: { id: 'test-full', started: '2026-03-25T09:00:00Z', project: 'aios-core' },
       events: [
-        { timestamp: '2026-03-25T09:00:00Z', type: 'agent_switch', agent: 'sm', story: 'AIOX-HO-2.1' },
-        { timestamp: '2026-03-25T09:30:00Z', type: 'story_start', agent: 'dev', story: 'AIOX-HO-2.1', files_modified: 3 },
-        { timestamp: '2026-03-25T10:00:00Z', type: 'periodic', agent: 'dev', story: 'AIOX-HO-2.1', prompt_count: 10, files_modified: 5 },
-        { timestamp: '2026-03-25T11:00:00Z', type: 'story_complete', agent: 'dev', story: 'AIOX-HO-2.1' },
-        { timestamp: '2026-03-25T11:30:00Z', type: 'story_start', agent: 'dev', story: 'AIOX-HO-2.2', files_modified: 2 },
-        { timestamp: '2026-03-25T12:00:00Z', type: 'periodic', agent: 'dev', story: 'AIOX-HO-2.2', prompt_count: 20 },
-        { timestamp: '2026-03-25T12:30:00Z', type: 'agent_switch', agent: 'qa', story: 'AIOX-HO-2.2' },
+        { timestamp: '2026-03-25T09:00:00Z', type: 'agent_switch', agent: 'sm', story: 'AIOX-SBM-2.1' },
+        { timestamp: '2026-03-25T09:30:00Z', type: 'story_start', agent: 'dev', story: 'AIOX-SBM-2.1', files_modified: 3 },
+        { timestamp: '2026-03-25T10:00:00Z', type: 'periodic', agent: 'dev', story: 'AIOX-SBM-2.1', prompt_count: 10, files_modified: 5 },
+        { timestamp: '2026-03-25T11:00:00Z', type: 'story_complete', agent: 'dev', story: 'AIOX-SBM-2.1' },
+        { timestamp: '2026-03-25T11:30:00Z', type: 'story_start', agent: 'dev', story: 'AIOX-SBM-2.2', files_modified: 2 },
+        { timestamp: '2026-03-25T12:00:00Z', type: 'periodic', agent: 'dev', story: 'AIOX-SBM-2.2', prompt_count: 20 },
+        { timestamp: '2026-03-25T12:30:00Z', type: 'agent_switch', agent: 'qa', story: 'AIOX-SBM-2.2' },
       ],
     };
 
     setupSessionState(state);
 
-    const { generateReport } = require(path.join(tmpDir, '.claude', 'lib', 'handoff', 'commands', 'session-report'));
+    const { generateReport } = require(path.join(tmpDir, '.aiox', 'lib', 'handoff', 'commands', 'session-report'));
     const report = generateReport(tmpDir);
 
     // Should contain base agent activity section (Story 2.1)
@@ -106,8 +106,8 @@ describe('Extended Session Report Integration (Story AIOX-HO-2.3)', () => {
 
     // Should contain Story Details section (Story 2.3)
     expect(report).toContain('Story Details:');
-    expect(report).toContain('AIOX-HO-2.1');
-    expect(report).toContain('AIOX-HO-2.2');
+    expect(report).toContain('AIOX-SBM-2.1');
+    expect(report).toContain('AIOX-SBM-2.2');
     expect(report).toContain('Done'); // HO-2.1 has story_complete
     expect(report).toContain('InProgress'); // HO-2.2 does not
 
@@ -129,7 +129,7 @@ describe('Extended Session Report Integration (Story AIOX-HO-2.3)', () => {
 
     setupSessionState(state);
 
-    const { generateReport } = require(path.join(tmpDir, '.claude', 'lib', 'handoff', 'commands', 'session-report'));
+    const { generateReport } = require(path.join(tmpDir, '.aiox', 'lib', 'handoff', 'commands', 'session-report'));
     const report = generateReport(tmpDir);
 
     // Should have agent activity
@@ -144,7 +144,7 @@ describe('Extended Session Report Integration (Story AIOX-HO-2.3)', () => {
   });
 
   test('returns error message when no session state exists', () => {
-    const { generateReport } = require(path.join(tmpDir, '.claude', 'lib', 'handoff', 'commands', 'session-report'));
+    const { generateReport } = require(path.join(tmpDir, '.aiox', 'lib', 'handoff', 'commands', 'session-report'));
     const report = generateReport(tmpDir);
 
     expect(report).toContain('No events recorded');
