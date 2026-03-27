@@ -453,7 +453,7 @@ describe('StaticGenerator (integration)', () => {
       // Find all http:// or https:// URLs
       const absoluteUrls = html.match(/https?:\/\/[^\s"'<>]+/g) || [];
 
-      // Filter out allowed ones (Google Fonts, CDN)
+      // Filter out allowed ones (Google Fonts, CDN, W3 namespaces, schema.org)
       const disallowed = absoluteUrls.filter(
         (url) =>
           !url.includes('fonts.googleapis.com') &&
@@ -461,7 +461,9 @@ describe('StaticGenerator (integration)', () => {
           !url.includes('cdn.jsdelivr.net') &&
           !url.includes('fonts.google.com') &&
           !url.includes('test.com') &&
-          !url.includes('example.com')
+          !url.includes('example.com') &&
+          !url.includes('w3.org') &&
+          !url.includes('schema.org')
       );
 
       expect(disallowed).toHaveLength(0);

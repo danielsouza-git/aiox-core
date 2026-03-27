@@ -3,6 +3,8 @@ import path from 'node:path';
 import { Eta } from 'eta';
 import { createLogger, type Logger } from '@bss/core';
 import { runBuildPipeline } from './build-pipeline';
+import { extractSurfacesPageData } from './pages/surfaces-page-data';
+import { extractSemanticTokensPageData } from './pages/semantic-tokens-page-data';
 
 /**
  * Build types supported by the static generator.
@@ -156,7 +158,10 @@ export const BRAND_BOOK_PAGES: BrandBookPage[] = [
   { slug: 'icons', title: 'Icons', template: 'icons' },
   { slug: 'components', title: 'Components', template: 'components' },
   { slug: 'motion', title: 'Motion', template: 'motion' },
+  { slug: 'surfaces', title: 'Surfaces & Borders', template: 'surfaces' },
+  { slug: 'semantic-tokens', title: 'Semantic Tokens', template: 'semantic-tokens' },
   { slug: 'templates', title: 'Templates', template: 'templates' },
+  { slug: 'about', title: 'About', template: 'about' },
 ];
 
 /**
@@ -492,6 +497,8 @@ export class StaticGenerator {
     const typographySpecimens = injectTypography(typographyTokens);
     const spacingBlocks = injectSpacing(spacingTokens);
     const componentGroups = injectComponents(path.join(config.tokenDir, 'component'));
+    const surfacesData = extractSurfacesPageData(semanticColors, effectsTokens);
+    const semanticTokensData = extractSemanticTokensPageData(semanticColors, effectsTokens, typographyTokens);
 
     // Build template data
     const templateData = {
@@ -508,6 +515,8 @@ export class StaticGenerator {
       effects: effectsTokens,
       grid: gridConfig,
       components: componentGroups,
+      surfacesData,
+      semanticTokens: semanticTokensData,
     };
 
     // Generate CSS
@@ -1070,6 +1079,663 @@ a:hover { text-decoration: underline; }
 .motion-card__value {
   font-family: var(--font-mono);
   font-weight: 600;
+}
+
+/* About Page — Overview Card */
+.about-overview__card {
+  background: var(--color-bg-subtle);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 24px 32px;
+  margin-bottom: 32px;
+}
+
+.about-overview__details {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0;
+  margin: 0;
+}
+
+.about-detail {
+  display: flex;
+  align-items: baseline;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.about-detail:last-child {
+  border-bottom: none;
+}
+
+.about-detail dt {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  min-width: 140px;
+  flex-shrink: 0;
+}
+
+.about-detail dd {
+  font-size: 15px;
+  color: var(--color-text);
+  margin: 0;
+}
+
+/* About Page — Tech Stack Grid */
+.tech-stack-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+  margin-bottom: 32px;
+}
+
+.tech-stack-item {
+  padding: 20px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  transition: box-shadow 0.15s;
+}
+
+.tech-stack-item:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.tech-stack-item__icon {
+  color: var(--brand-primary);
+  margin-bottom: 12px;
+}
+
+.tech-stack-item__name {
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0 0 4px 0;
+}
+
+.tech-stack-item__desc {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* About Page — Timeline */
+.timeline {
+  position: relative;
+  padding: 16px 0;
+  margin-bottom: 32px;
+}
+
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 19px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--color-border);
+}
+
+.timeline__item {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  padding-bottom: 32px;
+}
+
+.timeline__item:last-child {
+  padding-bottom: 0;
+}
+
+.timeline__marker {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--color-bg);
+  border: 2px solid var(--color-border);
+  flex-shrink: 0;
+}
+
+.timeline__number {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-text-secondary);
+}
+
+.timeline__item--complete .timeline__marker {
+  background: var(--brand-primary);
+  border-color: var(--brand-primary);
+}
+
+.timeline__item--complete .timeline__number {
+  color: #ffffff;
+}
+
+.timeline__item--active .timeline__marker {
+  border-color: var(--brand-primary);
+  box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.06);
+}
+
+.timeline__item--active .timeline__number {
+  color: var(--brand-primary);
+}
+
+.timeline__content {
+  padding-top: 6px;
+  flex: 1;
+}
+
+.timeline__title {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 4px 0;
+}
+
+.timeline__desc {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  margin: 0;
+  line-height: 1.6;
+  max-width: 520px;
+}
+
+/* About Page — Team Placeholder */
+.about-team__placeholder {
+  background: var(--color-bg-subtle);
+  border: 2px dashed var(--color-border);
+  border-radius: 8px;
+  padding: 32px;
+  text-align: center;
+}
+
+.about-team__placeholder p {
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  margin: 0 auto;
+  max-width: 480px;
+}
+
+/* About Page — Responsive */
+@media (max-width: 768px) {
+  .about-detail {
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .about-detail dt {
+    min-width: auto;
+  }
+
+  .tech-stack-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .timeline::before {
+    left: 15px;
+  }
+
+  .timeline__marker {
+    width: 32px;
+    height: 32px;
+  }
+
+  .timeline__number {
+    font-size: 12px;
+  }
+}
+
+/* Surfaces & Borders — Token Swatches */
+.token-grid { display: grid; gap: 16px; }
+.token-grid--3col { grid-template-columns: repeat(3, 1fr); }
+.token-grid--2col { grid-template-columns: repeat(2, 1fr); }
+
+.token-swatch {
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.token-swatch__preview {
+  height: 80px;
+  width: 100%;
+  border-radius: 8px 8px 0 0;
+}
+
+.token-swatch__info {
+  padding: 12px;
+}
+
+.token-swatch__name {
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.token-swatch__var {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--brand-primary);
+  margin-bottom: 4px;
+}
+
+.token-swatch__value {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.token-swatch__desc {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  margin-top: 4px;
+}
+
+.token-swatch__snippet {
+  padding: 8px 12px;
+  background: var(--color-bg-subtle);
+  border-top: 1px solid var(--color-border);
+  font-size: 12px;
+}
+
+.token-swatch__snippet code {
+  font-family: var(--font-mono);
+  color: var(--color-text-secondary);
+}
+
+/* Surfaces — Border Preview */
+.border-preview {
+  height: 80px;
+  width: 100%;
+  border-radius: 8px 8px 0 0;
+  background: var(--color-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Surfaces — Radius Preview */
+.radius-preview {
+  height: 80px;
+  width: 100%;
+  background: var(--brand-primary);
+  opacity: 0.15;
+}
+
+/* Surfaces — Glass Effects */
+.glass-card {
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.glass-preview {
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-image: linear-gradient(135deg, var(--brand-primary), #6366f1, #ec4899);
+  position: relative;
+}
+
+.glass-preview__label {
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 16px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.glass-snippet {
+  margin: 0;
+  padding: 12px;
+  background: var(--color-bg-subtle);
+  border-top: 1px solid var(--color-border);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.6;
+  overflow-x: auto;
+  white-space: pre;
+}
+
+/* Surfaces — Responsive */
+@media (max-width: 768px) {
+  .token-grid--3col { grid-template-columns: 1fr; }
+  .token-grid--2col { grid-template-columns: 1fr; }
+}
+
+/* Semantic Tokens — Background Swatches */
+.semantic-swatches {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+  margin-bottom: 32px;
+}
+
+.semantic-swatch {
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.semantic-swatch__preview {
+  height: 80px;
+  width: 100%;
+}
+
+.semantic-swatch__info {
+  padding: 10px 12px;
+}
+
+.semantic-swatch__name {
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 2px;
+}
+
+.semantic-swatch__css {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--brand-primary);
+  margin-bottom: 2px;
+}
+
+.semantic-swatch__value {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+/* Semantic Tokens — Text Previews */
+.semantic-text-tokens {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 16px;
+  margin-bottom: 32px;
+}
+
+.semantic-text-token {
+  padding: 20px 24px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+}
+
+.semantic-text-token__preview {
+  font-size: 20px;
+  line-height: 1.5;
+  margin-bottom: 12px;
+}
+
+.semantic-text-token__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  font-size: 12px;
+}
+
+.semantic-text-token__name {
+  font-weight: 600;
+}
+
+.semantic-text-token__css {
+  font-family: var(--font-mono);
+  color: var(--brand-primary);
+}
+
+.semantic-text-token__value {
+  font-family: var(--font-mono);
+  color: var(--color-text-secondary);
+}
+
+/* Semantic Tokens — Glow & Neon */
+.glow-tokens {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 20px;
+  margin-top: 16px;
+  margin-bottom: 32px;
+}
+
+.glow-token {
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.glow-token__preview {
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #1a1a2e;
+  border-radius: 8px;
+  margin: 16px;
+}
+
+.glow-token__label {
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.glow-token__meta {
+  padding: 12px 16px;
+  border-top: 1px solid var(--color-border);
+}
+
+.glow-token__css {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--brand-primary);
+  margin-bottom: 4px;
+}
+
+.glow-token__value {
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.glow-token__value code {
+  font-family: var(--font-mono);
+  color: var(--color-text-secondary);
+  word-break: break-all;
+}
+
+/* Semantic Tokens — Interactive States */
+.interactive-states {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+  margin-top: 16px;
+  margin-bottom: 32px;
+}
+
+.interactive-state {
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.interactive-state__demo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 64px;
+  background: var(--brand-primary);
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.interactive-state__demo--hover:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+  filter: brightness(1.1);
+}
+
+.interactive-state__demo--focus:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.interactive-state__demo--active:active {
+  transform: scale(0.98);
+  filter: brightness(0.9);
+}
+
+.interactive-state__demo--disabled {
+  background: var(--color-text-secondary);
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.interactive-state__info {
+  padding: 16px;
+}
+
+.interactive-state__title {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 4px 0;
+}
+
+.interactive-state__desc {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  margin: 0 0 8px 0;
+  line-height: 1.5;
+}
+
+.interactive-state__css {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  background: var(--color-bg-subtle);
+  padding: 8px;
+  border-radius: 4px;
+  word-break: break-all;
+  line-height: 1.5;
+}
+
+/* Semantic Tokens — Font Weights */
+.font-weight-tokens {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 16px;
+  margin-bottom: 32px;
+}
+
+.font-weight-token {
+  padding: 20px 24px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+}
+
+.font-weight-token__sample {
+  font-size: 24px;
+  line-height: 1.4;
+  margin-bottom: 8px;
+}
+
+.font-weight-token__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  font-size: 12px;
+}
+
+.font-weight-token__name {
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.font-weight-token__css {
+  font-family: var(--font-mono);
+  color: var(--brand-primary);
+}
+
+.font-weight-token__value {
+  font-family: var(--font-mono);
+  color: var(--color-text-secondary);
+}
+
+/* Semantic Tokens — shadcn/ui Mapping Table */
+.shadcn-table-wrapper {
+  overflow-x: auto;
+  margin-top: 16px;
+  margin-bottom: 32px;
+}
+
+.shadcn-mapping-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.shadcn-mapping-table th {
+  text-align: left;
+  padding: 12px 16px;
+  border-bottom: 2px solid var(--color-border);
+  font-weight: 600;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+.shadcn-mapping-table td {
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--color-border);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  vertical-align: middle;
+}
+
+.shadcn-mapping-table tbody tr:hover {
+  background: var(--color-bg-subtle);
+}
+
+.shadcn-mapping-table__color {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  border: 1px solid var(--color-border);
+  vertical-align: middle;
+  margin-right: 6px;
+}
+
+/* Semantic Tokens — Responsive */
+@media (max-width: 768px) {
+  .semantic-swatches { grid-template-columns: 1fr 1fr; }
+  .glow-tokens { grid-template-columns: 1fr; }
+  .interactive-states { grid-template-columns: 1fr; }
+  .shadcn-mapping-table { font-size: 12px; }
+  .shadcn-mapping-table th,
+  .shadcn-mapping-table td { padding: 8px 10px; }
 }
 `;
   }

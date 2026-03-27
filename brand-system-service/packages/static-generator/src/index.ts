@@ -36,6 +36,29 @@ export {
   type BrandBookPage,
 } from './static-generator';
 
+// Surfaces & Borders page (BSS-A.4)
+export {
+  extractSurfacesPageData,
+  type SurfaceToken,
+  type BorderToken,
+  type RadiusToken,
+  type GlassEffect,
+  type SurfacesPageData,
+} from './pages/surfaces-page-data';
+
+// Semantic Tokens page (BSS-A.5)
+export {
+  extractSemanticTokensPageData,
+  buildShadcnMappings,
+  type SemanticBackgroundToken,
+  type SemanticTextToken,
+  type GlowToken,
+  type InteractiveState,
+  type FontWeightToken,
+  type ShadcnMapping,
+  type SemanticTokensPageData,
+} from './pages/semantic-tokens-page-data';
+
 export {
   PdfGenerator,
   type PdfGeneratorConfig,

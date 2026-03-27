@@ -1,0 +1,135 @@
+<section aria-labelledby="semantic-tokens-title">
+  <h1 id="semantic-tokens-title">Semantic Tokens</h1>
+  <p class="section-intro">
+    Semantic tokens map design intent to concrete values. They provide a layer
+    of abstraction between raw color values and their purpose in the UI,
+    making theme changes predictable and consistent across
+    <%= it.brand.clientName %>.
+  </p>
+
+  <% if (it.semanticTokens && it.semanticTokens.backgrounds && it.semanticTokens.backgrounds.length > 0) { %>
+  <h2>Background Tokens</h2>
+  <p>Surface and background colors used across containers, cards, and page areas.</p>
+  <div class="semantic-swatches">
+    <% for (const token of it.semanticTokens.backgrounds) { %>
+    <div class="semantic-swatch">
+      <div class="semantic-swatch__preview" style="background-color: <%= token.value %>;" role="img" aria-label="Background swatch for <%= token.name %>: <%= token.value %>"></div>
+      <div class="semantic-swatch__info">
+        <div class="semantic-swatch__name"><%= token.name %></div>
+        <div class="semantic-swatch__css"><code><%= token.cssVar %></code></div>
+        <div class="semantic-swatch__value"><%= token.value %></div>
+      </div>
+    </div>
+    <% } %>
+  </div>
+  <% } %>
+
+  <% if (it.semanticTokens && it.semanticTokens.text && it.semanticTokens.text.length > 0) { %>
+  <h2>Text Tokens</h2>
+  <p>Typography color tokens for different levels of content hierarchy.</p>
+  <div class="semantic-text-tokens">
+    <% for (const token of it.semanticTokens.text) { %>
+    <div class="semantic-text-token">
+      <div class="semantic-text-token__preview" style="color: <%= token.value %>;">
+        <%= token.preview %>
+      </div>
+      <div class="semantic-text-token__meta">
+        <span class="semantic-text-token__name"><%= token.name %></span>
+        <code class="semantic-text-token__css"><%= token.cssVar %></code>
+        <span class="semantic-text-token__value"><%= token.value %></span>
+      </div>
+    </div>
+    <% } %>
+  </div>
+  <% } %>
+
+  <% if (it.semanticTokens && it.semanticTokens.glow && it.semanticTokens.glow.length > 0) { %>
+  <h2>Glow &amp; Neon Tokens</h2>
+  <p>Box-shadow based glow effects for emphasis, focus rings, and decorative accents.</p>
+  <div class="glow-tokens">
+    <% for (const token of it.semanticTokens.glow) { %>
+    <div class="glow-token">
+      <div class="glow-token__preview" style="box-shadow: <%= token.value %>;">
+        <span class="glow-token__label"><%= token.name %></span>
+      </div>
+      <div class="glow-token__meta">
+        <code class="glow-token__css"><%= token.cssVar %></code>
+        <div class="glow-token__value"><code><%= token.value %></code></div>
+      </div>
+    </div>
+    <% } %>
+  </div>
+  <% } %>
+
+  <% if (it.semanticTokens && it.semanticTokens.interactiveStates && it.semanticTokens.interactiveStates.length > 0) { %>
+  <h2>Interactive States</h2>
+  <p>Live CSS demonstrations of hover, focus, active, and disabled states. Interact with the boxes below to see each state.</p>
+  <div class="interactive-states">
+    <% for (const state of it.semanticTokens.interactiveStates) { %>
+    <div class="interactive-state">
+      <div class="interactive-state__demo interactive-state__demo--<%= state.state %>" tabindex="0" role="button" aria-label="Interactive state demo: <%= state.state %>">
+        <%= state.state %>
+      </div>
+      <div class="interactive-state__info">
+        <h3 class="interactive-state__title"><%= state.state.charAt(0).toUpperCase() + state.state.slice(1) %></h3>
+        <p class="interactive-state__desc"><%= state.description %></p>
+        <code class="interactive-state__css"><%= state.cssProperties %></code>
+      </div>
+    </div>
+    <% } %>
+  </div>
+  <% } %>
+
+  <% if (it.semanticTokens && it.semanticTokens.fontWeights && it.semanticTokens.fontWeights.length > 0) { %>
+  <h2>Font Weight Tokens</h2>
+  <p>Weight scale from thin (100) through black (900) for typographic hierarchy.</p>
+  <div class="font-weight-tokens">
+    <% for (const weight of it.semanticTokens.fontWeights) { %>
+    <div class="font-weight-token">
+      <div class="font-weight-token__sample" style="font-weight: <%= weight.value %>;">
+        The quick brown fox jumps over the lazy dog
+      </div>
+      <div class="font-weight-token__meta">
+        <span class="font-weight-token__name"><%= weight.name %></span>
+        <code class="font-weight-token__css"><%= weight.cssVar %></code>
+        <span class="font-weight-token__value"><%= weight.value %></span>
+      </div>
+    </div>
+    <% } %>
+  </div>
+  <% } %>
+
+  <% if (it.semanticTokens && it.semanticTokens.shadcnMappings && it.semanticTokens.shadcnMappings.length > 0) { %>
+  <h2>shadcn/ui Mapping</h2>
+  <p>
+    Maps shadcn/ui CSS variables to <%= it.brand.clientName %> semantic tokens.
+    Drop these into your <code>globals.css</code> to theme shadcn/ui components
+    with your brand tokens.
+  </p>
+  <div class="shadcn-table-wrapper">
+    <table class="shadcn-mapping-table" aria-label="shadcn/ui to BSS token mapping">
+      <thead>
+        <tr>
+          <th scope="col">shadcn/ui Variable</th>
+          <th scope="col">BSS Semantic Token</th>
+          <th scope="col">Resolved Value</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% for (const mapping of it.semanticTokens.shadcnMappings) { %>
+        <tr>
+          <td><code><%= mapping.shadcnVar %></code></td>
+          <td><code><%= mapping.bssToken %></code></td>
+          <td>
+            <% if (mapping.resolvedValue.startsWith('#') || mapping.resolvedValue.startsWith('rgb')) { %>
+            <span class="shadcn-mapping-table__color" style="background-color: <%= mapping.resolvedValue %>;"></span>
+            <% } %>
+            <code><%= mapping.resolvedValue %></code>
+          </td>
+        </tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+  <% } %>
+</section>
