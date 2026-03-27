@@ -103,6 +103,7 @@ const NAVIGATION_TREE: NavSection[] = [
     icon: SECTION_ICONS.identity,
     children: [
       { slug: 'logo', title: 'Logo System', section: 'identity', path: './logo.html' },
+      { slug: 'logo-usage', title: 'Logo Usage Rules', section: 'identity', path: './logo-usage.html' },
       { slug: 'moodboard', title: 'Moodboard', section: 'identity', path: '#', placeholder: true },
       { slug: 'movement-strategy', title: 'Movement & Strategy', section: 'identity', path: '#', placeholder: true },
     ],
