@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pauta Automation</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="dashboard-layout">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <p class="sidebar__label">Pauta Automation</p>
+      <h2 class="sidebar__title">Epoch News</h2>
+
+      <button class="sidebar__item sidebar__item--active" data-view="home" type="button">
+        <span class="sidebar__icon">&#127968;</span> Home
+      </button>
+
+      <button class="sidebar__item" data-view="lower" type="button">
+        <span class="sidebar__icon">&#127991;</span> Lower
+        <span class="sidebar__badge" id="badge-lower" data-count="0">0</span>
+      </button>
+
+      <button class="sidebar__item" data-view="slides" type="button">
+        <span class="sidebar__icon">&#128444;</span> Slides
+        <span class="sidebar__badge" id="badge-slides" data-count="0">0</span>
+      </button>
+
+      <button class="sidebar__item" data-view="videos" type="button">
+        <span class="sidebar__icon">&#127916;</span> Videos
+        <span class="sidebar__badge" id="badge-videos" data-count="0">0</span>
+      </button>
+
+      <div class="sidebar__spacer"></div>
+
+      <button class="sidebar__item" data-view="settings" type="button">
+        <span class="sidebar__icon">&#9881;</span> Configuracoes
+      </button>
+    </aside>
+
+    <!-- Content -->
+    <section class="content">
+
+      <!-- ══ HOME ══ -->
+      <div id="view-home" class="view view--active">
+        <header class="content__header">
+          <p class="content__eyebrow">Workspace</p>
+          <h1>Pauta Automation</h1>
+          <p>Cole o link do Google Docs da pauta para iniciar o processamento automatico.</p>
+        </header>
+
+        <!-- Input mode -->
+        <div class="card">
+          <div class="radio-group">
+            <label><input type="radio" name="inputMode" value="url" checked /> URL do Google Docs</label>
+            <label><input type="radio" name="inputMode" value="text" /> Colar Texto</label>
+          </div>
+
+          <div id="url-input">
+            <div class="input-row">
+              <div class="form-group">
+                <input type="text" class="form-input" id="docUrl" placeholder="https://docs.google.com/document/d/..." />
+              </div>
+              <button class="btn btn--primary" id="btnParse">Parsear Pauta</button>
+            </div>
+          </div>
+
+          <div id="text-input" style="display:none;">
+            <div class="form-group">
+              <textarea class="form-input" id="docText" placeholder="Cole o conteudo da pauta aqui..."></textarea>
+            </div>
+            <button class="btn btn--primary" id="btnParseText">Parsear Texto</button>
+          </div>
+
+          <p id="parseStatus" class="status-msg" style="margin-top:12px; display:none;"></p>
+        </div>
+
+        <!-- Items summary -->
+        <div id="home-items" class="card" style="display:none;">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h3>Itens Detectados</h3>
+            <button class="btn btn--success btn--sm" id="btnProcessTop" disabled>Processar Tudo</button>
+          </div>
+          <div class="summary" id="homeSummary"></div>
+
+          <!-- Tabs -->
+          <div class="tabs" style="margin-top:14px;">
+            <button class="tabs__btn tabs__btn--active" data-tab="all" type="button">
+              Todos <span class="tabs__count" id="tab-count-all">0</span>
+            </button>
+            <button class="tabs__btn" data-tab="lower" type="button">
+              Lower <span class="tabs__count" id="tab-count-lower">0</span>
+            </button>
+            <button class="tabs__btn" data-tab="slides" type="button">
+              Slides <span class="tabs__count" id="tab-count-slides">0</span>
+            </button>
+            <button class="tabs__btn" data-tab="videos" type="button">
+              Videos <span class="tabs__count" id="tab-count-videos">0</span>
+            </button>
+          </div>
+
+          <!-- Tab: Todos -->
+          <div class="tab-panel tab-panel--active" id="panel-all">
+            <div class="items-list" id="homeItemsList"></div>
+          </div>
+
+          <!-- Tab: Lower -->
+          <div class="tab-panel" id="panel-lower">
+            <!-- Global tarja type selector -->
+            <div class="tarja-type-selector" id="tarjaTypeSelector">
+              <span class="tarja-type-selector__label">Tipo de Conteudo:</span>
+              <label class="tarja-type-option">
+                <input type="radio" name="tarjaTypeGlobal" value="giro" checked onchange="onGlobalTarjaTypeChange(this.value)" />
+                <span>Giro de Noticias</span>
+              </label>
+              <label class="tarja-type-option">
+                <input type="radio" name="tarjaTypeGlobal" value="cobertura" onchange="onGlobalTarjaTypeChange(this.value)" />
+                <span>Cobertura Especial</span>
+              </label>
+              <label class="tarja-type-option">
+                <input type="radio" name="tarjaTypeGlobal" value="mira" onchange="onGlobalTarjaTypeChange(this.value)" />
+                <span>Na Mira do Marcos</span>
+              </label>
+              <label class="tarja-type-option">
+                <input type="radio" name="tarjaTypeGlobal" value="superchats" onchange="onGlobalTarjaTypeChange(this.value)" />
+                <span>Superchats &amp; Doacoes</span>
+              </label>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+              <div style="display:flex; align-items:center; gap:12px;">
+                <label style="display:flex; align-items:center; gap:6px; font-size:0.85rem; color:var(--text-soft); cursor:pointer;">
+                  <input type="checkbox" id="selectAllLower" checked onchange="toggleSelectAllSection('lower', this.checked)" /> Selecionar todos
+                </label>
+                <span class="footer-bar__count" id="selectedCountLower"></span>
+              </div>
+              <button class="btn btn--success btn--sm" id="btnProcessLower" disabled onclick="processSection('lower')">Processar Tarjas</button>
+            </div>
+            <div class="items-list" id="lowerItemsList">
+              <p style="color:var(--text-soft); font-size:0.88rem;">Nenhuma tarja detectada.</p>
+            </div>
+            <!-- Tarja edit panel -->
+            <div id="lower-edit" class="card" style="display:none; margin-top:12px;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                <h3>Editar Tarja</h3>
+                <button class="btn btn--ghost btn--sm" onclick="closeTarjaEdit()">Fechar</button>
+              </div>
+              <input type="hidden" id="edit-tarja-id" />
+              <div class="form-group">
+                <label>Tarja Principal (titulo)</label>
+                <input type="text" class="form-input" id="edit-tarja-title" placeholder="Titulo em CAIXA ALTA" />
+              </div>
+              <div class="form-group">
+                <label>Linha de Apoio (subtitulo)</label>
+                <input type="text" class="form-input" id="edit-tarja-subtitle" placeholder="Subtitulo da tarja" />
+              </div>
+              <div class="form-group">
+                <label>Tipo de Conteudo</label>
+                <select class="form-input" id="edit-tarja-type">
+                  <option value="giro">Giro de Noticias</option>
+                  <option value="cobertura">Cobertura Especial</option>
+                  <option value="mira">Na Mira do Marcos</option>
+                  <option value="superchats">Superchats &amp; Doacoes</option>
+                </select>
+              </div>
+              <button class="btn btn--primary" onclick="saveTarjaEdit()">Salvar Alteracoes</button>
+            </div>
+          </div>
+
+          <!-- Tab: Slides -->
+          <div class="tab-panel" id="panel-slides">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+              <div style="display:flex; align-items:center; gap:12px;">
+                <label style="display:flex; align-items:center; gap:6px; font-size:0.85rem; color:var(--text-soft); cursor:pointer;">
+                  <input type="checkbox" id="selectAllSlides" checked onchange="toggleSelectAllSection('slides', this.checked)" /> Selecionar todos
+                </label>
+                <span class="footer-bar__count" id="selectedCountSlides"></span>
+              </div>
+              <button class="btn btn--success btn--sm" id="btnProcessSlides" disabled onclick="processSection('slides')">Processar Slides</button>
+            </div>
+            <div class="items-list" id="slidesItemsList">
+              <p style="color:var(--text-soft); font-size:0.88rem;">Nenhum slide detectado.</p>
+            </div>
+          </div>
+
+          <!-- Tab: Videos -->
+          <div class="tab-panel" id="panel-videos">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+              <div style="display:flex; align-items:center; gap:12px;">
+                <label style="display:flex; align-items:center; gap:6px; font-size:0.85rem; color:var(--text-soft); cursor:pointer;">
+                  <input type="checkbox" id="selectAllVideos" checked onchange="toggleSelectAllSection('videos', this.checked)" /> Selecionar todos
+                </label>
+                <span class="footer-bar__count" id="selectedCountVideos"></span>
+              </div>
+              <button class="btn btn--success btn--sm" id="btnProcessVideos" disabled onclick="processSection('videos')">Processar Videos</button>
+            </div>
+            <div class="items-list" id="videosItemsList">
+              <p style="color:var(--text-soft); font-size:0.88rem;">Nenhum video detectado.</p>
+            </div>
+          </div>
+
+          <div class="footer-bar" style="margin-top:14px;">
+            <div class="footer-bar__left">
+              <label><input type="checkbox" id="selectAll" checked /> Selecionar todos</label>
+              <span class="footer-bar__count" id="selectedCount"></span>
+            </div>
+            <button class="btn btn--success" id="btnProcess" disabled>Processar Tudo</button>
+          </div>
+        </div>
+
+        <!-- Progress -->
+        <div id="home-progress" class="card" style="display:none;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+            <h3>Progresso</h3>
+            <button class="btn btn--danger btn--sm" id="btnCancel">Cancelar</button>
+          </div>
+          <div style="display:flex; align-items:center; gap:12px; margin-bottom:14px;">
+            <div class="progress-bar" style="flex:1;">
+              <div class="progress-bar__fill" id="globalProgress"></div>
+            </div>
+            <span id="globalProgressText" style="font-size:0.85rem; color:var(--text-soft);">0%</span>
+          </div>
+          <div class="items-list" id="progressItemsList"></div>
+          <div id="processSummary" class="summary" style="margin-top:14px; display:none;"></div>
+        </div>
+      </div>
+
+      <!-- ══ SETTINGS ══ -->
+      <div id="view-settings" class="view">
+        <header class="content__header">
+          <p class="content__eyebrow">Configuracoes</p>
+          <h1>Preferencias</h1>
+          <p>Credenciais, caminhos e opcoes de processamento.</p>
+        </header>
+
+        <div class="card">
+          <!-- Google APIs -->
+          <div class="settings-section">
+            <div class="settings-section__title">Google APIs</div>
+            <div class="form-group">
+              <label>API Key</label>
+              <input type="text" class="form-input" id="cfg-google-api_key" placeholder="(opcional)" />
+            </div>
+            <div class="file-input-row">
+              <div class="form-group">
+                <label>Credentials JSON</label>
+                <input type="text" class="form-input" id="cfg-google-credentials_path" placeholder="config/credentials.json" />
+              </div>
+              <button class="btn btn--ghost btn--sm" onclick="browseFile('cfg-google-credentials_path','JSON (*.json)')">...</button>
+            </div>
+            <div class="file-input-row">
+              <div class="form-group">
+                <label>Token Path</label>
+                <input type="text" class="form-input" id="cfg-google-token_path" placeholder="config/token.json" />
+              </div>
+              <button class="btn btn--ghost btn--sm" onclick="browseFile('cfg-google-token_path','JSON (*.json)')">...</button>
+            </div>
+            <div class="form-group">
+              <label>Slides Template ID</label>
+              <input type="text" class="form-input" id="cfg-google-slides_template_id" placeholder="ID do template no Google Slides" />
+            </div>
+          </div>
+
+          <!-- OpenAI -->
+          <div class="settings-section">
+            <div class="settings-section__title">OpenAI</div>
+            <div class="form-group">
+              <label>API Key</label>
+              <input type="password" class="form-input" id="cfg-openai-api_key" placeholder="sk-..." />
+            </div>
+          </div>
+
+          <!-- Paths -->
+          <div class="settings-section">
+            <div class="settings-section__title">Pasta de Saida</div>
+            <div class="file-input-row">
+              <div class="form-group">
+                <label>Diretorio de saida</label>
+                <input type="text" class="form-input" id="cfg-paths-output_dir" placeholder="C:/Users/.../Desktop" />
+              </div>
+              <button class="btn btn--ghost btn--sm" onclick="browseDir('cfg-paths-output_dir')">...</button>
+            </div>
+          </div>
+
+          <!-- Fonts -->
+          <div class="settings-section">
+            <div class="settings-section__title">Fontes Poppins</div>
+            <div class="file-input-row">
+              <div class="form-group">
+                <label>Bold</label>
+                <input type="text" class="form-input" id="cfg-paths-font_tarja_bold" />
+              </div>
+              <button class="btn btn--ghost btn--sm" onclick="browseFile('cfg-paths-font_tarja_bold','Fonte (*.ttf)')">...</button>
+            </div>
+            <div class="file-input-row" style="margin-top:8px;">
+              <div class="form-group">
+                <label>Regular</label>
+                <input type="text" class="form-input" id="cfg-paths-font_tarja_regular" />
+              </div>
+              <button class="btn btn--ghost btn--sm" onclick="browseFile('cfg-paths-font_tarja_regular','Fonte (*.ttf)')">...</button>
+            </div>
+            <div class="file-input-row" style="margin-top:8px;">
+              <div class="form-group">
+                <label>SemiBold</label>
+                <input type="text" class="form-input" id="cfg-paths-font_tarja_semibold" />
+              </div>
+              <button class="btn btn--ghost btn--sm" onclick="browseFile('cfg-paths-font_tarja_semibold','Fonte (*.ttf)')">...</button>
+            </div>
+          </div>
+
+          <!-- Tarja templates -->
+          <div class="settings-section">
+            <div class="settings-section__title">Templates de Tarja</div>
+            <div class="file-input-row">
+              <div class="form-group">
+                <label>Epoch News</label>
+                <input type="text" class="form-input" id="cfg-paths-tarja_template_epoch" />
+              </div>
+              <button class="btn btn--ghost btn--sm" onclick="browseFile('cfg-paths-tarja_template_epoch','PNG (*.png)')">...</button>
+            </div>
+            <div class="file-input-row" style="margin-top:8px;">
+              <div class="form-group">
+                <label>Cobertura Especial</label>
+                <input type="text" class="form-input" id="cfg-paths-tarja_template_cobertura" />
+              </div>
+              <button class="btn btn--ghost btn--sm" onclick="browseFile('cfg-paths-tarja_template_cobertura','PNG (*.png)')">...</button>
+            </div>
+          </div>
+
+          <!-- Video -->
+          <div class="settings-section">
+            <div class="settings-section__title">Video</div>
+            <div class="form-group">
+              <label>Qualidade padrao</label>
+              <select class="form-input" id="cfg-video-default_quality">
+                <option value="1080p">1080p</option>
+                <option value="720p">720p</option>
+                <option value="480p">480p</option>
+                <option value="best">Best</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="display:flex; gap:12px; align-items:center;">
+            <button class="btn btn--success" id="btnSaveSettings">Salvar Configuracoes</button>
+            <span id="settingsStatus" class="status-msg" style="display:none;"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ LOWER ══ -->
+      <div id="view-lower" class="view">
+        <header class="content__header">
+          <p class="content__eyebrow">Tarjas</p>
+          <h1>Lower Thirds</h1>
+          <p>Tarjas detectadas na pauta. Selecione o tipo de conteudo e clique em um item para editar.</p>
+        </header>
+
+        <!-- Global tarja type selector (view) -->
+        <div class="card">
+          <div class="tarja-type-selector" id="tarjaTypeViewSelector">
+            <span class="tarja-type-selector__label">Tipo de Conteudo:</span>
+            <label class="tarja-type-option">
+              <input type="radio" name="tarjaTypeView" value="giro" checked onchange="onGlobalTarjaTypeChange(this.value)" />
+              <span>Giro de Noticias</span>
+            </label>
+            <label class="tarja-type-option">
+              <input type="radio" name="tarjaTypeView" value="cobertura" onchange="onGlobalTarjaTypeChange(this.value)" />
+              <span>Cobertura Especial</span>
+            </label>
+            <label class="tarja-type-option">
+              <input type="radio" name="tarjaTypeView" value="mira" onchange="onGlobalTarjaTypeChange(this.value)" />
+              <span>Na Mira do Marcos</span>
+            </label>
+            <label class="tarja-type-option">
+              <input type="radio" name="tarjaTypeView" value="superchats" onchange="onGlobalTarjaTypeChange(this.value)" />
+              <span>Superchats &amp; Doacoes</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="card">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h3>Tarjas <span style="color:var(--text-soft); font-weight:400;">(<span id="lower-view-count">0</span>)</span></h3>
+            <div style="display:flex; gap:8px; align-items:center;">
+              <label style="display:flex; align-items:center; gap:6px; font-size:0.85rem; color:var(--text-soft); cursor:pointer;">
+                <input type="checkbox" id="lowerViewSelectAll" checked onchange="toggleSelectAllView('lower', this.checked)" /> Todos
+              </label>
+              <button class="btn btn--success btn--sm" id="btnProcessLowerView" disabled onclick="processView('lower')">Processar Tarjas</button>
+            </div>
+          </div>
+          <div class="items-list" id="lowerViewList" style="margin-top:12px;">
+            <p style="color:var(--text-soft); font-size:0.88rem;">Parseie uma pauta para ver tarjas aqui.</p>
+          </div>
+
+          <div id="lower-view-edit" class="card" style="display:none; margin-top:12px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+              <h3>Editar Tarja</h3>
+              <button class="btn btn--ghost btn--sm" onclick="closeTarjaViewEdit()">Fechar</button>
+            </div>
+            <input type="hidden" id="edit-view-tarja-id" />
+            <div class="form-group">
+              <label>Tarja Principal (titulo)</label>
+              <input type="text" class="form-input" id="edit-view-tarja-title" placeholder="Titulo em CAIXA ALTA" />
+            </div>
+            <div class="form-group">
+              <label>Linha de Apoio (subtitulo)</label>
+              <input type="text" class="form-input" id="edit-view-tarja-subtitle" placeholder="Subtitulo da tarja" />
+            </div>
+            <div class="form-group">
+              <label>Tipo de Conteudo</label>
+              <select class="form-input" id="edit-view-tarja-type">
+                <option value="giro">Giro de Noticias</option>
+                <option value="cobertura">Cobertura Especial</option>
+                <option value="mira">Na Mira do Marcos</option>
+                <option value="superchats">Superchats &amp; Doacoes</option>
+              </select>
+            </div>
+            <button class="btn btn--primary" onclick="saveTarjaViewEdit()">Salvar Alteracoes</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ SLIDES ══ -->
+      <div id="view-slides" class="view">
+        <header class="content__header">
+          <p class="content__eyebrow">Apresentacao</p>
+          <h1>Slides</h1>
+          <p>Slides detectados na pauta para geracao automatica no Google Slides.</p>
+        </header>
+
+        <div class="card">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h3>Slides <span style="color:var(--text-soft); font-weight:400;">(<span id="slides-view-count">0</span>)</span></h3>
+            <div style="display:flex; gap:8px; align-items:center;">
+              <label style="display:flex; align-items:center; gap:6px; font-size:0.85rem; color:var(--text-soft); cursor:pointer;">
+                <input type="checkbox" id="slidesViewSelectAll" checked onchange="toggleSelectAllView('slides', this.checked)" /> Todos
+              </label>
+              <button class="btn btn--success btn--sm" id="btnProcessSlidesView" disabled onclick="processView('slides')">Processar Slides</button>
+            </div>
+          </div>
+          <div class="summary" id="slides-view-summary" style="margin-top:10px;"></div>
+          <div class="items-list" id="slidesViewList" style="margin-top:12px;">
+            <p style="color:var(--text-soft); font-size:0.88rem;">Parseie uma pauta para ver slides aqui.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ VIDEOS ══ -->
+      <div id="view-videos" class="view">
+        <header class="content__header">
+          <p class="content__eyebrow">Videos</p>
+          <h1>Video Downloader</h1>
+          <p>Videos detectados na pauta para download e processamento automatico.</p>
+        </header>
+
+        <!-- Pauta videos list -->
+        <div class="card" id="videos-from-pauta-card">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h3>Videos <span style="color:var(--text-soft); font-weight:400;">(<span id="videos-view-count">0</span>)</span></h3>
+            <div style="display:flex; gap:8px; align-items:center;">
+              <label style="display:flex; align-items:center; gap:6px; font-size:0.85rem; color:var(--text-soft); cursor:pointer;">
+                <input type="checkbox" id="videosViewSelectAll" checked onchange="toggleSelectAllView('videos', this.checked)" /> Todos
+              </label>
+              <button class="btn btn--success btn--sm" id="btnProcessVideosView" disabled onclick="processView('videos')">Processar Videos</button>
+            </div>
+          </div>
+          <div class="summary" id="videos-view-summary" style="margin-top:10px;"></div>
+          <div class="items-list" id="videosViewList" style="margin-top:12px;">
+            <p style="color:var(--text-soft); font-size:0.88rem;">Parseie uma pauta para ver videos aqui.</p>
+          </div>
+        </div>
+
+        <!-- Standalone download form -->
+        <div class="card">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+            <h3>Download Manual</h3>
+            <button class="btn btn--ghost btn--sm" id="btnToggleDownloadForm" onclick="toggleDownloadForm()">Expandir</button>
+          </div>
+
+          <div id="download-form-container" style="display:none;">
+            <!-- URL input -->
+            <div class="form-group">
+              <label>URL ou Arquivo Local</label>
+              <div style="display:flex; gap:8px;">
+                <input type="text" class="form-input" id="download-url" placeholder="https://youtube.com/watch?v=..." style="flex:1;" />
+                <button class="btn btn--ghost btn--sm" onclick="browseVideoFile()">Navegar...</button>
+              </div>
+            </div>
+
+            <!-- Quality selector -->
+            <div class="form-group">
+              <label>Qualidade</label>
+              <select class="form-input" id="download-quality">
+                <option value="Best">Best</option>
+                <option value="1080p" selected>1080p</option>
+                <option value="720p">720p</option>
+                <option value="480p">480p</option>
+                <option value="Audio Only">Audio Only</option>
+              </select>
+            </div>
+
+            <!-- Clip settings -->
+            <div class="clip-group">
+              <div class="clip-header">
+                <label class="clip-label">Clip 1</label>
+              </div>
+              <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px;">
+                <div class="form-group" style="margin-bottom:0;">
+                  <label style="font-size:0.78rem;">Inicio (MMSS)</label>
+                  <input type="text" class="form-input mmss-input" id="clip1-start" placeholder="0000" pattern="[0-9]{4}" maxlength="4" />
+                </div>
+                <div class="form-group" style="margin-bottom:0;">
+                  <label style="font-size:0.78rem;">Fim (MMSS)</label>
+                  <input type="text" class="form-input mmss-input" id="clip1-end" placeholder="0030" pattern="[0-9]{4}" maxlength="4" />
+                </div>
+                <div class="form-group" style="margin-bottom:0;">
+                  <label style="font-size:0.78rem;">Repetir (vezes)</label>
+                  <input type="number" class="form-input" id="clip1-repeat" value="1" min="1" max="10" />
+                </div>
+              </div>
+            </div>
+
+            <!-- Clip 2 -->
+            <div class="clip-group">
+              <div class="clip-header">
+                <label class="clip-label"><input type="checkbox" id="clip2-enable" onchange="toggleClipInputs(2)" /> Clip 2</label>
+              </div>
+              <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px;">
+                <div class="form-group" style="margin-bottom:0;">
+                  <input type="text" class="form-input mmss-input" id="clip2-start" placeholder="0030" pattern="[0-9]{4}" maxlength="4" disabled />
+                </div>
+                <div class="form-group" style="margin-bottom:0;">
+                  <input type="text" class="form-input mmss-input" id="clip2-end" placeholder="0100" pattern="[0-9]{4}" maxlength="4" disabled />
+                </div>
+                <div class="form-group" style="margin-bottom:0;">
+                  <input type="number" class="form-input" id="clip2-repeat" value="1" min="1" max="10" disabled />
+                </div>
+              </div>
+            </div>
+
+            <!-- Clip 3 -->
+            <div class="clip-group">
+              <div class="clip-header">
+                <label class="clip-label"><input type="checkbox" id="clip3-enable" onchange="toggleClipInputs(3)" /> Clip 3</label>
+              </div>
+              <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px;">
+                <div class="form-group" style="margin-bottom:0;">
+                  <input type="text" class="form-input mmss-input" id="clip3-start" placeholder="0100" pattern="[0-9]{4}" maxlength="4" disabled />
+                </div>
+                <div class="form-group" style="margin-bottom:0;">
+                  <input type="text" class="form-input mmss-input" id="clip3-end" placeholder="0130" pattern="[0-9]{4}" maxlength="4" disabled />
+                </div>
+                <div class="form-group" style="margin-bottom:0;">
+                  <input type="number" class="form-input" id="clip3-repeat" value="1" min="1" max="10" disabled />
+                </div>
+              </div>
+            </div>
+
+            <!-- Merge and options -->
+            <div style="display:flex; gap:16px; margin-top:12px;">
+              <label style="display:flex; align-items:center; gap:6px; font-size:0.88rem; color:var(--text-soft); cursor:pointer;">
+                <input type="checkbox" id="download-merge" /> Merge clips (fadewhite 1s)
+              </label>
+              <label style="display:flex; align-items:center; gap:6px; font-size:0.88rem; color:var(--text-soft); cursor:pointer;">
+                <input type="checkbox" id="download-video-only" /> Video Only (skip subtitle)
+              </label>
+            </div>
+
+            <!-- Custom name -->
+            <div class="form-group">
+              <label>Nome customizado (opcional)</label>
+              <input type="text" class="form-input" id="download-custom-name" placeholder="video_download" />
+            </div>
+
+            <!-- Download button -->
+            <button class="btn btn--primary" id="btnStartDownload" onclick="startStandaloneDownload()">Iniciar Download</button>
+
+            <!-- Progress -->
+            <div id="download-progress-container" style="display:none; margin-top:16px;">
+              <div style="display:flex; align-items:center; gap:12px; margin-bottom:8px;">
+                <div class="progress-bar" style="flex:1;">
+                  <div class="progress-bar__fill" id="downloadProgress"></div>
+                </div>
+                <span id="downloadProgressText" style="font-size:0.85rem; color:var(--text-soft);">0%</span>
+              </div>
+              <p id="downloadStatus" class="status-msg"></p>
+            </div>
+
+            <!-- Download history -->
+            <div id="download-history" style="margin-top:20px;">
+              <h4 style="font-size:0.88rem; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:10px; color:var(--text-soft);">Historico (ultimos 10)</h4>
+              <div id="download-history-list" class="history-list">
+                <p style="color:var(--text-soft); font-size:0.85rem;">Nenhum download realizado ainda.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ SUBTITLE EDITOR MODAL ══ -->
+      <div id="subtitle-editor-modal" class="subtitle-modal" style="display:none;">
+        <div class="subtitle-modal__backdrop" onclick="closeSubtitleEditor()"></div>
+        <div class="subtitle-modal__content">
+          <!-- Header -->
+          <div class="subtitle-modal__header">
+            <h2>Editor de Legendas</h2>
+            <button class="btn btn--ghost btn--sm" onclick="closeSubtitleEditor()">Fechar</button>
+          </div>
+
+          <!-- Main content split -->
+          <div class="subtitle-editor-split">
+            <!-- Video player section -->
+            <div class="subtitle-video-section">
+              <div class="subtitle-video-player">
+                <video id="subtitle-video" controls>
+                  <source id="subtitle-video-source" type="video/mp4" />
+                  Seu navegador nao suporta video HTML5.
+                </video>
+                <div id="subtitle-overlay" class="subtitle-overlay"></div>
+              </div>
+
+              <!-- Video controls -->
+              <div class="subtitle-controls-row">
+                <div class="subtitle-speed-controls">
+                  <button class="btn btn--ghost btn--sm" onclick="setVideoSpeed(0.5)">0.5x</button>
+                  <button class="btn btn--ghost btn--sm" onclick="setVideoSpeed(1)">1x</button>
+                  <button class="btn btn--ghost btn--sm" onclick="setVideoSpeed(1.5)">1.5x</button>
+                  <button class="btn btn--ghost btn--sm" onclick="setVideoSpeed(2)">2x</button>
+                </div>
+              </div>
+
+              <!-- Style controls -->
+              <div class="subtitle-style-panel">
+                <h4>Estilo da Legenda</h4>
+                <div class="subtitle-style-grid">
+                  <div class="form-group" style="margin-bottom:0;">
+                    <label>Tamanho da Fonte: <span id="font-size-value">21</span>px</label>
+                    <input type="range" id="font-size-slider" min="14" max="42" value="21" oninput="updateFontSize(this.value)" />
+                  </div>
+                  <div class="form-group" style="margin-bottom:0;">
+                    <label>Cor do Texto</label>
+                    <input type="color" id="font-color-picker" value="#ffffff" onchange="updateFontColor(this.value)" />
+                  </div>
+                  <div class="form-group" style="margin-bottom:0;">
+                    <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                      <input type="checkbox" id="outline-toggle" checked onchange="updateOutline(this.checked)" />
+                      <span>Contorno (2px)</span>
+                    </label>
+                  </div>
+                  <div class="form-group" style="margin-bottom:0;">
+                    <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                      <input type="checkbox" id="bold-toggle" checked onchange="updateBold(this.checked)" />
+                      <span>Negrito</span>
+                    </label>
+                  </div>
+                  <div class="form-group" style="margin-bottom:0;">
+                    <label>Posicao</label>
+                    <div style="display:flex; gap:12px; margin-top:4px;">
+                      <label style="display:flex; align-items:center; gap:4px; font-size:0.85rem; cursor:pointer;">
+                        <input type="radio" name="subtitle-position" value="top" onchange="updatePosition(this.value)" />
+                        <span>Topo</span>
+                      </label>
+                      <label style="display:flex; align-items:center; gap:4px; font-size:0.85rem; cursor:pointer;">
+                        <input type="radio" name="subtitle-position" value="bottom" checked onchange="updatePosition(this.value)" />
+                        <span>Rodape</span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Editor section -->
+            <div class="subtitle-editor-section">
+              <div class="subtitle-editor-header">
+                <h4>Legendas (<span id="subtitle-count">0</span>)</h4>
+              </div>
+              <div id="subtitle-entries-list" class="subtitle-entries-list">
+                <p style="color:var(--text-soft); font-size:0.85rem;">Carregando legendas...</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Footer actions -->
+          <div class="subtitle-modal__footer">
+            <button class="btn btn--primary" onclick="saveSRT()">Salvar SRT</button>
+            <button class="btn btn--success" onclick="embedSubtitles()">Embutir Legendas no Video</button>
+            <span id="subtitle-action-status" class="status-msg" style="display:none;"></span>
+          </div>
+
+          <!-- Embed progress -->
+          <div id="subtitle-embed-progress" style="display:none; margin-top:12px;">
+            <div style="display:flex; align-items:center; gap:12px; margin-bottom:8px;">
+              <div class="progress-bar" style="flex:1;">
+                <div class="progress-bar__fill" id="subtitleEmbedProgress"></div>
+              </div>
+              <span id="subtitleEmbedProgressText" style="font-size:0.85rem; color:var(--text-soft);">0%</span>
+            </div>
+            <p id="subtitleEmbedStatus" class="status-msg"></p>
+          </div>
+        </div>
+      </div>
+
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

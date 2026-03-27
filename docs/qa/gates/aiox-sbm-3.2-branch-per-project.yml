@@ -1,0 +1,16 @@
+schema: 1
+story: 'SBM-3.2'
+gate: CONCERNS
+status_reason: 'All 8 ACs implemented, 46/46 tests pass, zero regressions across 263 handoff tests. Task 5 (hook wiring + settings.json) documented as BLOCKED on write permissions -- code written but not verified in-situ. Two dual-module-location risks noted.'
+reviewer: 'Quinn'
+updated: '2026-03-26T22:00:00Z'
+top_issues:
+  - id: 'ARCH-001'
+    severity: medium
+    finding: 'Dual module locations: .aiox/lib/handoff/ and .claude/lib/handoff/ both contain session-state.js with different code. The .claude/ version lacks the project field in event serialization. Hook references .claude/ for existing modules and .aiox/ for new module, creating split dependency graph.'
+    suggested_action: 'Unify to single canonical location. If .aiox/lib/ is the new standard, migrate all handoff modules there and update hook require() paths.'
+  - id: 'MNT-001'
+    severity: low
+    finding: 'Task 5 (handoff-auto.cjs hook creation and settings.json modification) is documented as BLOCKED on write permissions. The code exists and is reviewed, but runtime integration cannot be verified until permissions are granted.'
+    suggested_action: 'After write permissions granted, verify hook executes without errors by checking stdout output format matches Claude Code hook protocol.'
+waiver: { active: false }

@@ -1,0 +1,24 @@
+{
+  "google": {
+    "credentials_path": "config/credentials.json",
+    "token_path": "config/token.json",
+    "slides_template_id": "1JyJNOJmu7YPCnDI2kJFwCQkdOkOXxrN742Y09Y403So"
+  },
+  "openai": {
+    "api_key": ""
+  },
+  "paths": {
+    "output_dir": "C:/Users/mrapa/Desktop",
+    "font_tarja_bold": "D:/EPOCH/Epoch Times/Fontes/Poppins-Bold.ttf",
+    "font_tarja_regular": "D:/EPOCH/Epoch Times/Fontes/Poppins-Regular.ttf",
+    "font_tarja_semibold": "D:/EPOCH/Epoch Times/Fontes/Poppins-SemiBold.ttf",
+    "tarja_template_epoch": "D:/EPOCH/Epoch Times/epoch news/assets/lt epoch news.png",
+    "tarja_template_cobertura": "D:/EPOCH/Epoch Times/epoch news/assets/lt cobertura especial.png",
+    "tarja_template_superchats": "D:/EPOCH/Epoch Times/epoch news/assets/superchats e doacoes.png"
+  },
+  "video": {
+    "default_quality": "1080p",
+    "whisper_model": "whisper-1",
+    "translation_model": "gpt-4.1-mini"
+  }
+}
