@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * Integration Tests — Unified Handoff System
+ * Integration Tests — Unified Session and Branch Manager
  *
  * Tests the full 3-tier handoff system working together:
  * - Agent switch flow with micro-handoff + session state
@@ -27,7 +27,7 @@ jest.mock('child_process', () => ({
   execSync: jest.fn(),
 }));
 
-describe('Integration: Unified Handoff System', () => {
+describe('Integration: Unified Session and Branch Manager', () => {
   let tmpDir;
 
   beforeEach(() => {
