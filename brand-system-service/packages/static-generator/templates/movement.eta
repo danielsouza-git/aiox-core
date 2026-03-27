@@ -1,0 +1,208 @@
+<section aria-labelledby="movement-title">
+  <h1 id="movement-title">Movement & Strategy</h1>
+  <p class="section-intro">
+    Brand strategy framework for <%= it.brand.clientName %>.
+    Manifesto, positioning, archetypes, and narrative structure.
+  </p>
+
+  <nav class="movement-toc" aria-label="Section navigation">
+    <ul>
+      <li><a href="#manifesto">Manifesto</a></li>
+      <li><a href="#purpose-values">Purpose & Values</a></li>
+      <li><a href="#archetype">Archetype</a></li>
+      <li><a href="#positioning">Positioning</a></li>
+      <li><a href="#brandscript">BrandScript</a></li>
+      <li><a href="#vocabulary">Vocabulary</a></li>
+      <li><a href="#hero-journey">Hero's Journey</a></li>
+      <li><a href="#brand-contract">Brand Contract</a></li>
+    </ul>
+  </nav>
+
+  <% if (it.movement) { %>
+
+  <h2 id="manifesto">Manifesto</h2>
+  <% if (it.movement.manifesto) { %>
+  <blockquote class="movement-manifesto">
+    <p><%= it.movement.manifesto.statement %></p>
+  </blockquote>
+  <div class="movement-philosophy">
+    <% for (const stmt of it.movement.manifesto.philosophyStatements) { %>
+    <p class="movement-philosophy__statement"><%= stmt %></p>
+    <% } %>
+  </div>
+  <div class="movement-promise">
+    <h3>Brand Promise</h3>
+    <p><%= it.movement.manifesto.brandPromise %></p>
+  </div>
+  <% } %>
+
+  <h2 id="purpose-values">Purpose & Values</h2>
+  <% if (it.movement.purposeValues) { %>
+  <div class="movement-purpose">
+    <p class="movement-purpose__statement"><%= it.movement.purposeValues.purpose %></p>
+  </div>
+  <div class="movement-values-grid">
+    <% for (const val of it.movement.purposeValues.values) { %>
+    <div class="movement-value-card">
+      <h3 class="movement-value-card__name"><%= val.name %></h3>
+      <p class="movement-value-card__desc"><%= val.description %></p>
+    </div>
+    <% } %>
+  </div>
+  <% } %>
+
+  <h2 id="archetype">Brand Archetype</h2>
+  <% if (it.movement.archetype) { %>
+  <div class="archetype-composition">
+    <% for (const arch of it.movement.archetype.composition) { %>
+    <div class="archetype-card<%= arch === it.movement.archetype.primary ? ' archetype-card--primary' : '' %>">
+      <div class="archetype-card__icon"><%~ arch.icon %></div>
+      <div class="archetype-card__content">
+        <h3 class="archetype-card__name"><%= arch.archetype %></h3>
+        <div class="archetype-card__percentage"><%= arch.percentage %>%</div>
+        <p class="archetype-card__desc"><%= arch.description %></p>
+      </div>
+      <div class="archetype-card__bar" style="width: <%= arch.percentage %>%;"></div>
+    </div>
+    <% } %>
+  </div>
+  <% } %>
+
+  <h2 id="positioning">Positioning</h2>
+  <% if (it.movement.positioning) { %>
+  <blockquote class="movement-positioning">
+    <p><%= it.movement.positioning.statement %></p>
+  </blockquote>
+  <div class="positioning-grid">
+    <div class="positioning-element">
+      <div class="positioning-element__label">Category</div>
+      <div class="positioning-element__value"><%= it.movement.positioning.category %></div>
+    </div>
+    <div class="positioning-element">
+      <div class="positioning-element__label">Unique Value</div>
+      <div class="positioning-element__value"><%= it.movement.positioning.uniqueValue %></div>
+    </div>
+    <div class="positioning-element">
+      <div class="positioning-element__label">Target Audience</div>
+      <div class="positioning-element__value"><%= it.movement.positioning.targetAudience %></div>
+    </div>
+    <div class="positioning-element">
+      <div class="positioning-element__label">Method</div>
+      <div class="positioning-element__value"><%= it.movement.positioning.method %></div>
+    </div>
+  </div>
+  <% } %>
+
+  <h2 id="brandscript">BrandScript</h2>
+  <% if (it.movement.brandScript) { %>
+  <div class="brandscript-flow">
+    <div class="brandscript-card">
+      <div class="brandscript-card__label">Character</div>
+      <p><%= it.movement.brandScript.character %></p>
+    </div>
+    <div class="brandscript-card brandscript-card--problem">
+      <div class="brandscript-card__label">Problem</div>
+      <div class="brandscript-problem-levels">
+        <div><strong>External:</strong> <%= it.movement.brandScript.problem.external %></div>
+        <div><strong>Internal:</strong> <%= it.movement.brandScript.problem.internal %></div>
+        <div><strong>Philosophical:</strong> <%= it.movement.brandScript.problem.philosophical %></div>
+      </div>
+    </div>
+    <div class="brandscript-card">
+      <div class="brandscript-card__label">Guide</div>
+      <p><%= it.movement.brandScript.guide %></p>
+    </div>
+    <div class="brandscript-card">
+      <div class="brandscript-card__label">Plan</div>
+      <ol class="brandscript-plan">
+        <% for (const step of it.movement.brandScript.plan) { %>
+        <li><%= step %></li>
+        <% } %>
+      </ol>
+    </div>
+    <div class="brandscript-card">
+      <div class="brandscript-card__label">Call to Action</div>
+      <p class="brandscript-cta"><%= it.movement.brandScript.action %></p>
+    </div>
+    <div class="brandscript-outcomes">
+      <div class="brandscript-card brandscript-card--success">
+        <div class="brandscript-card__label">Success</div>
+        <p><%= it.movement.brandScript.success %></p>
+      </div>
+      <div class="brandscript-card brandscript-card--failure">
+        <div class="brandscript-card__label">Failure</div>
+        <p><%= it.movement.brandScript.failure %></p>
+      </div>
+    </div>
+  </div>
+  <% } %>
+
+  <h2 id="vocabulary">Vocabulary</h2>
+  <% if (it.movement.vocabulary) { %>
+  <div class="vocabulary-section">
+    <div class="vocabulary-group vocabulary-group--power">
+      <h3>Power Words</h3>
+      <div class="vocabulary-words">
+        <% for (const word of it.movement.vocabulary.powerWords) { %>
+        <span class="vocabulary-word vocabulary-word--power"><%= word %></span>
+        <% } %>
+      </div>
+    </div>
+    <div class="vocabulary-group vocabulary-group--banned">
+      <h3>Banned Words</h3>
+      <div class="vocabulary-words">
+        <% for (const word of it.movement.vocabulary.bannedWords) { %>
+        <span class="vocabulary-word vocabulary-word--banned"><%= word %></span>
+        <% } %>
+      </div>
+    </div>
+    <div class="vocabulary-group">
+      <h3>Tone Guidelines</h3>
+      <ul class="vocabulary-tone">
+        <% for (const guideline of it.movement.vocabulary.toneGuidelines) { %>
+        <li><%= guideline %></li>
+        <% } %>
+      </ul>
+    </div>
+  </div>
+  <% } %>
+
+  <h2 id="hero-journey">Hero's Journey</h2>
+  <% if (it.movement.heroJourney) { %>
+  <div class="hero-journey-timeline">
+    <% for (const stage of it.movement.heroJourney) { %>
+    <div class="hero-journey-stage" id="stage-<%= stage.name %>">
+      <div class="hero-journey-stage__marker"></div>
+      <div class="hero-journey-stage__content">
+        <h3 class="hero-journey-stage__title"><%= stage.title %></h3>
+        <p><%= stage.description %></p>
+      </div>
+    </div>
+    <% } %>
+  </div>
+  <% } %>
+
+  <h2 id="brand-contract">Brand Contract</h2>
+  <% if (it.movement.brandContract) { %>
+  <div class="brand-contract">
+    <div class="brand-contract__section brand-contract__section--promises">
+      <h3>We Promise</h3>
+      <ul>
+        <% for (const promise of it.movement.brandContract.promises) { %>
+        <li><%= promise %></li>
+        <% } %>
+      </ul>
+    </div>
+    <div class="brand-contract__section brand-contract__section--demands">
+      <h3>We Ask</h3>
+      <ul>
+        <% for (const demand of it.movement.brandContract.demands) { %>
+        <li><%= demand %></li>
+        <% } %>
+      </ul>
+    </div>
+  </div>
+  <% } %>
+
+  <% } %>
+</section>

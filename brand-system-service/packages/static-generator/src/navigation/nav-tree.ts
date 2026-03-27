@@ -80,6 +80,7 @@ const NAVIGATION_TREE: NavSection[] = [
     children: [
       { slug: 'guidelines', title: 'Brand Voice', section: 'guidelines', path: './guidelines.html' },
       { slug: 'manifesto', title: 'Manifesto', section: 'guidelines', path: '#', placeholder: true },
+      { slug: 'seo-documentation', title: 'SEO Documentation', section: 'guidelines', path: './seo-documentation.html' },
     ],
   },
   {
@@ -104,8 +105,9 @@ const NAVIGATION_TREE: NavSection[] = [
     children: [
       { slug: 'logo', title: 'Logo System', section: 'identity', path: './logo.html' },
       { slug: 'logo-usage', title: 'Logo Usage Rules', section: 'identity', path: './logo-usage.html' },
-      { slug: 'moodboard', title: 'Moodboard', section: 'identity', path: '#', placeholder: true },
-      { slug: 'movement-strategy', title: 'Movement & Strategy', section: 'identity', path: '#', placeholder: true },
+      { slug: 'moodboard', title: 'Moodboard', section: 'identity', path: './moodboard.html' },
+      { slug: 'movement-strategy', title: 'Movement & Strategy', section: 'identity', path: './movement.html' },
+      { slug: 'editorial-strategy', title: 'Editorial Strategy', section: 'identity', path: './editorial-strategy.html' },
     ],
   },
   {

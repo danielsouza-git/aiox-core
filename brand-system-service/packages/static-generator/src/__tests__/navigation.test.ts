@@ -82,11 +82,9 @@ describe('getNavItems', () => {
     const placeholders = items.filter((i) => i.placeholder === true);
     expect(placeholders.length).toBeGreaterThan(0);
 
-    // Remaining placeholders: manifesto, moodboard, movement-strategy
+    // Remaining placeholder: manifesto only (moodboard and movement activated in Wave 2)
     const placeholderSlugs = placeholders.map((p) => p.slug);
     expect(placeholderSlugs).toContain('manifesto');
-    expect(placeholderSlugs).toContain('moodboard');
-    expect(placeholderSlugs).toContain('movement-strategy');
   });
 
   it('should not mark existing pages as placeholders', () => {
@@ -110,11 +108,12 @@ describe('findNavItem', () => {
     expect(item!.section).toBe('foundations');
   });
 
-  it('should find a placeholder page by slug', () => {
+  it('should find the moodboard page by slug (activated in Wave 2)', () => {
     const item = findNavItem('moodboard');
     expect(item).toBeDefined();
     expect(item!.slug).toBe('moodboard');
-    expect(item!.placeholder).toBe(true);
+    expect(item!.path).toBe('./moodboard.html');
+    expect(item!.placeholder).toBeFalsy();
   });
 
   it('should return undefined for unknown slug', () => {
@@ -288,7 +287,7 @@ describe('backward compatibility', () => {
   });
 
   it('should have placeholder paths as # for upcoming pages', () => {
-    const placeholderSlugs = ['manifesto', 'moodboard', 'movement-strategy'];
+    const placeholderSlugs = ['manifesto'];
 
     for (const slug of placeholderSlugs) {
       const item = findNavItem(slug);
@@ -299,7 +298,7 @@ describe('backward compatibility', () => {
   });
 
   it('should have valid paths for newly activated pages', () => {
-    const activatedPages = ['surfaces', 'semantic-tokens', 'about'];
+    const activatedPages = ['surfaces', 'semantic-tokens', 'about', 'logo-usage', 'moodboard'];
 
     for (const slug of activatedPages) {
       const item = findNavItem(slug);
@@ -307,5 +306,12 @@ describe('backward compatibility', () => {
       expect(item!.path).toBe(`./${slug}.html`);
       expect(item!.placeholder).toBeFalsy();
     }
+  });
+
+  it('should have movement-strategy page with ./movement.html path', () => {
+    const item = findNavItem('movement-strategy');
+    expect(item).toBeDefined();
+    expect(item!.path).toBe('./movement.html');
+    expect(item!.placeholder).toBeFalsy();
   });
 });

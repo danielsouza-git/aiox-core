@@ -1,0 +1,108 @@
+<section aria-labelledby="logo-usage-title">
+  <h1 id="logo-usage-title">Logo Usage Rules</h1>
+  <p class="section-intro">
+    Guidelines for correct usage of the <%= it.brand.clientName %> logo across all media and contexts.
+  </p>
+
+  <h2>Clear Space</h2>
+  <% if (it.logoUsage && it.logoUsage.clearSpace) { %>
+  <p><%= it.logoUsage.clearSpace.description %></p>
+  <div class="clear-space-diagram">
+    <svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Clear space diagram showing minimum safe zone around logo">
+      <rect x="100" y="75" width="200" height="150" fill="#f3f4f6" stroke="#e5e7eb" stroke-width="1"/>
+      <rect x="140" y="105" width="120" height="90" fill="#ffffff" stroke="<%= it.brand.primaryColor %>" stroke-width="2"/>
+      <text x="200" y="155" text-anchor="middle" font-family="system-ui" font-size="14" fill="#374151"><%= it.brand.clientName %></text>
+      <line x1="100" y1="70" x2="140" y2="70" stroke="#ef4444" stroke-width="1" stroke-dasharray="4"/>
+      <text x="120" y="65" text-anchor="middle" font-size="11" fill="#ef4444"><%= it.logoUsage.clearSpace.minMultiplier %><%= it.logoUsage.clearSpace.unitName %></text>
+      <line x1="260" y1="70" x2="300" y2="70" stroke="#ef4444" stroke-width="1" stroke-dasharray="4"/>
+      <text x="280" y="65" text-anchor="middle" font-size="11" fill="#ef4444"><%= it.logoUsage.clearSpace.minMultiplier %><%= it.logoUsage.clearSpace.unitName %></text>
+    </svg>
+  </div>
+  <% } %>
+
+  <h2>Approved Usage</h2>
+  <div class="logo-dos-grid">
+    <% if (it.logoUsage && it.logoUsage.dos) { %>
+    <% for (const item of it.logoUsage.dos) { %>
+    <div class="logo-do-card" style="background: <%= item.bgColor %>; color: <%= item.textColor %>;">
+      <div class="logo-do-card__check">&#10003;</div>
+      <div class="logo-do-card__label"><%= item.label %></div>
+      <div class="logo-do-card__desc"><%= item.description %></div>
+    </div>
+    <% } %>
+    <% } %>
+  </div>
+
+  <h2>Incorrect Usage</h2>
+  <div class="logo-donts-grid">
+    <% if (it.logoUsage && it.logoUsage.donts) { %>
+    <% for (const item of it.logoUsage.donts) { %>
+    <div class="logo-dont-card">
+      <div class="logo-dont-card__preview" style="filter: <%= item.cssTransform.startsWith('drop-shadow') || item.cssTransform.startsWith('hue-rotate') || item.cssTransform.startsWith('opacity') || item.cssTransform.startsWith('contrast') ? item.cssTransform : 'none' %>; transform: <%= item.cssTransform.startsWith('rotate') || item.cssTransform.startsWith('scale') ? item.cssTransform : 'none' %>;">
+        <img src="./assets/logo.svg" alt="Incorrect: <%= item.label %>" width="80" height="60">
+      </div>
+      <div class="logo-dont-card__x">&#10007;</div>
+      <div class="logo-dont-card__label"><%= item.label %></div>
+      <div class="logo-dont-card__desc"><%= item.description %></div>
+    </div>
+    <% } %>
+    <% } %>
+  </div>
+
+  <h2>Color Contexts</h2>
+  <div class="logo-context-grid">
+    <% if (it.logoUsage && it.logoUsage.colorContexts) { %>
+    <% for (const ctx of it.logoUsage.colorContexts) { %>
+    <div class="logo-context-card" style="background: <%= ctx.bgColor %>;">
+      <div class="logo-context-card__logo" style="color: <%= ctx.logoColor %>;">
+        <img src="./assets/logo.svg" alt="Logo <%= ctx.name %>" width="120" height="80" style="filter: brightness(0) invert(<%= ctx.logoColor === '#ffffff' ? '1' : '0' %>);">
+      </div>
+      <div class="logo-context-card__info" style="color: <%= ctx.logoColor %>;">
+        <div class="logo-context-card__name"><%= ctx.name %></div>
+        <div class="logo-context-card__desc"><%= ctx.description %></div>
+      </div>
+    </div>
+    <% } %>
+    <% } %>
+  </div>
+
+  <h2>File Formats</h2>
+  <% if (it.logoUsage && it.logoUsage.fileFormats) { %>
+  <div class="file-format-table-wrapper">
+    <table class="file-format-table">
+      <thead>
+        <tr>
+          <th>Format</th>
+          <th>Extension</th>
+          <th>Dimensions</th>
+          <th>Use Case</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% for (const fmt of it.logoUsage.fileFormats) { %>
+        <tr>
+          <td><strong><%= fmt.format %></strong></td>
+          <td><code><%= fmt.extension %></code></td>
+          <td><%= fmt.dimensions %></td>
+          <td><%= fmt.useCase %></td>
+        </tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+  <% } %>
+
+  <h2>Minimum Size</h2>
+  <% if (it.logoUsage && it.logoUsage.minimumSize) { %>
+  <div class="minimum-size-grid">
+    <div class="minimum-size-card">
+      <div class="minimum-size-card__label">Digital</div>
+      <div class="minimum-size-card__value"><%= it.logoUsage.minimumSize.digital %></div>
+    </div>
+    <div class="minimum-size-card">
+      <div class="minimum-size-card__label">Print</div>
+      <div class="minimum-size-card__value"><%= it.logoUsage.minimumSize.print %></div>
+    </div>
+  </div>
+  <% } %>
+</section>

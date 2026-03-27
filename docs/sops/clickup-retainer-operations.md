@@ -1,14 +1,16 @@
 # ClickUp Retainer Operations — Brand System Service
 
-**Story:** BSS-6.7 | **Version:** 1.0 | **Date:** 2026-03-23 | **Author:** Morgan (PM)
+**Story:** BSS-6.7 | **Version:** 2.0 (Free Plan) | **Date:** 2026-03-27 | **Author:** Morgan (PM)
 
 ---
 
 ## 1. Overview
 
-Retainer clients receive monthly recurring deliverables managed via ClickUp recurring tasks. This SOP covers how to activate, manage, adjust, and deactivate retainer operations for any client.
+Retainer clients receive monthly recurring deliverables managed via ClickUp recurring tasks. This SOP covers how to activate, manage, adjust, and deactivate retainer operations for any client using the ClickUp Free Forever plan.
 
 **Retainer add-on pricing:** $2,500/month
+
+**Free Plan Adaptation:** Recurring tasks work natively on Free plan (no paid feature needed). Automation for monthly notifications replaced by manual PM process on the 1st of each month.
 
 ---
 
@@ -28,19 +30,20 @@ Retainer clients receive monthly recurring deliverables managed via ClickUp recu
 
 ### Tier Scope Summary
 
-| Tier | Active Tasks | Monthly Hours |
-|------|-------------|---------------|
-| Tier 1 | 1, 2, 6, 7 | 8.5h |
-| Tier 2 | 1, 2, 3, 4, 6, 7 | 13.5h |
-| Tier 3 | All 7 | 15.5h |
+| Tier | Active Tasks | Monthly Hours | Monthly Cost |
+|------|-------------|---------------|-------------|
+| Tier 1 | 1, 2, 6, 7 | 8.5h | $2,500 |
+| Tier 2 | 1, 2, 3, 4, 6, 7 | 13.5h | $2,500 |
+| Tier 3 | All 7 | 15.5h | $2,500 |
 
 ---
 
 ## 3. Task Description Templates
 
 ### Monthly Content Calendar
+
 ```
-## Monthly Content Calendar — {Month} {Year}
+## Monthly Content Calendar -- {Month} {Year}
 **Client:** {client_name}
 **Tier:** {tier}
 
@@ -59,8 +62,9 @@ Retainer clients receive monthly recurring deliverables managed via ClickUp recu
 ```
 
 ### Posts Batch Generation (30 posts)
+
 ```
-## Posts Batch Generation — {Month} {Year}
+## Posts Batch Generation -- {Month} {Year}
 **Client:** {client_name}
 **Batch Size:** 30 posts
 
@@ -79,8 +83,9 @@ Retainer clients receive monthly recurring deliverables managed via ClickUp recu
 ```
 
 ### Email Campaign
+
 ```
-## Email Campaign — {Month} {Year}
+## Email Campaign -- {Month} {Year}
 **Client:** {client_name}
 
 ### Scope
@@ -98,8 +103,9 @@ Retainer clients receive monthly recurring deliverables managed via ClickUp recu
 ```
 
 ### Blog Post
+
 ```
-## Blog Post — {Month} {Year}
+## Blog Post -- {Month} {Year}
 **Client:** {client_name}
 
 ### Scope
@@ -117,8 +123,9 @@ Retainer clients receive monthly recurring deliverables managed via ClickUp recu
 ```
 
 ### Site Maintenance & Updates
+
 ```
-## Site Maintenance — {Month} {Year}
+## Site Maintenance -- {Month} {Year}
 **Client:** {client_name}
 
 ### Scope
@@ -137,8 +144,9 @@ Retainer clients receive monthly recurring deliverables managed via ClickUp recu
 ```
 
 ### Monthly Analytics Report
+
 ```
-## Monthly Analytics Report — {Month} {Year}
+## Monthly Analytics Report -- {Month} {Year}
 **Client:** {client_name}
 
 ### Scope
@@ -157,13 +165,14 @@ Retainer clients receive monthly recurring deliverables managed via ClickUp recu
 ```
 
 ### Monthly Retainer Summary
+
 ```
-## Monthly Retainer Summary — {Month} {Year}
+## Monthly Retainer Summary -- {Month} {Year}
 **Client:** {client_name}
 **Tier:** {tier}
 
 ### Purpose
-Parent tracking task for this month's retainer scope. Review all subtasks, confirm completion, report to client.
+Parent tracking task for this month's retainer scope. Review all deliverables, confirm completion, report to client.
 
 ### Checklist
 - [ ] Content Calendar delivered
@@ -183,83 +192,126 @@ Parent tracking task for this month's retainer scope. Review all subtasks, confi
 
 ## 4. How to Activate Retainer for a New Client
 
+### Prerequisites
+
+- Client Folder exists (created from test-client duplication per BSS-6.2)
+- Client tier tag applied (`tier-1`, `tier-2`, or `tier-3`)
+- Retainer List contains 7 pre-created tasks with recurrence OFF
+
 ### Step-by-Step
 
-1. **Open the client Folder** created from BSS Client Template
-2. **Navigate to the Retainer List** — recurring tasks are pre-created but inactive
-3. **Determine client tier** from the `tier` custom field
-4. **Activate applicable tasks** based on tier matrix (Section 2):
+1. **Open the client Folder** > navigate to the **Retainer List**
+2. **Check client tier tag** to determine scope
+3. **Activate applicable tasks** based on tier matrix (Section 2):
    - Open each applicable task
-   - Set due date > Recurring > Monthly > Day {N} (per schedule)
-   - Enable recurrence
-5. **Disable inapplicable tasks** for the client's tier:
-   - Tier 1: Disable Email Campaign, Blog Post, Site Maintenance
-   - Tier 2: Disable Site Maintenance
-   - Tier 3: Enable all
-6. **Assign team members** to each recurring task
-7. **Set `deliverable_status`** to Draft on all active tasks
-8. **Notify Manager:** Add comment on Monthly Retainer Summary: "@manager Retainer activated for {client_name} — {tier} scope"
+   - Click Due Date > enable **Recurring** > set to **Monthly** > Day {N} per schedule
+   - Confirm recurrence is enabled
+4. **Leave inapplicable tasks inactive** for the client's tier:
+   - Tier 1: Leave Email Campaign (#3), Blog Post (#4), Site Maintenance (#5) with recurrence OFF
+   - Tier 2: Leave Site Maintenance (#5) with recurrence OFF
+   - Tier 3: Activate all 7 tasks
+5. **Assign team members** to each active recurring task
+6. **Apply tag** `draft` to all active tasks (initial status)
+7. **Add notification comment** on Monthly Retainer Summary:
+   ```
+   @team Retainer activated for {client_name} -- {tier} scope ({N} tasks, {X}h/month)
+   ```
 
 ---
 
 ## 5. Monthly Cycle Management
 
-### Automatic Monthly Creation
+### How Recurring Tasks Work (Free Plan)
 
-ClickUp recurring tasks create a new instance when the previous instance is marked as Done (closed).
+ClickUp recurring tasks create a new instance when the previous instance is marked Done (closed). This works natively on the Free plan -- no paid feature required.
 
 **Monthly flow:**
-1. **Day 1:** Monthly Content Calendar + Monthly Retainer Summary tasks auto-create
-2. **Day 3:** Posts Batch Generation auto-creates
-3. **Day 5:** Email Campaign + Blog Post auto-create (Tier 2+)
-4. **Day 10:** Site Maintenance auto-creates (Tier 3)
-5. **Day 25:** Monthly Analytics Report auto-creates
-6. **Before month-end:** PM reviews Monthly Retainer Summary, confirms all subtasks Done
 
-### Manager Notification Automation
+1. **Day 1:** Monthly Content Calendar + Monthly Retainer Summary tasks should be open
+2. **Day 3:** Posts Batch Generation should be open
+3. **Day 5:** Email Campaign + Blog Post should be open (Tier 2+)
+4. **Day 10:** Site Maintenance should be open (Tier 3)
+5. **Day 25:** Monthly Analytics Report should be open
+6. **Before month-end:** PM reviews Monthly Retainer Summary, confirms all tasks Done
 
-**Configuration:**
-- **Trigger:** New task created in Retainer List (via recurrence)
-- **Condition:** Day = 1st of month
-- **Action:** Post comment on Monthly Retainer Summary: "@manager Monthly retainer tasks created for {client_name} — review and assign"
+### Manual Monthly Process (Replaces Automation)
 
-**Setup:**
-1. Folder > Automations > + New
-2. Trigger: Task created in Retainer List
-3. Action: Post comment with manager tag
+On the **1st of each month**, PM performs this check:
 
-### Important: Close Tasks Promptly
+1. **Verify recurring tasks created** for all retainer clients
+   - Open each retainer client's Retainer List
+   - Confirm new task instances exist for the current month
+2. **Add notification comment** on each client's Monthly Retainer Summary:
+   ```
+   @team Monthly retainer tasks are live for {Month} -- check your assignments
+   ```
+3. **Verify assignees** on new task instances (ClickUp preserves assignees on recurring tasks)
+4. **Apply `draft` tag** to any new instances missing it
+5. **Update BSS Monthly Metrics doc** with current month's retainer client list
 
-ClickUp recurring tasks generate the next instance **only when the previous is closed**. If December's tasks are not marked Done by December 31, January's tasks will not auto-create.
+### Critical: Close Tasks Promptly
 
-**Best practice:** PM closes all completed monthly tasks by the 28th. The Monthly Retainer Summary task should be the last one closed each month.
+ClickUp recurring tasks generate the next instance **only when the previous one is closed**. If December's tasks are not marked Done by December 31, January's tasks will not auto-create.
 
-**Alternative approach:** Use ClickUp Automations (Business plan) to create tasks on a schedule regardless of previous task status:
-1. Automation trigger: Every month on Day {N}
-2. Action: Create task from template in Retainer List
+**Best practice:**
+- PM closes all completed monthly tasks by the **28th** of each month
+- Monthly Retainer Summary should be the **last task closed** each month
+- If a task cannot be completed by month-end, close it with a note and create a carry-over task manually
+
+### What to Do if Recurring Task Did Not Create
+
+If a new month's task is missing:
+
+1. Check if the previous month's instance was closed (it must be Done/Closed)
+2. Close the previous instance
+3. Wait 1-2 minutes for ClickUp to generate the new instance
+4. If still missing, create the task manually using the description template from Section 3
+5. Set it to recurring for next month
 
 ---
 
 ## 6. How to Adjust Monthly Scope
 
 ### Adding a Task
+
 1. Create the new task in the Retainer List
-2. Set to recurring (monthly, appropriate day)
-3. Update the Monthly Retainer Summary checklist to include the new item
-4. Document the scope change in the task comments
+2. Add description using the appropriate template from Section 3
+3. Set to recurring (Monthly, appropriate day)
+4. Apply tag `draft`
+5. Assign team member
+6. Update the Monthly Retainer Summary checklist to include the new item
+7. Add comment documenting the scope change
 
 ### Removing a Task
+
 1. Open the recurring task
-2. Remove recurrence (due date > Recurring > None)
+2. Remove recurrence (Due Date > Recurring > None)
 3. Close the task with a comment: "Scope change: removed from retainer as of {date}"
 4. Update the Monthly Retainer Summary checklist
 
 ### Tier Upgrade
-If a client upgrades their tier (e.g., Tier 1 → Tier 2):
-1. Activate the newly applicable tasks (see tier matrix)
-2. Set recurrence on each
-3. Update the `tier` custom field on all tasks
-4. Document: "Tier upgrade: {old} → {new}, effective {date}"
+
+If a client upgrades their tier (e.g., Tier 1 -> Tier 2):
+
+1. Activate the newly applicable tasks (see tier matrix in Section 2)
+2. Set recurrence on each new task (Monthly, day per schedule)
+3. Remove old tier tag, apply new tier tag (`tier-1` -> `tier-2`)
+4. Assign team members to new tasks
+5. Apply `draft` tag to new tasks
+6. Add comment on Monthly Retainer Summary:
+   ```
+   Tier upgrade: {old tier} -> {new tier}, effective {YYYY-MM-DD}
+   New tasks activated: {list}
+   ```
+
+### Tier Downgrade
+
+If a client downgrades their tier:
+
+1. Disable recurrence on tasks no longer in scope
+2. Close those tasks with comment: "Tier downgrade: removed from scope as of {date}"
+3. Update tier tag
+4. Update Monthly Retainer Summary checklist
 
 ---
 
@@ -267,12 +319,17 @@ If a client upgrades their tier (e.g., Tier 1 → Tier 2):
 
 When a client ends their retainer subscription:
 
-1. **Complete current month's work** — finish all open retainer tasks for the current month
-2. **Remove recurrence** on all retainer tasks (open each > Due date > Recurring > None)
-3. **Close all retainer tasks** with comment: "Retainer deactivated as of {date}"
-4. **Update project status:** Set `project_status` to "Completed" (or "On Hold" if temporary)
+1. **Complete current month's work** -- finish all open retainer tasks for the current month
+2. **Remove recurrence** on all retainer tasks (open each > Due Date > Recurring > None)
+3. **Close all retainer tasks** with comment: "Retainer deactivated as of {YYYY-MM-DD}"
+4. **Update client status:** Remove retainer-related tags if needed
 5. **Final analytics report:** Generate and send final retainer report to client
-6. **Document:** Add comment on Monthly Retainer Summary: "Retainer closed. Final report sent {date}."
+6. **Add closing comment** on Monthly Retainer Summary:
+   ```
+   Retainer closed effective {YYYY-MM-DD}. Final report sent to client.
+   Total months active: {N}
+   ```
+7. **Update BSS Monthly Metrics doc** to remove client from active retainers
 
 ---
 
@@ -280,20 +337,34 @@ When a client ends their retainer subscription:
 
 Test on `test-client` Folder:
 
-1. **Activate recurring tasks** for Tier 2 scope (5 active tasks + summary)
-2. **Trigger recurrence:** Close a recurring task and verify the next instance creates
-3. **Verify fields:** New instance has `deliverable_status: Draft`, correct description, correct assignee role
-4. **Verify notification:** Manager notification fires when retainer tasks are created
-5. **Test tier adjustment:** Upgrade to Tier 3, activate Site Maintenance
-6. **Test deactivation:** Remove recurrence on all tasks, close them
+1. **Activate recurring tasks** for Tier 2 scope (tasks 1, 2, 3, 4, 6, 7)
+2. **Verify task descriptions** match templates in Section 3
+3. **Verify tags:** All active tasks have `draft` tag
+4. **Trigger recurrence:** Close a recurring task and verify the next instance creates
+5. **Verify new instance:** Has correct description template, `draft` tag, and assignee role
+6. **Test tier adjustment:** Upgrade to Tier 3, activate Site Maintenance (#5)
+7. **Test deactivation:** Remove recurrence on all tasks, close them with deactivation comment
+8. **Verify Monthly Retainer Summary** checklist items match active tier scope
 
 **Checklist:**
-- [ ] 7 recurring task types configured correctly
-- [ ] Recurrence triggers new instance on task close
-- [ ] New instances have correct default field values
-- [ ] Manager notification fires on monthly creation
-- [ ] Tier-based activation works (only applicable tasks active)
-- [ ] Deactivation procedure works cleanly
+
+- [x] 7 recurring task types configured correctly in Retainer List
+- [x] Recurrence triggers new instance on task close
+- [x] New instances have correct description template and `draft` tag
+- [x] Manual monthly PM notification process documented
+- [x] Tier-based activation works (only applicable tasks active)
+- [x] Tier upgrade process works
+- [x] Deactivation procedure works cleanly
+
+---
+
+## 9. Upgrade Path
+
+| Signal | Threshold | Action |
+|--------|-----------|--------|
+| Manual monthly check takes >15 min | 10+ retainer clients | Consider Unlimited for automations |
+| Need automated task creation on schedule | Regardless of previous task status | Consider Business plan for scheduled automations |
+| Need retainer hours tracking | Any time | Consider Business plan for time tracking |
 
 ---
 
@@ -301,5 +372,5 @@ Test on `test-client` Folder:
 
 - **PRD:** FR-8.1 (revised v1.2), FR-2.6 (service tiers)
 - **Story:** BSS-6.7 (Retainer Operations)
-- **Related SOPs:** `clickup-workspace-guide.md` (custom fields), `clickup-deliverables-guide.md` (deliverable_status pipeline), `clickup-client-onboarding.md` (template setup)
+- **Related SOPs:** `clickup-workspace-guide.md` (tags setup), `clickup-deliverables-guide.md` (deliverable status pipeline), `clickup-client-onboarding.md` (template setup)
 - **Related Epics:** EPIC-BSS-3 (creative pipeline feeds batch generation), EPIC-BSS-8 (QA checklists for retainer deliverables)

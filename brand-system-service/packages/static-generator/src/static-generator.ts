@@ -9,6 +9,8 @@ import { extractIconSystemPageData } from './pages/icon-system-page-data';
 import { extractLogoUsagePageData } from './pages/logo-usage-page-data';
 import { extractMoodboardPageData } from './pages/moodboard-page-data';
 import { extractMovementPageData } from './pages/movement-page-data';
+import { extractSeoDocumentationPageData } from './pages/seo-documentation-page-data';
+import { extractEditorialStrategyPageData } from './pages/editorial-strategy-page-data';
 import { buildNavigationTree, generateBreadcrumbs } from './navigation';
 
 /**
@@ -169,6 +171,8 @@ export const BRAND_BOOK_PAGES: BrandBookPage[] = [
   { slug: 'templates', title: 'Templates', template: 'templates' },
   { slug: 'moodboard', title: 'Moodboard', template: 'moodboard' },
   { slug: 'movement', title: 'Movement & Strategy', template: 'movement' },
+  { slug: 'seo-documentation', title: 'SEO Documentation', template: 'seo-documentation' },
+  { slug: 'editorial-strategy', title: 'Editorial Strategy', template: 'editorial-strategy' },
   { slug: 'about', title: 'About', template: 'about' },
 ];
 
@@ -511,6 +515,12 @@ export class StaticGenerator {
     const logoUsageData = extractLogoUsagePageData(config.brandConfig);
     const moodboardData = extractMoodboardPageData(undefined, config.brandConfig.primaryColor);
     const movementData = extractMovementPageData(undefined, config.brandConfig.clientName);
+    const seoDocumentationData = extractSeoDocumentationPageData({
+      brandName: config.brandConfig.clientName,
+      domain: config.brandConfig.websiteUrl.replace(/^https?:\/\//, '').replace(/\/$/, '') || 'example.com',
+      tagline: config.brandConfig.tagline,
+    });
+    const editorialStrategyData = extractEditorialStrategyPageData();
 
     // Build navigation tree (hierarchical sidebar with icons + breadcrumbs)
     const navigationTree = buildNavigationTree();
@@ -537,6 +547,8 @@ export class StaticGenerator {
       logoUsage: logoUsageData,
       moodboard: moodboardData,
       movement: movementData,
+      seoDocumentation: seoDocumentationData,
+      editorialStrategy: editorialStrategyData,
     };
 
     // Generate CSS
