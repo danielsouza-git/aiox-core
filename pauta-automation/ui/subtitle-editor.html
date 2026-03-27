@@ -524,6 +524,18 @@
               <option value="top">Topo</option>
             </select>
           </label>
+          <label class="checkbox-label">
+            <input type="checkbox" id="style-background" checked onchange="onStyleChange()" />
+            Faixa de fundo
+          </label>
+          <label>
+            Cor da faixa
+            <input type="color" id="style-bg-color" value="#000000" onchange="onStyleChange()" />
+          </label>
+          <label>
+            Opacidade: <span id="bg-opacity-val">50</span>%
+            <input type="range" id="style-bg-opacity" min="0" max="100" value="50" oninput="onStyleChange()" />
+          </label>
         </div>
       </div>
     </div>
@@ -542,8 +554,8 @@
 
   <!-- Footer -->
   <div class="editor-footer">
-    <button class="btn btn--primary" onclick="saveAndEmbed()">Salvar e Embutir</button>
-    <button class="btn btn--ghost" onclick="saveOnly()">Salvar SRT</button>
+    <button class="btn btn--primary" onclick="saveAndEmbed()">Salvar</button>
+    <button class="btn btn--ghost" onclick="exportSrtOnly()">Exportar SRT</button>
     <button class="btn btn--danger" onclick="cancelEditor()">Cancelar</button>
     <span id="footer-status" class="status-msg" style="display:none;"></span>
   </div>
@@ -575,7 +587,10 @@ const style = {
   color: "#ffffff",
   outline_color: "#000000",
   outline_width: 2,
-  position: "bottom"
+  position: "bottom",
+  background_enabled: true,
+  background_color: "#000000",
+  background_opacity: 50
 };
 
 /* ── API ── */
@@ -721,6 +736,7 @@ function onTextInput(textarea) {
   const idx = parseInt(textarea.dataset.idx, 10);
   subtitles[idx].text = textarea.value;
   hasUnsavedChanges = true;
+  updateOverlayForEntry(idx);
 }
 
 function seekToEntry(idx) {
@@ -728,6 +744,7 @@ function seekToEntry(idx) {
   if (video && subtitles[idx]) {
     video.currentTime = subtitles[idx].start_seconds;
   }
+  updateOverlayForEntry(idx);
 }
 
 function addEntry() {
@@ -934,10 +951,20 @@ function onStyleChange() {
   style.outline_color = document.getElementById("style-outline-color").value;
   style.outline_width = document.getElementById("style-outline").checked ? 2 : 0;
   style.position = document.getElementById("style-position").value;
+  style.background_enabled = document.getElementById("style-background").checked;
+  style.background_color = document.getElementById("style-bg-color").value;
+  style.background_opacity = parseInt(document.getElementById("style-bg-opacity").value, 10);
 
   document.getElementById("font-size-val").textContent = style.font_size;
+  document.getElementById("bg-opacity-val").textContent = style.background_opacity;
 
   // Apply to overlay
+  applyOverlayStyle();
+
+  hasUnsavedChanges = true;
+}
+
+function applyOverlayStyle() {
   const overlay = document.getElementById("subtitle-overlay");
   overlay.style.fontSize = style.font_size + "px";
   overlay.style.color = style.color;
@@ -957,7 +984,29 @@ function onStyleChange() {
     overlay.classList.remove("position-top");
   }
 
-  hasUnsavedChanges = true;
+  // Background strip
+  if (style.background_enabled) {
+    const bgHex = style.background_color;
+    const bgR = parseInt(bgHex.substring(1, 3), 16);
+    const bgG = parseInt(bgHex.substring(3, 5), 16);
+    const bgB = parseInt(bgHex.substring(5, 7), 16);
+    const bgA = style.background_opacity / 100;
+    overlay.style.background = "rgba(" + bgR + "," + bgG + "," + bgB + "," + bgA + ")";
+    overlay.style.padding = "4px 12px";
+    overlay.style.borderRadius = "4px";
+  } else {
+    overlay.style.background = "transparent";
+    overlay.style.padding = "0";
+    overlay.style.borderRadius = "0";
+  }
+}
+
+function updateOverlayForEntry(idx) {
+  const overlay = document.getElementById("subtitle-overlay");
+  if (idx >= 0 && idx < subtitles.length && subtitles[idx].text) {
+    overlay.textContent = subtitles[idx].text;
+    applyOverlayStyle();
+  }
 }
 
 /* ── Save / Cancel / Embed ── */
@@ -971,7 +1020,7 @@ function showStatus(msg, level) {
   }
 }
 
-async function saveOnly() {
+async function exportSrtOnly() {
   const pyApi = api();
   if (!pyApi || !srtPath) {
     showStatus("Nenhum SRT carregado.", "err");
@@ -1019,12 +1068,27 @@ async function saveAndEmbed() {
   const b = parseInt(hexColor.substring(5, 7), 16);
   const assColor = "&H00" + b.toString(16).padStart(2, "0").toUpperCase() + g.toString(16).padStart(2, "0").toUpperCase() + r.toString(16).padStart(2, "0").toUpperCase();
 
+  // Convert background hex color to ASS BGR format with opacity
+  let assBgColor = "&H80000000"; // default
+  let borderStyle = 1; // outline only by default
+  if (style.background_enabled) {
+    borderStyle = 3; // opaque box
+    const bgHex = style.background_color;
+    const bgR = parseInt(bgHex.substring(1, 3), 16);
+    const bgG = parseInt(bgHex.substring(3, 5), 16);
+    const bgB = parseInt(bgHex.substring(5, 7), 16);
+    const bgAlpha = Math.round((1 - style.background_opacity / 100) * 255);
+    assBgColor = "&H" + bgAlpha.toString(16).padStart(2, "0").toUpperCase() + bgB.toString(16).padStart(2, "0").toUpperCase() + bgG.toString(16).padStart(2, "0").toUpperCase() + bgR.toString(16).padStart(2, "0").toUpperCase();
+  }
+
   const embedStyle = {
     font_size: style.font_size,
     bold: style.bold,
     color: assColor,
     outline_width: style.outline_width,
-    position: style.position
+    position: style.position,
+    border_style: borderStyle,
+    background_color: assBgColor
   };
 
   // Show progress

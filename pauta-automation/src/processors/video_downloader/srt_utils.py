@@ -35,6 +35,8 @@ class SubtitleStyle:
     outline_color: str = "&H00000000"  # Black
     outline_width: int = 2
     position: str = "bottom"  # bottom = Alignment 2 (bottom-center)
+    border_style: int = 3  # 1=outline only, 3=opaque box (background strip)
+    background_color: str = "&H80000000"  # Black 50% transparent (ASS AABBGGRR)
 
 
 def format_timestamp(seconds: float) -> str:
@@ -262,9 +264,9 @@ def generate_ass(srt_path: str, style: SubtitleStyle | None = None) -> str:
         f.write(
             f"Style: Default,{style.font_name},{style.font_size},"
             f"{style.color},&H000000FF,"
-            f"{style.outline_color},&H40000000,"
+            f"{style.outline_color},{style.background_color},"
             f"{bold_flag},0,0,0,"
-            f"100,100,0,0,1,{style.outline_width},0,"
+            f"100,100,0,0,{style.border_style},{style.outline_width},0,"
             f"{alignment},10,10,20,1\n"
         )
         f.write("\n")
