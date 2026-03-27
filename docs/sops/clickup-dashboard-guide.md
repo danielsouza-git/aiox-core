@@ -1,177 +1,236 @@
-# ClickUp Dashboard Guide — Brand System Service
+# ClickUp Dashboard & Metrics Guide — Brand System Service
 
-**Story:** BSS-6.6 | **Version:** 1.0 | **Date:** 2026-03-23 | **Author:** Morgan (PM)
+**Story:** BSS-6.6 | **Version:** 2.0 (Free Plan) | **Date:** 2026-03-27 | **Author:** Morgan (PM)
 
 ---
 
 ## 1. Overview
 
-The **"BSS Operations"** dashboard provides a single view of operational health across all active client projects. It is visible to Admin and Manager roles at the Workspace level.
+The ClickUp Free plan does not support custom dashboards with widgets. Instead, BSS uses **5 saved views** at the Space level and a **manual metrics tracking document** (ClickUp Doc) to provide operational visibility.
+
+**Free Plan Adaptation:** Dashboard widgets replaced by saved views. Custom field metrics replaced by manual tracking. Client satisfaction field replaced by manual score tracking in monthly metrics doc.
 
 ---
 
-## 2. Dashboard Setup
+## 2. Saved Views (Replaces Dashboard Widgets)
 
-1. Navigate to **ClickUp sidebar > Dashboards > + New Dashboard**
-2. Name: **"BSS Operations"**
-3. Set sharing: **Admin and Manager roles** (not visible to Members)
-4. Add the 6 widgets described below
-
----
-
-## 3. Widget Configuration
-
-### Widget 1: Project Timeline
+### View 1: Active Projects
 
 | Setting | Value |
 |---------|-------|
-| **Widget type** | Timeline / Gantt or Table |
-| **Source** | All active client Folders in "Brand System Service" Space |
-| **Filter** | `project_status` IN (Planning, Active) |
-| **Fields shown** | Task name (milestone), `deadline`, `project_status`, `client_name` |
-| **Purpose** | Show planned vs actual completion dates for all active projects |
+| **Location** | Space > Everything view |
+| **Filter** | Status = Active or Planning |
+| **Sort** | Due date ascending |
+| **Purpose** | See all active and planned client projects at a glance |
 
-**Setup steps:**
-1. + Add Widget > Timeline (or Table)
-2. Data source: Space "Brand System Service"
-3. Filter: `project_status` not equal to "Completed"
-4. Columns: task name, deadline, project_status, client_name
-5. Sort by: deadline ascending
+**How to create:**
+1. Go to the "Brand System Service" Space
+2. Click "Everything" view (shows all tasks across all Folders)
+3. Click "Filter" > Status > select "Active" and "Planning"
+4. Sort by Due Date ascending
+5. Click "Save View" > name it **"Active Projects"**
+
+**Free plan note:** Group by Folder is not available on Free plan. Tasks appear in a flat list. Use the Folder name in the task path to identify which client each task belongs to.
 
 ---
 
-### Widget 2: Deliverables Status
+### View 2: Deliverables Pipeline
 
 | Setting | Value |
 |---------|-------|
-| **Widget type** | Table or Board view |
-| **Source** | All tasks with `deliverable_status` field set, across active Folders |
-| **Filter** | Lists = Brand Identity, Creatives, Web |
-| **Group by** | `deliverable_status` (Draft / In Review / Approved / Delivered) |
-| **Fields shown** | Task name, `client_name`, `deliverable_status`, assignee |
+| **Location** | Space > Everything view |
+| **Filter** | Tags contains any of: `draft`, `in-review`, `approved`, `delivered` |
+| **Sort** | Tag name (manual visual scan) |
 | **Purpose** | See where every deliverable is in its lifecycle |
 
-**Setup steps:**
-1. + Add Widget > Table (or Custom)
-2. Data source: Space, filter to Lists named "Brand Identity", "Creatives", "Web"
-3. Group by: `deliverable_status`
-4. Columns: task name, client_name, deliverable_status, assignee
+**How to create:**
+1. Go to the "Brand System Service" Space > Everything view
+2. Click "Filter" > Tags > select `draft`, `in-review`, `approved`, `delivered`
+3. Click "Save View" > name it **"Deliverables Pipeline"**
+
+**Free plan note:** Group by Tag is not available on Free plan. To see deliverables by status, you can create separate filtered views per tag, or visually scan tags in the list. The flat view still shows all deliverable tasks with their tags visible.
+
+**Workaround for pipeline visualization:**
+- Scan the tag column to count tasks per status
+- Or create 4 separate quick filters (one per status tag) within the same view
 
 ---
 
-### Widget 3: Approval Velocity
+### View 3: Pending Approvals
 
 | Setting | Value |
 |---------|-------|
-| **Widget type** | KPI or Time in Status |
-| **Source** | All tasks in Approvals Lists across active Folders |
-| **Metric** | Average time from `approval_status` = Pending to = Approved |
-| **Purpose** | Track how quickly clients are approving deliverables |
+| **Location** | Space > Everything view |
+| **Filter** | Tags contains `approval-pending` |
+| **Sort** | Due date ascending |
+| **Purpose** | See all deliverables waiting for client approval, oldest first |
 
-**Setup steps:**
-1. + Add Widget > Time in Status (if available) or KPI
-2. Data source: Approvals Lists, all active Folders
-3. Status to measure: "Pending" (map task status to match approval_status)
-4. Display: average time per client
-
-**Workaround (if Time in Status is not available for custom fields):**
-- Use task statuses that mirror approval_status: create statuses "Pending", "Approved", "Needs Revision" on the Approvals List
-- Set task status = approval_status value (sync manually or via automation)
-- Then Time in Status widget can measure time spent in "Pending" status
+**How to create:**
+1. Go to Space > Everything view
+2. Click "Filter" > Tags > select `approval-pending`
+3. Sort by Due Date ascending
+4. Click "Save View" > name it **"Pending Approvals"**
 
 ---
 
-### Widget 4: Revision Count
+### View 4: Revision Alerts
 
 | Setting | Value |
 |---------|-------|
-| **Widget type** | Table or Custom Field chart |
-| **Source** | All approval tasks across active Folders |
-| **Fields** | `client_name`, `deliverable_type`, `revision_round` |
-| **Highlight** | Tasks where `revision_round` = 3 (cap approaching/hit) |
-| **Purpose** | Identify clients using many revision rounds |
+| **Location** | Space > Everything view |
+| **Filter** | Tags contains `rev-3` |
+| **Sort** | Due date ascending |
+| **Purpose** | Identify deliverables approaching or at revision cap (CON-14: 3 rounds max) |
 
-**Setup steps:**
-1. + Add Widget > Table
-2. Data source: Approvals Lists
-3. Columns: client_name, deliverable_type, revision_round
-4. Sort by: revision_round descending
-5. Conditional formatting (if available): highlight rows where revision_round = 3
+**How to create:**
+1. Go to Space > Everything view
+2. Click "Filter" > Tags > select `rev-3`
+3. Click "Save View" > name it **"Revision Alerts"**
+
+**Note:** Tasks with `rev-3` tag are at their final allowed revision round. If the client requests another revision, the `revision-cap-hit` tag should be applied and scope change process triggered. See `clickup-approval-workflow.md`.
 
 ---
 
-### Widget 5: Change Requests
+### View 5: Completed Projects
 
 | Setting | Value |
 |---------|-------|
-| **Widget type** | Table or KPI |
-| **Source** | Tasks tagged "change-request" across all active Folders |
-| **Fields** | Count total, open vs resolved, average resolution time |
-| **Purpose** | Track scope change requests across all projects |
+| **Location** | Space > Everything view |
+| **Filter** | Status = Completed (or tasks tagged `delivered` in closed Folders) |
+| **Sort** | Completion date descending |
+| **Purpose** | Archive view of all completed client projects |
 
-**Setup steps:**
-1. Create tag `change-request` if it doesn't exist (add to any task > Tags > type "change-request")
-2. + Add Widget > Table
-3. Data source: Space, filter by tag = "change-request"
-4. Columns: task name, client_name, status (open/closed), created date
-5. Add a KPI widget showing total count
+**How to create:**
+1. Go to Space > Everything view
+2. Click "Filter" > Status > select "Completed" (or "Closed")
+3. Click "Save View" > name it **"Completed Projects"**
 
 ---
 
-### Widget 6: Client Satisfaction
+## 3. Manual Metrics Tracking
 
-| Setting | Value |
-|---------|-------|
-| **Widget type** | KPI or Chart |
-| **Source** | `client_satisfaction` field on completed project summary tasks |
-| **Metric** | Average score (1-5 scale) per completed project |
-| **Purpose** | Track overall client satisfaction across delivered projects |
+### BSS Monthly Metrics Document
 
-**New custom field required:**
-- **Name:** `client_satisfaction`
-- **Type:** Number (range 1-5)
-- **Scope:** Workspace level
-- **When to fill:** Manager fills after receiving post-delivery survey response from client
+Create a ClickUp Doc at the Space level named **"BSS Monthly Metrics"**. This document replaces dashboard KPI widgets with manually tracked operational metrics.
 
-**Setup steps:**
-1. Create `client_satisfaction` field (Workspace Settings > Custom Fields)
-2. + Add Widget > KPI or Custom Field chart
-3. Data source: tasks with `project_status` = "Completed"
-4. Metric: Average of `client_satisfaction`
+### Template (copy for each month)
+
+```
+## BSS Operations -- {Month} {Year}
+
+### Active Clients
+| Client | Tier | Status | Phase | Notes |
+|--------|------|--------|-------|-------|
+| {client} | {tier-1/2/3} | {Active/Planning} | {Onboarding/Brand Identity/Creatives/Web/Delivery} | |
+
+### Approval Velocity (Manual Tracking)
+| Client | Deliverable | Submitted Date | Approved Date | Days to Approve |
+|--------|-------------|----------------|---------------|-----------------|
+| {client} | {Brand Identity/Creatives/Web} | {YYYY-MM-DD} | {YYYY-MM-DD} | {N} |
+
+**Average approval time this month:** {N} days
+
+### Revision Summary
+| Client | Deliverable | Rounds Used | Cap Hit? | Notes |
+|--------|-------------|-------------|----------|-------|
+| {client} | {type} | {1/2/3} | {Yes/No} | |
+
+**Clients at rev-3:** {count}
+**Scope changes triggered:** {count}
+
+### Client Satisfaction (Post-Delivery)
+| Client | Score (1-5) | Feedback Date | Notes |
+|--------|-------------|---------------|-------|
+| {client} | {score} | {YYYY-MM-DD} | {brief feedback} |
+
+**Average satisfaction this month:** {N}/5
+```
+
+### Update Cadence
+
+| When | What | Who |
+|------|------|-----|
+| **Every Friday** | Update Active Clients table, add new approval/revision entries | PM |
+| **On delivery** | Record approval velocity (submitted -> approved dates) | PM |
+| **On revision** | Update revision summary table | PM |
+| **Post-delivery** | Record client satisfaction score (from survey/feedback) | PM |
+| **1st of month** | Create new month section, archive previous month | PM |
+
+### How to Track Approval Velocity Manually
+
+Since ClickUp Free does not have "Time in Status" widgets:
+
+1. When submitting a deliverable for approval, note the date in the Pending Approvals view or in the metrics doc
+2. When the client approves, note the approval date
+3. Calculate the difference in days
+4. Record in the Monthly Metrics doc under "Approval Velocity"
+
+### How to Track Client Satisfaction Manually
+
+1. After delivering the final handoff package, send a brief satisfaction survey (email or form)
+2. Record the score (1-5 scale) in the Monthly Metrics doc
+3. Add any qualitative feedback in the Notes column
 
 ---
 
-## 4. Dashboard Refresh
+## 4. Access Control
 
-ClickUp dashboards update in **near-real-time** (within 5 minutes of underlying data changes). No manual refresh is typically needed. If data appears stale, click the refresh icon on the dashboard.
+On the Free Plan, all workspace members see saved Space views. There is no granular dashboard sharing.
 
----
+| Role | View Access |
+|------|-------------|
+| Admin | All saved views + can create/edit views + metrics doc |
+| Member | All saved views (read-only unless they created them) |
+| Guest | Only tasks shared with them directly |
 
-## 5. Access Control
-
-| Role | Dashboard Access |
-|------|-----------------|
-| Admin | Full view + edit widgets |
-| Manager | Full view + edit widgets |
-| Member | No access (unless explicitly shared) |
-
-To change sharing: Dashboard settings (gear icon) > Sharing > Select roles/users.
+**Privacy note:** If certain metrics should be restricted (e.g., client satisfaction scores), keep the BSS Monthly Metrics doc shared only with Admin/Manager roles. ClickUp Docs can be shared selectively via the doc's sharing settings.
 
 ---
 
-## 6. Validation Checklist
+## 5. Weekly Operations Review Process
+
+### Friday Operations Review (15-20 minutes)
+
+1. **Open "Active Projects" view** -- review status of all active clients
+2. **Open "Pending Approvals" view** -- check for items pending >5 business days, follow up
+3. **Open "Revision Alerts" view** -- check for any new `rev-3` items, trigger scope change if needed
+4. **Open "Deliverables Pipeline" view** -- scan for bottlenecks (many items stuck in `draft` or `in-review`)
+5. **Update BSS Monthly Metrics doc** -- add new entries, update existing data
+6. **Action items:** Note any follow-ups needed, assign via ClickUp comments
+
+---
+
+## 6. Upgrade Path
+
+| Signal | Threshold | Upgrade Action |
+|--------|-----------|----------------|
+| Manual metrics tracking takes >30 min/week | 10+ active clients | Consider Unlimited ($7/user/mo) for custom field dropdowns and basic reporting |
+| Cannot answer "status of X?" quickly | Regularly happening | Consider Unlimited for custom field filtering and grouping |
+| Need automated reports or KPI dashboards | Monthly reporting needed | Consider Business ($12/user/mo) for native dashboards with widgets |
+| Need client-facing portal with real-time status | 30+ clients | Consider EPIC-BSS-15 (proprietary Client Portal) |
+
+### What Each Plan Adds
+
+| Plan | Monthly Cost | Key Features for BSS |
+|------|-------------|---------------------|
+| **Free** (current) | $0 | Saved views, tags, recurring tasks, basic filters |
+| **Unlimited** | $7/user/mo | Custom fields (dropdowns), unlimited views, basic reporting |
+| **Business** | $12/user/mo | Dashboards with widgets, advanced automations, time tracking |
+
+---
+
+## 7. Validation Checklist
 
 Using `test-client` Folder with sample data:
 
-- [ ] "BSS Operations" dashboard created and accessible
-- [ ] Project Timeline widget shows test-client with correct dates
-- [ ] Deliverables Status widget groups by deliverable_status correctly
-- [ ] Approval Velocity widget displays time metrics (or sensible approximation)
-- [ ] Revision Count widget shows revision_round values, highlights round=3
-- [ ] Change Requests widget shows tagged tasks with count
-- [ ] Client Satisfaction widget shows average score
-- [ ] Dashboard visible to Admin and Manager, not to Member
-- [ ] Data refreshes within 5 minutes of a field change
+- [x] "Active Projects" saved view created and shows filtered results
+- [x] "Deliverables Pipeline" saved view shows tasks with status tags
+- [x] "Pending Approvals" saved view shows `approval-pending` tasks sorted by due date
+- [x] "Revision Alerts" saved view shows `rev-3` tagged tasks
+- [x] "Completed Projects" saved view shows completed/closed tasks
+- [x] "BSS Monthly Metrics" ClickUp Doc created with template sections
+- [x] Metrics doc is editable and shareable with team
+- [x] Weekly update process documented and PM calendar reminder set
 
 ---
 
@@ -179,4 +238,4 @@ Using `test-client` Folder with sample data:
 
 - **PRD:** FR-8.6 (revised v1.2)
 - **Story:** BSS-6.6 (Dashboard & Metrics)
-- **Related SOPs:** `clickup-workspace-guide.md` (custom fields), `clickup-approval-workflow.md` (approval data), `clickup-deliverables-guide.md` (deliverable_status)
+- **Related SOPs:** `clickup-workspace-guide.md` (tags setup), `clickup-approval-workflow.md` (approval data), `clickup-deliverables-guide.md` (deliverable status tags)

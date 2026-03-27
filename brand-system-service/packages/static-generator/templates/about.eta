@@ -1,0 +1,154 @@
+<section aria-labelledby="about-title">
+  <h1 id="about-title">About <%= it.brand.clientName %></h1>
+  <p class="section-intro">
+    Project overview, technology stack, and system evolution for the <%= it.brand.clientName %> brand system.
+  </p>
+
+  <!-- Project Overview -->
+  <h2>Project Overview</h2>
+  <div class="about-overview__card">
+    <dl class="about-overview__details">
+      <div class="about-detail">
+        <dt>Brand Name</dt>
+        <dd><%= it.brand.clientName %></dd>
+      </div>
+      <% if (it.brand.tagline) { %>
+      <div class="about-detail">
+        <dt>Tagline</dt>
+        <dd><%= it.brand.tagline %></dd>
+      </div>
+      <% } %>
+      <% if (it.brand.websiteUrl) { %>
+      <div class="about-detail">
+        <dt>Website</dt>
+        <dd><a href="<%= it.brand.websiteUrl %>"><%= it.brand.websiteUrl %></a></dd>
+      </div>
+      <% } %>
+      <% if (it.brand.brandBookTitle) { %>
+      <div class="about-detail">
+        <dt>Brand Book</dt>
+        <dd><%= it.brand.brandBookTitle %></dd>
+      </div>
+      <% } %>
+    </dl>
+  </div>
+
+  <!-- Technology Stack -->
+  <h2>Technology Stack</h2>
+  <p>This brand system was built using the following tools and technologies:</p>
+  <div class="tech-stack-grid">
+    <div class="tech-stack-item">
+      <div class="tech-stack-item__icon" aria-hidden="true">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+      </div>
+      <h3 class="tech-stack-item__name">Style Dictionary</h3>
+      <p class="tech-stack-item__desc">Design token generation and transformation pipeline</p>
+    </div>
+    <div class="tech-stack-item">
+      <div class="tech-stack-item__icon" aria-hidden="true">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+      </div>
+      <h3 class="tech-stack-item__name">Eta Templates</h3>
+      <p class="tech-stack-item__desc">Static HTML rendering with build-time data injection</p>
+    </div>
+    <div class="tech-stack-item">
+      <div class="tech-stack-item__icon" aria-hidden="true">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+      </div>
+      <h3 class="tech-stack-item__name">OKLCH Color Engine</h3>
+      <p class="tech-stack-item__desc">Perceptual color science for accessible palettes</p>
+    </div>
+    <div class="tech-stack-item">
+      <div class="tech-stack-item__icon" aria-hidden="true">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      </div>
+      <h3 class="tech-stack-item__name">Puppeteer</h3>
+      <p class="tech-stack-item__desc">Automated PDF export from HTML pages</p>
+    </div>
+    <div class="tech-stack-item">
+      <div class="tech-stack-item__icon" aria-hidden="true">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      </div>
+      <h3 class="tech-stack-item__name">LightningCSS</h3>
+      <p class="tech-stack-item__desc">CSS bundling, optimization, and minification</p>
+    </div>
+    <div class="tech-stack-item">
+      <div class="tech-stack-item__icon" aria-hidden="true">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      </div>
+      <h3 class="tech-stack-item__name">Fuse.js</h3>
+      <p class="tech-stack-item__desc">Client-side fuzzy search for brand book navigation</p>
+    </div>
+    <div class="tech-stack-item">
+      <div class="tech-stack-item__icon" aria-hidden="true">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+      </div>
+      <h3 class="tech-stack-item__name">esbuild</h3>
+      <p class="tech-stack-item__desc">JavaScript bundling for search and interactive features</p>
+    </div>
+    <div class="tech-stack-item">
+      <div class="tech-stack-item__icon" aria-hidden="true">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+      </div>
+      <h3 class="tech-stack-item__name">WCAG 2.1 AA</h3>
+      <p class="tech-stack-item__desc">Accessibility compliance for colors and components</p>
+    </div>
+  </div>
+
+  <!-- System Evolution Timeline -->
+  <h2>System Evolution</h2>
+  <p>The brand system is developed through five structured phases:</p>
+  <div class="timeline">
+    <div class="timeline__item timeline__item--complete">
+      <div class="timeline__marker" aria-hidden="true">
+        <span class="timeline__number">1</span>
+      </div>
+      <div class="timeline__content">
+        <h3 class="timeline__title">Brand Identity</h3>
+        <p class="timeline__desc">Logo system, color palette, typography selection, and core visual identity elements.</p>
+      </div>
+    </div>
+    <div class="timeline__item timeline__item--complete">
+      <div class="timeline__marker" aria-hidden="true">
+        <span class="timeline__number">2</span>
+      </div>
+      <div class="timeline__content">
+        <h3 class="timeline__title">Design Foundations</h3>
+        <p class="timeline__desc">Spacing scale, grid system, motion tokens, and design token infrastructure.</p>
+      </div>
+    </div>
+    <div class="timeline__item timeline__item--active">
+      <div class="timeline__marker" aria-hidden="true">
+        <span class="timeline__number">3</span>
+      </div>
+      <div class="timeline__content">
+        <h3 class="timeline__title">UI Components</h3>
+        <p class="timeline__desc">Button, card, form, and layout component specifications with token integration.</p>
+      </div>
+    </div>
+    <div class="timeline__item">
+      <div class="timeline__marker" aria-hidden="true">
+        <span class="timeline__number">4</span>
+      </div>
+      <div class="timeline__content">
+        <h3 class="timeline__title">Showcase</h3>
+        <p class="timeline__desc">Application examples, page templates, and real-world usage demonstrations.</p>
+      </div>
+    </div>
+    <div class="timeline__item">
+      <div class="timeline__marker" aria-hidden="true">
+        <span class="timeline__number">5</span>
+      </div>
+      <div class="timeline__content">
+        <h3 class="timeline__title">Final Edition</h3>
+        <p class="timeline__desc">PDF export, offline package, search index, and complete brand book delivery.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Team Placeholder -->
+  <h2>Team</h2>
+  <div class="about-team__placeholder">
+    <p>Team member information can be added here after generation. Update the brand profile with team data to populate this section automatically.</p>
+  </div>
+</section>

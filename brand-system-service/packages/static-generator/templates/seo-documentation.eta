@@ -1,0 +1,310 @@
+<section aria-labelledby="seo-documentation-title">
+  <h1 id="seo-documentation-title">SEO Documentation</h1>
+  <p class="section-intro">
+    SEO implementation guide for the <%= it.brand.clientName %> brand.
+    Meta tags, Open Graph, Twitter/X Cards, and structured data examples — all pre-populated with brand data.
+  </p>
+
+  <nav class="seo-toc" aria-label="SEO section navigation">
+    <ul>
+      <li><a href="#meta-tags">Meta Tags</a></li>
+      <li><a href="#open-graph">Open Graph</a></li>
+      <li><a href="#twitter-card">Twitter/X Cards</a></li>
+      <li><a href="#json-ld">JSON-LD Schemas</a></li>
+      <li><a href="#image-specs">Image Specifications</a></li>
+    </ul>
+  </nav>
+
+  <% if (it.seoDocumentation) { %>
+
+  <!-- Meta Tags Guide -->
+  <h2 id="meta-tags">Meta Tags Guide</h2>
+  <p>
+    Essential HTML meta tags for search engine optimization. Every page in the
+    <%= it.brand.clientName %> web presence should include these tags.
+  </p>
+
+  <% const metaItems = [it.seoDocumentation.metaTags.title, it.seoDocumentation.metaTags.description, it.seoDocumentation.metaTags.robots, it.seoDocumentation.metaTags.canonical]; %>
+  <% for (const item of metaItems) { %>
+  <div class="seo-tag-card">
+    <h3 class="seo-tag-card__tag"><code>&lt;<%= item.tag %><% if (item.attribute) { %> <%= item.attribute %><% } %>&gt;</code></h3>
+    <p class="seo-tag-card__desc"><%= item.description %></p>
+    <% if (item.maxLength) { %>
+    <div class="seo-tag-card__limit">Maximum length: <strong><%= item.maxLength %> characters</strong></div>
+    <% } %>
+    <div class="seo-tag-card__practice">
+      <strong>Best Practice:</strong> <%= item.bestPractice %>
+    </div>
+  </div>
+  <% } %>
+
+  <h3>Complete Meta Tags Snippet</h3>
+  <div class="seo-code-block" role="region" aria-label="Meta tags code example">
+    <div class="seo-code-block__header">
+      <span class="seo-code-block__lang">HTML</span>
+      <button class="seo-code-block__copy" type="button" aria-label="Copy code to clipboard" onclick="this.parentElement.parentElement.querySelector('.seo-copy-fn').click()">Copy</button>
+    </div>
+    <pre class="seo-code-block__pre"><code class="seo-code-block__code language-html"><%~ it.seoDocumentation.metaTags.fullSnippet %></code></pre>
+    <button class="seo-copy-fn" style="display:none" data-code="<%= it.seoDocumentation.metaTags.fullSnippet %>"></button>
+  </div>
+
+  <!-- Open Graph Guide -->
+  <h2 id="open-graph">Open Graph Guide</h2>
+  <p>
+    Open Graph protocol tags control how <%= it.brand.clientName %> pages appear
+    when shared on Facebook, LinkedIn, Discord, Slack, and other platforms.
+  </p>
+
+  <div class="seo-og-grid">
+    <% for (const prop of it.seoDocumentation.openGraph.properties) { %>
+    <div class="seo-og-card">
+      <div class="seo-og-card__property"><code><%= prop.property %></code></div>
+      <div class="seo-og-card__content">"<%= prop.content %>"</div>
+      <p class="seo-og-card__desc"><%= prop.description %></p>
+      <div class="seo-og-card__practice"><%= prop.bestPractice %></div>
+    </div>
+    <% } %>
+  </div>
+
+  <h3>Complete Open Graph Snippet</h3>
+  <div class="seo-code-block" role="region" aria-label="Open Graph code example">
+    <div class="seo-code-block__header">
+      <span class="seo-code-block__lang">HTML</span>
+      <button class="seo-code-block__copy" type="button" aria-label="Copy code to clipboard" onclick="this.parentElement.parentElement.querySelector('.seo-copy-fn').click()">Copy</button>
+    </div>
+    <pre class="seo-code-block__pre"><code class="seo-code-block__code language-html"><%~ it.seoDocumentation.openGraph.fullSnippet %></code></pre>
+    <button class="seo-copy-fn" style="display:none" data-code="<%= it.seoDocumentation.openGraph.fullSnippet %>"></button>
+  </div>
+
+  <!-- Twitter/X Card Guide -->
+  <h2 id="twitter-card">Twitter/X Card Guide</h2>
+  <p>
+    Twitter Card meta tags optimize how <%= it.brand.clientName %> content appears
+    in the Twitter/X timeline when links are shared.
+  </p>
+
+  <% for (const prop of it.seoDocumentation.twitterCard.properties) { %>
+  <div class="seo-tag-card">
+    <h3 class="seo-tag-card__tag"><code><%= prop.name %></code></h3>
+    <div class="seo-tag-card__value">Value: "<%= prop.content %>"</div>
+    <p class="seo-tag-card__desc"><%= prop.description %></p>
+    <div class="seo-tag-card__practice">
+      <strong>Best Practice:</strong> <%= prop.bestPractice %>
+    </div>
+  </div>
+  <% } %>
+
+  <h3>Complete Twitter Card Snippet</h3>
+  <div class="seo-code-block" role="region" aria-label="Twitter Card code example">
+    <div class="seo-code-block__header">
+      <span class="seo-code-block__lang">HTML</span>
+      <button class="seo-code-block__copy" type="button" aria-label="Copy code to clipboard" onclick="this.parentElement.parentElement.querySelector('.seo-copy-fn').click()">Copy</button>
+    </div>
+    <pre class="seo-code-block__pre"><code class="seo-code-block__code language-html"><%~ it.seoDocumentation.twitterCard.fullSnippet %></code></pre>
+    <button class="seo-copy-fn" style="display:none" data-code="<%= it.seoDocumentation.twitterCard.fullSnippet %>"></button>
+  </div>
+
+  <!-- JSON-LD Schema Examples -->
+  <h2 id="json-ld">JSON-LD Structured Data</h2>
+  <p>
+    JSON-LD (JavaScript Object Notation for Linked Data) embeds structured data
+    in pages to enable rich search results, Knowledge Panels, and enhanced listings for <%= it.brand.clientName %>.
+  </p>
+
+  <% for (const schema of it.seoDocumentation.jsonLd.schemas) { %>
+  <div class="seo-schema-card">
+    <h3><%= schema.schemaType %> Schema</h3>
+    <p class="seo-schema-card__desc"><%= schema.description %></p>
+    <div class="seo-schema-card__usecase">
+      <strong>Use Case:</strong> <%= schema.useCase %>
+    </div>
+    <div class="seo-code-block" role="region" aria-label="<%= schema.schemaType %> schema code example">
+      <div class="seo-code-block__header">
+        <span class="seo-code-block__lang">JSON-LD</span>
+        <button class="seo-code-block__copy" type="button" aria-label="Copy code to clipboard" onclick="this.parentElement.parentElement.querySelector('.seo-copy-fn').click()">Copy</button>
+      </div>
+      <pre class="seo-code-block__pre"><code class="seo-code-block__code language-json"><%= schema.snippet %></code></pre>
+      <button class="seo-copy-fn" style="display:none" data-code="<%= schema.snippet %>"></button>
+    </div>
+  </div>
+  <% } %>
+
+  <!-- Image Specifications -->
+  <h2 id="image-specs">Image Specifications</h2>
+  <p>
+    Recommended image dimensions for social sharing and structured data across platforms.
+  </p>
+
+  <div class="seo-image-specs-grid">
+    <% for (const spec of it.seoDocumentation.imageSpecs.specs) { %>
+    <div class="seo-image-spec-card">
+      <div class="seo-image-spec-card__platform"><%= spec.platform %></div>
+      <div class="seo-image-spec-card__dimensions">
+        <svg class="seo-image-spec-card__diagram" viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="<%= spec.platform %> image size: <%= spec.width %>x<%= spec.height %>px">
+          <rect x="10" y="10" width="180" height="100" fill="none" stroke="var(--brand-primary)" stroke-width="2" stroke-dasharray="4" rx="4"/>
+          <text x="100" y="60" text-anchor="middle" font-family="var(--font-mono)" font-size="14" fill="var(--color-text)"><%= spec.width %> x <%= spec.height %></text>
+          <text x="100" y="80" text-anchor="middle" font-family="var(--font-mono)" font-size="11" fill="var(--color-text-secondary)"><%= spec.aspectRatio %></text>
+        </svg>
+      </div>
+      <div class="seo-image-spec-card__details">
+        <div><strong>Format:</strong> <%= spec.format %></div>
+        <div><strong>Max Size:</strong> <%= spec.maxFileSize %></div>
+      </div>
+      <p class="seo-image-spec-card__notes"><%= spec.notes %></p>
+    </div>
+    <% } %>
+  </div>
+
+  <% } %>
+</section>
+
+<style>
+/* SEO Documentation page styles — inline per CON-22 (offline, no CDN) */
+.seo-toc {
+  margin-bottom: 32px;
+  padding: 16px 24px;
+  background: var(--color-bg-subtle);
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+}
+.seo-toc ul { list-style: none; display: flex; gap: 24px; flex-wrap: wrap; }
+.seo-toc a { font-size: 14px; font-weight: 500; }
+
+/* Tag Cards */
+.seo-tag-card {
+  padding: 20px 24px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+.seo-tag-card__tag { margin: 0 0 8px; font-size: 16px; }
+.seo-tag-card__tag code { font-family: var(--font-mono); color: var(--brand-primary); }
+.seo-tag-card__desc { color: var(--color-text-secondary); font-size: 14px; margin-bottom: 8px; }
+.seo-tag-card__limit { font-size: 13px; color: var(--color-text-secondary); margin-bottom: 8px; padding: 4px 12px; background: var(--color-bg-subtle); border-radius: 4px; display: inline-block; }
+.seo-tag-card__value { font-family: var(--font-mono); font-size: 13px; color: var(--color-text-secondary); margin-bottom: 8px; }
+.seo-tag-card__practice { font-size: 13px; color: var(--color-text-secondary); border-top: 1px solid var(--color-border); padding-top: 8px; margin-top: 8px; }
+
+/* Code Blocks — offline syntax highlighting (vanilla CSS) */
+.seo-code-block {
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 24px;
+}
+.seo-code-block__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 16px;
+  background: #1e1e2e;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+.seo-code-block__lang { font-family: var(--font-mono); font-size: 12px; color: #a6adc8; text-transform: uppercase; letter-spacing: 0.05em; }
+.seo-code-block__copy {
+  font-size: 12px;
+  padding: 4px 12px;
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 4px;
+  background: transparent;
+  color: #cdd6f4;
+  cursor: pointer;
+  font-family: var(--font-body);
+}
+.seo-code-block__copy:hover { background: rgba(255,255,255,0.1); }
+.seo-code-block__pre {
+  margin: 0;
+  padding: 16px 20px;
+  background: #1e1e2e;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.seo-code-block__code {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.6;
+  color: #cdd6f4;
+  white-space: pre;
+  tab-size: 2;
+}
+
+/* OG Property Grid */
+.seo-og-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.seo-og-card {
+  padding: 16px 20px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+}
+.seo-og-card__property { font-family: var(--font-mono); font-size: 14px; font-weight: 600; color: var(--brand-primary); margin-bottom: 4px; }
+.seo-og-card__content { font-family: var(--font-mono); font-size: 12px; color: var(--color-text-secondary); margin-bottom: 8px; word-break: break-all; }
+.seo-og-card__desc { font-size: 13px; margin-bottom: 8px; }
+.seo-og-card__practice { font-size: 12px; color: var(--color-text-secondary); border-top: 1px solid var(--color-border); padding-top: 8px; }
+
+/* Schema Cards */
+.seo-schema-card { margin-bottom: 32px; }
+.seo-schema-card__desc { color: var(--color-text-secondary); font-size: 14px; margin-bottom: 8px; }
+.seo-schema-card__usecase { font-size: 13px; color: var(--color-text-secondary); margin-bottom: 12px; }
+
+/* Image Specs Grid */
+.seo-image-specs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.seo-image-spec-card {
+  padding: 16px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  text-align: center;
+}
+.seo-image-spec-card__platform { font-weight: 600; font-size: 14px; margin-bottom: 8px; }
+.seo-image-spec-card__diagram { width: 100%; max-width: 200px; height: auto; margin-bottom: 8px; }
+.seo-image-spec-card__details { font-size: 13px; margin-bottom: 8px; }
+.seo-image-spec-card__details div { margin-bottom: 2px; }
+.seo-image-spec-card__notes { font-size: 12px; color: var(--color-text-secondary); text-align: left; }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .seo-toc ul { flex-direction: column; gap: 8px; }
+  .seo-og-grid { grid-template-columns: 1fr; }
+  .seo-image-specs-grid { grid-template-columns: 1fr; }
+}
+</style>
+
+<script>
+/* Copy-to-clipboard — offline, vanilla JS per CON-22 */
+(function() {
+  'use strict';
+  document.addEventListener('click', function(e) {
+    var btn = e.target.closest('.seo-code-block__copy');
+    if (!btn) return;
+    var block = btn.closest('.seo-code-block');
+    if (!block) return;
+    var code = block.querySelector('.seo-code-block__code');
+    if (!code) return;
+    var text = code.textContent || '';
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function() {
+        btn.textContent = 'Copied!';
+        setTimeout(function() { btn.textContent = 'Copy'; }, 2000);
+      });
+    } else {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      btn.textContent = 'Copied!';
+      setTimeout(function() { btn.textContent = 'Copy'; }, 2000);
+    }
+  });
+})();
+</script>

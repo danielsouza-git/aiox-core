@@ -1,0 +1,93 @@
+<section aria-labelledby="surfaces-title">
+  <h1 id="surfaces-title">Surfaces & Borders</h1>
+  <p class="section-intro">
+    Surface tokens define background colors for different UI contexts.
+    Border and radius tokens ensure consistent edge treatments across all
+    <%= it.brand.clientName %> brand touchpoints.
+  </p>
+
+  <% if (it.surfacesData && it.surfacesData.surfaces && it.surfacesData.surfaces.length > 0) { %>
+  <h2>Surface Tokens</h2>
+  <p>Background tokens for layered UI surfaces. Each token maps to a CSS custom property.</p>
+  <div class="token-grid token-grid--3col">
+    <% for (const token of it.surfacesData.surfaces) { %>
+    <div class="token-swatch">
+      <div class="token-swatch__preview" style="background: <%= token.value %>; border: 1px solid var(--color-border);" role="img" aria-label="Surface swatch for <%= token.name %>: <%= token.value %>"></div>
+      <div class="token-swatch__info">
+        <div class="token-swatch__name"><%= token.name %></div>
+        <code class="token-swatch__var"><%= token.cssVar %></code>
+        <div class="token-swatch__value"><%= token.value %></div>
+        <% if (token.description) { %>
+        <div class="token-swatch__desc"><%= token.description %></div>
+        <% } %>
+      </div>
+      <div class="token-swatch__snippet">
+        <code>var(<%= token.cssVar %>)</code>
+      </div>
+    </div>
+    <% } %>
+  </div>
+  <% } %>
+
+  <% if (it.surfacesData && it.surfacesData.borders && it.surfacesData.borders.length > 0) { %>
+  <h2>Border Tokens</h2>
+  <p>Border color tokens for dividers, outlines, and interactive states.</p>
+  <div class="token-grid token-grid--3col">
+    <% for (const token of it.surfacesData.borders) { %>
+    <div class="token-swatch">
+      <div class="border-preview" style="border: 3px solid <%= token.value %>;" role="img" aria-label="Border swatch for <%= token.name %>: <%= token.value %>"></div>
+      <div class="token-swatch__info">
+        <div class="token-swatch__name"><%= token.name %></div>
+        <code class="token-swatch__var"><%= token.cssVar %></code>
+        <div class="token-swatch__value"><%= token.value %></div>
+        <% if (token.description) { %>
+        <div class="token-swatch__desc"><%= token.description %></div>
+        <% } %>
+      </div>
+      <div class="token-swatch__snippet">
+        <code>border: 1px solid var(<%= token.cssVar %>)</code>
+      </div>
+    </div>
+    <% } %>
+  </div>
+  <% } %>
+
+  <% if (it.surfacesData && it.surfacesData.radii && it.surfacesData.radii.length > 0) { %>
+  <h2>Radius Tokens</h2>
+  <p>Border radius tokens for consistent corner rounding across components.</p>
+  <div class="token-grid token-grid--3col">
+    <% for (const token of it.surfacesData.radii) { %>
+    <div class="token-swatch">
+      <div class="radius-preview" style="border-radius: <%= token.value %>;" role="img" aria-label="Radius preview for <%= token.name %>: <%= token.pixels %>"></div>
+      <div class="token-swatch__info">
+        <div class="token-swatch__name"><%= token.name %></div>
+        <code class="token-swatch__var"><%= token.cssVar %></code>
+        <div class="token-swatch__value"><%= token.value %> (<%= token.pixels %>)</div>
+      </div>
+      <div class="token-swatch__snippet">
+        <code>border-radius: var(<%= token.cssVar %>)</code>
+      </div>
+    </div>
+    <% } %>
+  </div>
+  <% } %>
+
+  <% if (it.surfacesData && it.surfacesData.glass && it.surfacesData.glass.length > 0) { %>
+  <h2>Glass Effects</h2>
+  <p>Frosted glass effects using <code>backdrop-filter</code> for layered UI elements.</p>
+  <div class="token-grid token-grid--2col">
+    <% for (const effect of it.surfacesData.glass) { %>
+    <div class="glass-card">
+      <div class="glass-preview" style="background: <%= effect.bgOpacity %>; backdrop-filter: blur(<%= effect.backdropBlur %>); -webkit-backdrop-filter: blur(<%= effect.backdropBlur %>);">
+        <span class="glass-preview__label"><%= effect.name %></span>
+      </div>
+      <div class="token-swatch__info">
+        <div class="token-swatch__name"><%= effect.name %></div>
+        <div class="token-swatch__value">blur: <%= effect.backdropBlur %></div>
+      </div>
+      <pre class="glass-snippet"><code><%= effect.css %></code></pre>
+    </div>
+    <% } %>
+  </div>
+  <% } %>
+</section>
