@@ -23,6 +23,47 @@ from src.processors.video_downloader.srt_utils import (
 
 
 # ======================================================================
+# SubtitleStyle
+# ======================================================================
+
+
+class TestSubtitleStyle:
+    """Tests for SubtitleStyle dataclass with background fields."""
+
+    def test_default_values(self):
+        style = SubtitleStyle()
+        assert style.font_name == "Arial"
+        assert style.font_size == 21
+        assert style.bold is True
+        assert style.border_style == 3
+        assert style.background_color == "&H80000000"
+
+    def test_border_style_outline_only(self):
+        style = SubtitleStyle(border_style=1)
+        assert style.border_style == 1
+
+    def test_custom_background_color(self):
+        style = SubtitleStyle(background_color="&H40FF0000")
+        assert style.background_color == "&H40FF0000"
+
+    def test_all_fields_set(self):
+        style = SubtitleStyle(
+            font_name="Helvetica",
+            font_size=28,
+            bold=False,
+            color="&H0000FFFF",
+            outline_color="&H00FF0000",
+            outline_width=3,
+            position="top",
+            border_style=1,
+            background_color="&H00000000",
+        )
+        assert style.font_name == "Helvetica"
+        assert style.border_style == 1
+        assert style.background_color == "&H00000000"
+
+
+# ======================================================================
 # format_timestamp
 # ======================================================================
 
@@ -347,6 +388,40 @@ class TestGenerateAss:
         content = open(ass_path, "r", encoding="utf-8").read()
         # First entry: 0:00:00.00 to 0:00:05.20
         assert "0:00:00.00,0:00:05.20" in content
+
+    def test_generate_ass_default_border_style_3(self, tmp_path):
+        """Default style uses BorderStyle=3 (opaque box) for background strip."""
+        srt_path = self._create_srt(tmp_path)
+        ass_path = generate_ass(srt_path)
+
+        content = open(ass_path, "r", encoding="utf-8").read()
+        # Style line should contain BorderStyle=3
+        style_line = [line for line in content.split("\n") if line.startswith("Style:")][0]
+        assert ",3," in style_line  # BorderStyle=3
+        assert "&H80000000" in style_line  # Default BackColour
+
+    def test_generate_ass_border_style_1_outline_only(self, tmp_path):
+        """BorderStyle=1 when background disabled."""
+        srt_path = self._create_srt(tmp_path)
+        outline_style = SubtitleStyle(border_style=1, background_color="&H00000000")
+        ass_path = generate_ass(srt_path, style=outline_style)
+
+        content = open(ass_path, "r", encoding="utf-8").read()
+        style_line = [line for line in content.split("\n") if line.startswith("Style:")][0]
+        assert ",1," in style_line  # BorderStyle=1
+
+    def test_generate_ass_custom_background_color(self, tmp_path):
+        """Custom background color is written to ASS BackColour field."""
+        srt_path = self._create_srt(tmp_path)
+        custom_style = SubtitleStyle(
+            border_style=3,
+            background_color="&H40FF0000",  # Semi-transparent blue
+        )
+        ass_path = generate_ass(srt_path, style=custom_style)
+
+        content = open(ass_path, "r", encoding="utf-8").read()
+        style_line = [line for line in content.split("\n") if line.startswith("Style:")][0]
+        assert "&H40FF0000" in style_line
 
 
 # ======================================================================

@@ -850,6 +850,8 @@ class PautaBridge:
                 color=style.get("color", "&H00FFFFFF"),  # JS will send in ASS format
                 outline_width=style.get("outline_width", 2),
                 position=style.get("position", "bottom"),
+                border_style=style.get("border_style", 3),
+                background_color=style.get("background_color", "&H80000000"),
             )
 
             # Determine output path
