@@ -1,0 +1,202 @@
+# ===============================================================================
+# Squad: OPS -- Process Operations Foundation
+# Domain: Mapeamento, Arquitetura e Automacao de Processos
+# Created: 2026-03-29
+# Version: 1.0.0
+# ===============================================================================
+
+squad:
+  name: ops
+  display_name: "OPS Squad -- Process Operations"
+  version: "1.0.0"
+  domain: "Mapeamento, Arquitetura e Automacao de Processos"
+  description: |
+    Squad fundacional que serve como "arquiteto da casa" para todos os outros squads.
+    Recebe demandas de qualquer squad, mapeia processos, desenha arquitetura no ClickUp,
+    cria automacoes e valida qualidade atraves de um fluxo sequencial de quality gates.
+    Sem o OPS, cada squad inventa suas proprias regras.
+
+  philosophy: |
+    "Processo bom e processo que funciona sem voce."
+    Todo processo deve ser mapeado do fim ao inicio, desenhado com donos claros,
+    automatizado onde possivel e validado por quem nao conhece o processo.
+    Se um leigo nao consegue executar, o processo nao esta pronto.
+
+  keywords:
+    - processos
+    - mapeamento
+    - arquitetura-clickup
+    - automacao
+    - quality-gates
+    - fluxo-sequencial
+    - handoffs
+    - validacao
+
+  entry_agent: ops-head
+  created_by: "dex-builder"
+  created_at: "2026-03-29"
+
+# -------------------------------------------------------------------------------
+# TIER ARCHITECTURE
+# -------------------------------------------------------------------------------
+
+tiers:
+  tier_0:
+    name: "Coordenacao e Distribuicao"
+    agents:
+      - ops-head
+    purpose: "Recebe demandas, distribui para o time, acompanha progresso, entrega output final"
+
+  tier_1:
+    name: "Mapeamento e Arquitetura"
+    agents:
+      - process-mapper
+      - process-architect
+    purpose: "Mapeamento de processos existentes e desenho de nova arquitetura no ClickUp"
+
+  tier_2:
+    name: "Automacao e Validacao"
+    agents:
+      - automation-architect
+      - process-validator
+    purpose: "Criacao de automacoes, definicoes de tasks e validacao final de qualidade"
+
+# -------------------------------------------------------------------------------
+# AGENT REGISTRY
+# -------------------------------------------------------------------------------
+
+agents:
+  ops-head:
+    file: agents/ops-head.md
+    tier: 0
+    focus: "Coordenacao geral, distribuicao de demandas, acompanhamento de progresso"
+
+  process-mapper:
+    file: agents/process-mapper.md
+    tier: 1
+    focus: "Mapeamento de processos do fim ao inicio, discovery e criacao de novos fluxos"
+
+  process-architect:
+    file: agents/process-architect.md
+    tier: 1
+    focus: "Traducao de processos em estruturas ClickUp (folders, lists, fields, status)"
+
+  automation-architect:
+    file: agents/automation-architect.md
+    tier: 2
+    focus: "Definicoes de tasks e automacoes (ClickUp Automations, N8N, Webhooks)"
+
+  process-validator:
+    file: agents/process-validator.md
+    tier: 2
+    focus: "Design de quality gates, validacao final de processos, teste com leigo"
+
+# -------------------------------------------------------------------------------
+# HANDOFF MATRIX
+# -------------------------------------------------------------------------------
+
+handoffs:
+  ops-head:
+    routes_to: [process-mapper, process-architect, automation-architect, process-validator]
+    receives_from: ["any-squad"]
+
+  process-mapper:
+    routes_to: [process-architect]
+    receives_from: [ops-head]
+    escalates_to: [ops-head]
+    gate: "discovery-process + create-process aprovados (>70%)"
+
+  process-architect:
+    routes_to: [automation-architect]
+    receives_from: [process-mapper]
+    escalates_to: [ops-head]
+    gate: "design-architecture + design-executors aprovados (>70%)"
+
+  automation-architect:
+    routes_to: [process-validator]
+    receives_from: [process-architect]
+    escalates_to: [ops-head]
+    gate: "create-task-definitions + create-task-definitions-automations aprovados (>70%)"
+
+  process-validator:
+    routes_to: ["ENTREGA"]
+    receives_from: [automation-architect]
+    escalates_to: [ops-head]
+    gate: "design-qa-gates + test-qa-gates aprovados (>70%) = Quality Gate FINAL"
+
+# -------------------------------------------------------------------------------
+# CROSS-CUTTING CONCERNS
+# -------------------------------------------------------------------------------
+
+cross_cutting:
+  external_dependencies:
+    description: "OPS e o squad fundacional -- outros squads dependem dele"
+    inbound:
+      - source: "any-squad"
+        trigger: "Pedido de mapeamento ou criacao de processo"
+        receives: "ops-head"
+    outbound:
+      - target: "requesting-squad"
+        trigger: "Processo validado e entregue"
+        delivers: "Processo completo com automacoes e quality gates"
+
+  tools_ecosystem:
+    description: "Ferramentas externas SaaS utilizadas pelo squad"
+    tools:
+      - ClickUp
+      - Notion
+      - Slack
+      - Loom
+      - Figma
+      - Miro
+      - Google Docs
+      - Google Drive
+      - Google Sheets
+      - N8N
+      - Webhooks
+
+  quality_standards:
+    default_threshold: 70
+    description: "Cada etapa deve atingir >70% no quality gate para avancar"
+
+# -------------------------------------------------------------------------------
+# QUALITY GATES FLOW
+# -------------------------------------------------------------------------------
+
+quality_gates:
+  flow: sequential
+  description: |
+    Fluxo sequencial obrigatorio. Cada etapa deve atingir >70% no quality gate
+    para liberar a proxima. Se reprovar, volta para a etapa anterior corrigir.
+
+  stages:
+    - stage: 1
+      agent: process-mapper
+      tasks: [discovery-process, create-process]
+      threshold: 70
+      next: process-architect
+      on_fail: "Volta para process-mapper corrigir"
+
+    - stage: 2
+      agent: process-architect
+      tasks: [design-architecture, design-executors]
+      threshold: 70
+      next: automation-architect
+      on_fail: "Volta para process-architect corrigir"
+
+    - stage: 3
+      agent: automation-architect
+      tasks: [create-task-definitions, create-task-definitions-automations]
+      threshold: 70
+      next: process-validator
+      on_fail: "Volta para automation-architect corrigir"
+
+    - stage: 4
+      agent: process-validator
+      tasks: [design-qa-gates, test-qa-gates]
+      threshold: 70
+      type: "Quality Gate FINAL"
+      next: "ENTREGA"
+      on_fail: "Indica qual etapa anterior deve corrigir"
+
+  final_output: "Processo completo, validado, automatizado e pronto para operacao"

@@ -1,0 +1,141 @@
+# ===============================================================================
+# Squad: Vendas
+# Domain: Vendas — Pipeline Comercial Completo
+# Created: 2026-03-29
+# Version: 1.0.0
+# ===============================================================================
+
+squad:
+  name: vendas
+  display_name: "Squad Vendas"
+  version: "1.0.0"
+  domain: "Vendas — Pipeline Comercial Completo"
+  description: |
+    Squad responsavel pelo ciclo completo de vendas: desde a captacao e qualificacao
+    de leads ate o fechamento de contratos e analise de performance comercial.
+    Cobre prospecao, qualificacao BANT, discovery calls, propostas, negociacao,
+    fechamento e inteligencia de vendas com forecast e reporting.
+
+  philosophy: |
+    "Pipeline previsivel, execucao consistente, dados direcionam decisoes."
+    Cada lead e tratado com rigor metodologico. O SDR qualifica com BANT,
+    o Closer conduz com empatia e tecnica, e o Analyst garante visibilidade
+    total do funil. O Head remove blockers e cobra resultados.
+
+  keywords:
+    - vendas
+    - pipeline
+    - leads
+    - prospecao
+    - qualificacao
+    - BANT
+    - discovery
+    - proposta
+    - negociacao
+    - fechamento
+    - forecast
+    - CRM
+    - funil
+    - conversao
+
+  entry_agent: vendas-head
+
+# -------------------------------------------------------------------------------
+# TIER ARCHITECTURE
+# -------------------------------------------------------------------------------
+
+tiers:
+  tier_0:
+    name: "Gestao Comercial"
+    agents:
+      - vendas-head
+    purpose: "Define metas, distribui leads, acompanha pipeline, remove blockers"
+
+  tier_1:
+    name: "Execucao Comercial"
+    agents:
+      - sdr
+      - closer
+    purpose: "Prospecao, qualificacao e fechamento de negocios"
+
+  tier_2:
+    name: "Inteligencia Comercial"
+    agents:
+      - sales-analyst
+    purpose: "Analise de funil, forecast e reporting de performance"
+
+# -------------------------------------------------------------------------------
+# AGENT REGISTRY
+# -------------------------------------------------------------------------------
+
+agents:
+  vendas-head:
+    file: agents/vendas-head.md
+    tier: 0
+    focus: "Gestao de metas, distribuicao de leads, acompanhamento de pipeline"
+
+  sdr:
+    file: agents/sdr.md
+    tier: 1
+    focus: "Lead scoring, qualificacao BANT, primeiro contato"
+
+  closer:
+    file: agents/closer.md
+    tier: 1
+    focus: "Discovery call, proposta, negociacao, fechamento"
+
+  sales-analyst:
+    file: agents/sales-analyst.md
+    tier: 2
+    focus: "Analise de pipeline, forecast de receita, reporting"
+
+# -------------------------------------------------------------------------------
+# HANDOFF MATRIX
+# -------------------------------------------------------------------------------
+
+handoffs:
+  vendas-head:
+    routes_to: [sdr, closer, sales-analyst]
+
+  sdr:
+    collaborates_with: [closer]
+    escalates_to: [vendas-head]
+    handoff_output: "Lead qualificado + call agendada -> Closer"
+
+  closer:
+    collaborates_with: [sdr, sales-analyst]
+    escalates_to: [vendas-head]
+    handoff_output: "Contrato assinado -> CS (onboarding) | Lead frio -> Marketing (nurture)"
+
+  sales-analyst:
+    collaborates_with: [vendas-head, sdr, closer]
+    escalates_to: [vendas-head]
+
+# -------------------------------------------------------------------------------
+# CROSS-SQUAD FLOWS
+# -------------------------------------------------------------------------------
+
+cross_squad_flows:
+  to_cs:
+    trigger: "Close Deal concluido com sucesso"
+    target_squad: cs
+    target_agent: onboarding-specialist
+    payload: "Cliente assinado com dados do contrato para Welcome Client"
+
+  to_marketing:
+    trigger: "Lead frio identificado pelo Closer"
+    target_squad: marketing
+    target_agent: nurture-specialist
+    payload: "Lead com historico de interacoes para fluxo de nurture"
+
+  from_marketing:
+    trigger: "Lead gerado por campanha de marketing"
+    source_squad: marketing
+    target_agent: sdr
+    payload: "Lead bruto para scoring e qualificacao"
+
+  from_cs:
+    trigger: "Oportunidade de upsell identificada pelo CS"
+    source_squad: cs
+    target_agent: sdr
+    payload: "Lead de upsell com contexto do cliente existente"

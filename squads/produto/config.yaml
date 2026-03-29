@@ -1,0 +1,190 @@
+# ===============================================================================
+# Squad: Produto -- Product Management
+# Domain: Discovery, Roadmap, Conteudo e Qualidade de Produto
+# Created: 2026-03-29
+# Version: 1.0.0
+# ===============================================================================
+
+squad:
+  name: produto
+  display_name: "Produto Squad -- Product Management"
+  version: "1.0.0"
+  domain: "Discovery, Roadmap, Conteudo e Qualidade de Produto"
+  description: |
+    Squad responsavel pelo ciclo de vida completo do produto: discovery de
+    oportunidades, roadmap, especificacao, coordenacao de lancamento, criacao de
+    conteudo (cursos, videos, guias), revisao de qualidade e publicacao.
+    O Product Manager delega para o AIOX core @pm (Morgan) para PRD e spec formais.
+    CS/Retencao-Produto foca exclusivamente em qualidade de produto (distinto do
+    CS squad que foca em retencao de cliente).
+
+  philosophy: |
+    "Produto bom e produto que o cliente usa e volta."
+    Cada produto passa por discovery rigoroso, spec clara, conteudo de qualidade
+    e validacao antes de chegar ao cliente. Se o cliente nao consegue completar,
+    o produto nao esta pronto.
+
+  keywords:
+    - produto
+    - discovery
+    - roadmap
+    - spec
+    - conteudo
+    - cursos
+    - videos
+    - quality-check
+    - lancamento
+    - nps
+
+  entry_agent: produto-head
+  created_by: "dex-builder"
+  created_at: "2026-03-29"
+
+# -------------------------------------------------------------------------------
+# TIER ARCHITECTURE
+# -------------------------------------------------------------------------------
+
+tiers:
+  tier_0:
+    name: "Coordenacao e Estrategia"
+    agents:
+      - produto-head
+    purpose: "Define roadmap, prioriza backlog, valida qualidade, alinha com negocio"
+
+  tier_1:
+    name: "Gestao de Produto e Conteudo"
+    agents:
+      - product-manager
+      - content-creator
+    purpose: "Discovery, spec, criacao de conteudo e coordenacao de lancamento"
+
+  tier_2:
+    name: "Qualidade de Produto"
+    agents:
+      - cs-retencao-produto
+    purpose: "Validacao de qualidade, teste de experiencia e feedback loop"
+
+# -------------------------------------------------------------------------------
+# AGENT REGISTRY
+# -------------------------------------------------------------------------------
+
+agents:
+  produto-head:
+    file: agents/produto-head.md
+    tier: 0
+    focus: "Define roadmap, prioriza backlog, valida qualidade, alinha com negocio, cobra entregas"
+
+  product-manager:
+    file: agents/product-manager.md
+    tier: 1
+    focus: "Discovery, roadmap, spec e coordenacao de lancamento"
+    delegation: "@pm (Morgan) para PRD e spec formais"
+
+  content-creator:
+    file: agents/content-creator.md
+    tier: 1
+    focus: "Pesquisa, criacao, revisao e publicacao de conteudo (cursos, videos, guias)"
+
+  cs-retencao-produto:
+    file: agents/cs-retencao-produto.md
+    tier: 2
+    focus: "Quality check, teste de experiencia, feedback loop e relatorio de qualidade"
+
+# -------------------------------------------------------------------------------
+# HANDOFF MATRIX
+# -------------------------------------------------------------------------------
+
+handoffs:
+  produto-head:
+    routes_to: [product-manager, content-creator, cs-retencao-produto]
+    receives_from: ["orchestrator", "any-squad"]
+
+  product-manager:
+    routes_to: [content-creator, cs-retencao-produto]
+    receives_from: [produto-head]
+    escalates_to: [produto-head]
+    delegation:
+      target: "@pm (Morgan)"
+      scope: "PRD e spec formais"
+      trigger: "Quando necessita documentacao formal de requisitos"
+
+  content-creator:
+    routes_to: [cs-retencao-produto]
+    receives_from: [product-manager, produto-head]
+    escalates_to: [produto-head]
+
+  cs-retencao-produto:
+    routes_to: [product-manager, content-creator]
+    receives_from: [produto-head, content-creator]
+    escalates_to: [produto-head]
+    note: "Feedback de qualidade volta para PM (priorizacao) ou Content Creator (correcao)"
+
+# -------------------------------------------------------------------------------
+# CROSS-SQUAD FLOWS
+# -------------------------------------------------------------------------------
+
+cross_squad_flows:
+  outbound:
+    - target: "marketing"
+      trigger: "Produto pronto para lancamento"
+      delivers: "Briefing de lancamento, materiais, datas"
+      task: launch-coordination
+
+    - target: "vendas"
+      trigger: "Produto pronto para lancamento"
+      delivers: "Argumentario de vendas, diferenciais, pricing"
+      task: launch-coordination
+
+  inbound:
+    - source: "customer-success"
+      trigger: "Feedback recorrente de clientes sobre produto"
+      receives: "cs-retencao-produto"
+      task: feedback-loop
+
+  internal_feedback:
+    - from: cs-retencao-produto
+      to: content-creator
+      trigger: "Problemas de qualidade identificados"
+      action: "Content Creator corrige conteudo"
+
+    - from: cs-retencao-produto
+      to: product-manager
+      trigger: "Feedback consolidado para priorizacao"
+      action: "PM prioriza melhorias no roadmap"
+
+# -------------------------------------------------------------------------------
+# CROSS-CUTTING CONCERNS
+# -------------------------------------------------------------------------------
+
+cross_cutting:
+  tools_ecosystem:
+    description: "Ferramentas externas SaaS utilizadas pelo squad"
+    tools:
+      - ClickUp
+      - Notion
+      - Slack
+      - Miro
+      - Figma
+      - Typeform
+      - Google Sheets
+      - Google Docs
+      - YouTube
+      - Loom
+      - Descript
+      - Canva
+      - Hotmart
+      - Kajabi
+      - Teachable
+      - Calendly
+
+  quality_standards:
+    default_threshold: 70
+    description: "Quality gates aplicaveis a revisao de conteudo e validacao de produto"
+
+  delegation_model:
+    description: "Delegacoes explicitas para agentes AIOX core"
+    delegations:
+      - agent: product-manager
+        delegates_to: "@pm (Morgan)"
+        scope: "PRD formais, spec de requisitos, criterios de aceitacao"
+        reason: "Capacidade de PRD/spec ja existe no @pm -- nao duplicar"

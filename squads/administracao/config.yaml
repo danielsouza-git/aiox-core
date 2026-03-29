@@ -1,0 +1,202 @@
+# ===============================================================================
+# Squad: Administracao -- Back-Office Operations
+# Domain: Financeiro, RH/People, Juridico, Facilities, Compliance
+# Created: 2026-03-29
+# Version: 1.0.0
+# ===============================================================================
+
+squad:
+  name: administracao
+  display_name: "Administracao Squad -- Back-Office Operations"
+  version: "1.0.0"
+  domain: "Financeiro, RH/People, Juridico, Facilities, Compliance"
+  description: |
+    Squad responsavel por todo o backoffice da empresa, cobrindo 5 areas funcionais:
+    Financeiro (contas a pagar/receber, fluxo de caixa, relatorios), RH/People
+    (recrutamento, onboarding, gestao de pessoas, offboarding), Juridico (contratos,
+    compliance legal, disputas), Facilities (ferramentas SaaS, acessos, fornecedores)
+    e Compliance (auditorias internas, politicas ESG, LGPD). E o maior squad em
+    numero de tasks (17) e o backbone operacional do negocio.
+
+  philosophy: |
+    "Backoffice invisivel e backoffice que funciona."
+    Cada area funcional tem autonomia operacional, mas decisoes estrategicas
+    (contratacao, demissao, compras acima do threshold, escolha de fornecedor)
+    passam pelo Admin Head. Processos sao criados via OPS, nao internamente.
+
+  keywords:
+    - financeiro
+    - rh
+    - people
+    - juridico
+    - facilities
+    - compliance
+    - backoffice
+    - contas
+    - contratos
+    - lgpd
+
+  entry_agent: admin-head
+  created_by: "dex-builder"
+  created_at: "2026-03-29"
+
+# -------------------------------------------------------------------------------
+# TIER ARCHITECTURE
+# -------------------------------------------------------------------------------
+
+tiers:
+  tier_0:
+    name: "Coordenacao e Controle"
+    agents:
+      - admin-head
+    purpose: "Controla backoffice, distribui demandas, controla orcamento, remove blockers, reporta saude financeira"
+
+  tier_1:
+    name: "Operacoes Core"
+    agents:
+      - financeiro
+      - rh-people
+      - juridico
+    purpose: "Areas funcionais criticas: financas, pessoas e juridico"
+
+  tier_2:
+    name: "Suporte e Conformidade"
+    agents:
+      - facilities
+      - compliance
+    purpose: "Gestao de ferramentas/acessos/fornecedores e conformidade regulatoria"
+
+# -------------------------------------------------------------------------------
+# AGENT REGISTRY
+# -------------------------------------------------------------------------------
+
+agents:
+  admin-head:
+    file: agents/admin-head.md
+    tier: 0
+    focus: "Coordenacao geral do backoffice, controle orcamentario, remocao de blockers"
+
+  financeiro:
+    file: agents/financeiro.md
+    tier: 1
+    focus: "Contas a pagar/receber, fluxo de caixa, DRE e relatorios financeiros"
+
+  rh-people:
+    file: agents/rh-people.md
+    tier: 1
+    focus: "Ciclo completo de pessoas: recrutamento, onboarding, gestao, offboarding"
+
+  juridico:
+    file: agents/juridico.md
+    tier: 1
+    focus: "Contratos, compliance legal, disputas e integracao com advogado externo"
+
+  facilities:
+    file: agents/facilities.md
+    tier: 2
+    focus: "Gestao de ferramentas SaaS, controle de acessos, gestao de fornecedores"
+
+  compliance:
+    file: agents/compliance.md
+    tier: 2
+    focus: "Auditorias internas, politicas ESG, conformidade LGPD"
+
+# -------------------------------------------------------------------------------
+# HANDOFF MATRIX
+# -------------------------------------------------------------------------------
+
+handoffs:
+  admin-head:
+    routes_to: [financeiro, rh-people, juridico, facilities, compliance]
+    receives_from: ["orchestrator", "any-squad"]
+
+  financeiro:
+    routes_to: [admin-head]
+    receives_from: [admin-head]
+    escalates_to: [admin-head]
+    gate: "Pagamentos acima do threshold precisam de aprovacao do Head"
+
+  rh-people:
+    routes_to: [admin-head, facilities]
+    receives_from: [admin-head]
+    escalates_to: [admin-head]
+    gate: "Contratacao e demissao decididas pelo Head"
+
+  juridico:
+    routes_to: [admin-head]
+    receives_from: [admin-head]
+    escalates_to: [admin-head]
+    gate: "Negociacao de disputas precisa de aprovacao do Head"
+
+  facilities:
+    routes_to: [admin-head]
+    receives_from: [admin-head, rh-people]
+    escalates_to: [admin-head]
+    gate: "Compras e escolha de fornecedor aprovadas pelo Head"
+
+  compliance:
+    routes_to: [admin-head]
+    receives_from: [admin-head]
+    escalates_to: [admin-head]
+    gate: "Politicas aprovadas pelo CEO"
+
+# -------------------------------------------------------------------------------
+# CROSS-CUTTING CONCERNS
+# -------------------------------------------------------------------------------
+
+cross_cutting:
+  external_dependencies:
+    description: "Administracao e o backbone operacional -- depende de OPS para criacao de processos"
+    inbound:
+      - source: "orchestrator"
+        trigger: "Demanda administrativa de qualquer area"
+        receives: "admin-head"
+      - source: "rh-people"
+        trigger: "Onboarding de novo colaborador precisa de acessos"
+        receives: "facilities"
+    outbound:
+      - target: "ops"
+        trigger: "Necessidade de mapeamento ou criacao de processo"
+        delivers: "Pedido de processo via OPS Head"
+      - target: "any-squad"
+        trigger: "Relatorios financeiros, compliance ou juridicos"
+        delivers: "Relatorios e pareceres conforme demanda"
+
+  tools_ecosystem:
+    description: "Ferramentas externas SaaS utilizadas pelo squad"
+    tools:
+      - Cloze
+      - Conta Azul
+      - Omie
+      - Stripe
+      - Banco
+      - Google Sheets
+      - Google Slides
+      - Google Drive
+      - Google Docs
+      - Google Admin
+      - Slack
+      - LinkedIn
+      - Notion
+      - ClickUp
+      - Convenia
+      - Typeform
+      - DocuSign
+      - Clicksign
+      - Email
+      - SoC Admin
+      - Checklist
+
+  quality_standards:
+    default_threshold: 70
+    description: "Cada task deve atingir >70% no quality gate para ser considerada completa"
+
+  delegation_notes:
+    description: "Decisoes estrategicas sao do Head, operacionais sao dos agentes"
+    rules:
+      - "Contratacao e demissao: Head decide, RH/People executa"
+      - "Pagamentos acima do threshold: Head aprova, Financeiro executa"
+      - "Compras e escolha de fornecedor: Head aprova, Facilities executa"
+      - "Politicas ESG: Compliance redige, CEO aprova"
+      - "Negociacao sem aprovacao: BLOQUEADO -- Juridico nao negocia sozinho"
+      - "Criacao de processos: OPS faz, Administracao NAO cria processos internamente"

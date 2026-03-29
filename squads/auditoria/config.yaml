@@ -1,0 +1,190 @@
+# ===============================================================================
+# Squad: Auditoria -- Structural Auditing
+# Domain: Auditoria Estrutural de Squads
+# Created: 2026-03-29
+# Version: 1.0.0
+# ===============================================================================
+
+squad:
+  name: auditoria
+  display_name: "Auditoria Squad -- Structural Auditing"
+  version: "1.0.0"
+  domain: "Auditoria Estrutural de Squads"
+  description: |
+    Squad independente responsavel por auditar a ESTRUTURA de todos os outros squads:
+    completude de agentes e tasks, cobertura de funcoes de negocio, correcao de delegacoes,
+    deteccao de overlaps entre squads e conformidade de quality gates.
+    NAO audita processos (isso e do OPS) -- audita se os squads estao completos,
+    corretos e sem lacunas.
+
+  philosophy: |
+    "O que nao e auditado, nao e confiavel."
+    Auditoria independente garante que a estrutura de squads permanece integra,
+    completa e sem duplicacoes nao-intencionais. Cada squad deve ter todos os agentes
+    registrados, todas as tasks existentes, todas as secoes obrigatorias presentes
+    e quality gates configurados corretamente.
+
+  keywords:
+    - auditoria
+    - completude
+    - cobertura
+    - delegacao
+    - overlap
+    - quality-gates
+    - validacao-estrutural
+    - independencia
+
+  entry_agent: auditoria-head
+  created_by: "dex-builder"
+  created_at: "2026-03-29"
+
+# -------------------------------------------------------------------------------
+# INDEPENDENCE DECLARATION
+# -------------------------------------------------------------------------------
+#
+# O Squad Auditoria opera de forma INDEPENDENTE:
+# - NAO reporta a nenhum outro squad
+# - Tem acesso de LEITURA a todos os squads (config.yaml, agents/, tasks/)
+# - Pode ser acionado periodicamente ou sob demanda
+# - Seus findings sao reportados diretamente aos Builders/CEO
+# - Escopo: audita ESTRUTURA (agentes, tasks, cobertura, completude)
+# - NAO audita PROCESSOS (isso e responsabilidade do OPS)
+#
+# Squads auditados:
+# - 6 squads tecnicos: claude-code-mastery, branding, design-system, copy,
+#   visual-production, qa-accessibility
+# - 6 squads de negocio: ops, vendas, administracao, produto, customer-success,
+#   marketing
+# - Qualquer squad futuro adicionado a squads/
+# -------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------
+# TIER ARCHITECTURE
+# -------------------------------------------------------------------------------
+
+tiers:
+  tier_0:
+    name: "Coordenacao de Auditoria"
+    agents:
+      - auditoria-head
+    purpose: "Comissiona auditorias, revisa relatorios, escala findings, acompanha remediacoes"
+
+  tier_1:
+    name: "Auditoria de Estrutura"
+    agents:
+      - squad-auditor
+    purpose: "Valida completude estrutural de cada squad e conformidade de quality gates"
+
+  tier_2:
+    name: "Analise e Alinhamento"
+    agents:
+      - coverage-analyst
+      - alignment-checker
+    purpose: "Analise de cobertura, deteccao de overlaps e validacao de delegacoes"
+
+# -------------------------------------------------------------------------------
+# AGENT REGISTRY
+# -------------------------------------------------------------------------------
+
+agents:
+  auditoria-head:
+    file: agents/auditoria-head.md
+    tier: 0
+    focus: "Comissiona auditorias, consolida findings, escala para Builders/CEO"
+
+  squad-auditor:
+    file: agents/squad-auditor.md
+    tier: 1
+    focus: "Completude estrutural (agentes, tasks, secoes) e conformidade de quality gates"
+
+  coverage-analyst:
+    file: agents/coverage-analyst.md
+    tier: 2
+    focus: "Cobertura de funcoes de negocio e deteccao de overlap entre squads"
+
+  alignment-checker:
+    file: agents/alignment-checker.md
+    tier: 2
+    focus: "Validacao de delegacoes e consolidacao de relatorio executivo"
+
+# -------------------------------------------------------------------------------
+# HANDOFF MATRIX
+# -------------------------------------------------------------------------------
+
+handoffs:
+  auditoria-head:
+    routes_to: [squad-auditor, coverage-analyst, alignment-checker]
+    receives_from: ["builders", "ceo", "on-demand", "periodic"]
+
+  squad-auditor:
+    routes_to: [auditoria-head]
+    receives_from: [auditoria-head]
+    escalates_to: [auditoria-head]
+    delivers: "Relatorios de completude e conformidade de quality gates"
+
+  coverage-analyst:
+    routes_to: [auditoria-head]
+    receives_from: [auditoria-head]
+    escalates_to: [auditoria-head]
+    delivers: "Matriz de cobertura e relatorio de overlaps"
+
+  alignment-checker:
+    routes_to: [auditoria-head]
+    receives_from: [auditoria-head]
+    escalates_to: [auditoria-head]
+    delivers: "Relatorio de validacao de delegacoes e relatorio consolidado"
+
+# -------------------------------------------------------------------------------
+# CROSS-CUTTING CONCERNS
+# -------------------------------------------------------------------------------
+
+cross_cutting:
+  independence:
+    description: "Auditoria opera independente de todos os squads"
+    access: "Leitura a todos os squads em squads/"
+    reports_to: "Builders / CEO (direto)"
+    scope: "ESTRUTURA (agentes, tasks, cobertura, completude) -- NAO processos"
+
+  scope_distinction:
+    description: "Diferenca clara entre Auditoria e OPS"
+    auditoria: "Audita se squads estao COMPLETOS e CORRETOS (estrutura)"
+    ops: "Audita se PROCESSOS funcionam corretamente (execucao)"
+
+  tools_ecosystem:
+    description: "Ferramentas utilizadas pelo squad"
+    tools:
+      - Notion
+      - Sheets
+      - Markdown
+
+  quality_standards:
+    default_threshold: 70
+    description: "Cada auditoria gera um relatorio com score de conformidade"
+
+# -------------------------------------------------------------------------------
+# AUDIT WORKFLOW
+# -------------------------------------------------------------------------------
+
+audit_workflow:
+  description: |
+    Fluxo de auditoria nao e sequencial com gates (diferente do OPS).
+    Os 3 agentes especializados podem trabalhar em paralelo.
+    O Alignment Checker consolida TODOS os outputs no relatorio final.
+
+  stages:
+    - stage: 1
+      agent: squad-auditor
+      tasks: [squad-completeness-audit, quality-gate-compliance-check]
+      description: "Valida estrutura e quality gates de cada squad"
+
+    - stage: 2
+      agent: coverage-analyst
+      tasks: [task-coverage-analysis, cross-squad-overlap-detection]
+      description: "Mapeia cobertura e detecta overlaps"
+
+    - stage: 3
+      agent: alignment-checker
+      tasks: [agent-delegation-validation, audit-report]
+      description: "Valida delegacoes e consolida relatorio final"
+
+  final_output: "Relatorio consolidado de auditoria com severidade e acoes recomendadas"
