@@ -1,0 +1,118 @@
+# Brand Health Check Flow
+# Brand perception audit from assessment to recommendations
+
+name: brand-health-check-flow
+version: 1.0.0
+description: Comprehensive brand health assessment from perception audit through touchpoint review to consistency scoring and action plan
+
+trigger:
+  command: "*brand-health-check"
+  agent: brand-auditor
+
+phases:
+  - id: perception
+    name: Brand Perception Audit
+    agent: brand-auditor
+    task: brand-perception-audit
+    inputs:
+      - brand
+      - intended_perception
+      - channels
+    outputs:
+      - perception_scores
+      - perception_gaps
+      - channel_breakdown
+    next: touchpoints
+
+  - id: touchpoints
+    name: Touchpoint Audit
+    agent: brand-auditor
+    task: touchpoint-audit
+    inputs:
+      - brand
+      - perception_gaps
+    outputs:
+      - touchpoint_inventory
+      - compliance_scores
+      - non_compliant_list
+    next: scoring
+
+  - id: scoring
+    name: Consistency Scoring
+    agent: brand-auditor
+    task: consistency-score
+    inputs:
+      - perception_scores
+      - compliance_scores
+      - touchpoint_inventory
+    outputs:
+      - consistency_score
+      - dimension_breakdown
+      - weakest_areas
+    next: recommendations
+
+  - id: recommendations
+    name: Recommendations & Roadmap
+    agent: brand-auditor
+    inputs:
+      - perception_gaps
+      - non_compliant_list
+      - weakest_areas
+      - consistency_score
+    outputs:
+      - improvement_roadmap
+      - quick_wins
+      - long_term_strategy
+    next: review
+
+  - id: review
+    name: Health Report Review
+    agent: brand-auditor
+    inputs:
+      - consistency_score
+      - improvement_roadmap
+      - perception_gaps
+    outputs:
+      - brand_health_report
+      - executive_summary
+      - monitoring_cadence
+    decisions:
+      healthy: deliver
+      needs_action: deliver
+      critical: escalate
+
+  - id: deliver
+    name: Delivery Ready
+    agent: brand-auditor
+    outputs:
+      - final_health_report
+      - action_plan
+      - monitoring_schedule
+
+  - id: escalate
+    name: Escalation
+    agent: brand-auditor
+    outputs:
+      - critical_issues_brief
+      - emergency_action_plan
+      - stakeholder_notification
+
+quality_gates:
+  - phase: perception
+    checklist: brand-health-checklist
+  - phase: touchpoints
+    checklist: brand-health-checklist
+  - phase: scoring
+    checklist: brand-health-checklist
+
+metrics:
+  - overall_consistency_score
+  - touchpoints_audited
+  - perception_gap_average
+  - remediation_progress
+
+tags:
+  - brand-health
+  - perception
+  - consistency
+  - audit

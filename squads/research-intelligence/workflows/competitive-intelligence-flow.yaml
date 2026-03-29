@@ -1,0 +1,108 @@
+# Competitive Intelligence Flow
+# Deep competitor analysis from identification to positioning
+
+name: competitive-intelligence-flow
+version: 1.0.0
+description: Focused competitive intelligence workflow from competitor identification through visual audit to positioning map
+
+trigger:
+  command: "*competitive-intelligence"
+  agent: competitive-analyst
+
+phases:
+  - id: identification
+    name: Competitor Identification
+    agent: competitive-analyst
+    inputs:
+      - industry
+      - brand_profile
+      - geography
+    outputs:
+      - competitor_list
+      - competitor_classification
+      - competitor_urls
+    next: audit
+
+  - id: audit
+    name: Full Competitive Audit
+    agent: competitive-analyst
+    task: competitive-audit
+    inputs:
+      - competitor_list
+      - industry
+    outputs:
+      - competitive_matrix
+      - scoring_results
+      - differentiation_gaps
+    next: benchmark
+
+  - id: benchmark
+    name: Visual Benchmarking
+    agent: competitive-analyst
+    task: visual-benchmark
+    inputs:
+      - competitor_urls
+      - competitive_matrix
+    outputs:
+      - palette_comparison
+      - typography_comparison
+      - layout_patterns
+      - visual_evidence
+    next: positioning
+
+  - id: positioning
+    name: Positioning Map
+    agent: competitive-analyst
+    task: positioning-map
+    inputs:
+      - competitive_matrix
+      - palette_comparison
+      - differentiation_gaps
+    outputs:
+      - positioning_map
+      - white_space_analysis
+      - positioning_recommendation
+    next: review
+
+  - id: review
+    name: Intelligence Review
+    agent: competitive-analyst
+    inputs:
+      - competitive_matrix
+      - positioning_map
+      - visual_evidence
+    outputs:
+      - competitive_intelligence_report
+      - strategic_recommendations
+      - monitoring_plan
+    decisions:
+      complete: deliver
+      needs_deeper_analysis: audit
+
+  - id: deliver
+    name: Delivery Ready
+    agent: competitive-analyst
+    outputs:
+      - final_intelligence_package
+      - positioning_strategy
+      - competitive_monitoring_dashboard
+
+quality_gates:
+  - phase: audit
+    checklist: competitive-audit-checklist
+  - phase: benchmark
+    checklist: competitive-audit-checklist
+  - phase: review
+    checklist: research-quality-checklist
+
+metrics:
+  - competitors_analyzed
+  - visual_evidence_count
+  - white_spaces_identified
+  - intelligence_freshness
+
+tags:
+  - competitive
+  - intelligence
+  - positioning
+  - visual-audit
