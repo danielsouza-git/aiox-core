@@ -1,6 +1,7 @@
 """Authentication para Google APIs — suporta API key e OAuth2."""
 
 import os
+import sys
 from googleapiclient.discovery import build
 
 
@@ -12,7 +13,12 @@ SCOPES = [
 ]
 
 # Diretorio raiz do projeto (pauta-automation/)
-_PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# Quando empacotado como executavel (PyInstaller), __file__ aponta para _MEIPASS
+# temporario. Usamos sys.executable para resolver o diretorio real do .exe.
+if getattr(sys, "frozen", False):
+    _PROJECT_ROOT = os.path.dirname(os.path.abspath(sys.executable))
+else:
+    _PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # Cache de credenciais para evitar refresh multiplos na mesma sessao
 _cached_creds = None

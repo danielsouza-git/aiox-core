@@ -13,6 +13,7 @@ Estrategia: duplica slides template e substitui conteudo via placeholders.
 import logging
 import os
 import re
+import sys
 import time
 from typing import Callable, Optional
 from urllib.parse import urlparse
@@ -35,10 +36,13 @@ from src.google_api.slides_client import SlidesClient
 from src.processors.base import BaseProcessor
 
 # Diretorio de logos locais
-LOGOS_DIR = os.path.join(
-    os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
-    "assets", "logos",
-)
+# Quando empacotado como executavel (PyInstaller), __file__ aponta para _MEIPASS
+# temporario. Usamos sys.executable para resolver o diretorio real do .exe.
+if getattr(sys, "frozen", False):
+    _LOGOS_BASE = os.path.dirname(os.path.abspath(sys.executable))
+else:
+    _LOGOS_BASE = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+LOGOS_DIR = os.path.join(_LOGOS_BASE, "assets", "logos")
 
 logger = logging.getLogger(__name__)
 

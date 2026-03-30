@@ -6,6 +6,7 @@ Estrategia: oEmbed API quando disponivel, scraping como fallback.
 
 import os
 import re
+import sys
 import tempfile
 from typing import Optional
 
@@ -27,7 +28,13 @@ BROWSER_HEADERS = {
 }
 
 # Diretorio para assets de logos de plataformas
-ASSETS_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "assets", "platform_logos")
+# Quando empacotado como executavel (PyInstaller), __file__ aponta para _MEIPASS
+# temporario. Usamos sys.executable para resolver o diretorio real do .exe.
+if getattr(sys, "frozen", False):
+    _ASSETS_BASE = os.path.dirname(os.path.abspath(sys.executable))
+else:
+    _ASSETS_BASE = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+ASSETS_DIR = os.path.join(_ASSETS_BASE, "assets", "platform_logos")
 
 
 def extract_post_content(url: str, platform: Platform) -> PostContent:
