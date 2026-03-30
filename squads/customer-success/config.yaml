@@ -1,0 +1,215 @@
+# ===============================================================================
+# Squad: Customer Success -- Client Lifecycle
+# Domain: Onboarding, Suporte, Retencao e Sucesso do Cliente
+# Created: 2026-03-29
+# Version: 1.0.0
+# ===============================================================================
+
+squad:
+  name: customer-success
+  display_name: "Customer Success Squad -- Client Lifecycle"
+  version: "1.0.0"
+  domain: "Onboarding, Suporte, Retencao e Sucesso do Cliente"
+  description: |
+    Squad responsavel pelo ciclo de vida completo do cliente: desde o welcome e
+    onboarding apos fechamento de venda, passando por suporte tecnico (triage,
+    resolucao, escalacao), ate engajamento proativo, deteccao de upsell e
+    prevencao de churn. CS/Retencao foca em saude e retencao do cliente
+    (distinto do squad Produto, onde CS/Retencao valida qualidade do produto).
+
+  philosophy: |
+    "Cliente satisfeito e cliente que fica, expande e indica."
+    Cada interacao deve gerar valor percebido. O onboarding garante a primeira
+    vitoria rapida. O suporte resolve com agilidade e documentacao. A retencao
+    antecipa problemas antes que o cliente pense em sair.
+
+  keywords:
+    - customer-success
+    - onboarding
+    - suporte
+    - retencao
+    - churn
+    - nps
+    - health-score
+    - upsell
+    - ticket
+    - engajamento
+
+  entry_agent: cs-head
+  created_by: "dex-builder"
+  created_at: "2026-03-29"
+
+# -------------------------------------------------------------------------------
+# TIER ARCHITECTURE
+# -------------------------------------------------------------------------------
+
+tiers:
+  tier_0:
+    name: "Estrategia e Coordenacao"
+    agents:
+      - cs-head
+    purpose: "Define estrategia CS, monitora saude da base, acompanha churn, remove blockers"
+
+  tier_1:
+    name: "Ativacao e Suporte"
+    agents:
+      - onboarding-specialist
+      - suporte
+    purpose: "Onboarding de novos clientes e suporte tecnico para clientes ativos"
+
+  tier_2:
+    name: "Retencao e Expansao"
+    agents:
+      - cs-retencao
+    purpose: "Monitoramento de saude, engajamento proativo, deteccao de upsell e prevencao de churn"
+
+# -------------------------------------------------------------------------------
+# AGENT REGISTRY
+# -------------------------------------------------------------------------------
+
+agents:
+  cs-head:
+    file: agents/cs-head.md
+    tier: 0
+    focus: "Estrategia CS, monitoramento de saude da base, acompanhamento de churn e NPS"
+
+  onboarding-specialist:
+    file: agents/onboarding-specialist.md
+    tier: 1
+    focus: "Welcome, setup, primeira vitoria e handoff para CS ongoing"
+
+  suporte:
+    file: agents/suporte.md
+    tier: 1
+    focus: "Triage N1/N2/N3, resolucao de tickets, escalacao e metricas de suporte"
+
+  cs-retencao:
+    file: agents/cs-retencao.md
+    tier: 2
+    focus: "Health check, engajamento proativo, deteccao de upsell e prevencao de churn"
+
+
+# -------------------------------------------------------------------------------
+# TASK REGISTRY
+# -------------------------------------------------------------------------------
+
+components:
+  tasks:
+    # onboarding-specialist
+    - welcome-client.md
+    - setup-account.md
+    - first-value.md
+    - handoff-to-cs.md
+    # suporte
+    - ticket-triage.md
+    - resolve-ticket.md
+    - escalate-ticket.md
+    - support-report.md
+    # cs-retencao
+    - health-check.md
+    - engagement.md
+    - upsell-detection.md
+    - churn-prevention.md
+
+
+# -------------------------------------------------------------------------------
+# HANDOFF MATRIX
+# -------------------------------------------------------------------------------
+
+handoffs:
+  cs-head:
+    routes_to: [onboarding-specialist, suporte, cs-retencao]
+    receives_from: ["vendas (close-deal)", "produto (feedback)"]
+
+  onboarding-specialist:
+    routes_to: [cs-retencao]
+    receives_from: [cs-head, "vendas (close-deal)"]
+    escalates_to: [cs-head]
+    gate: "handoff-to-cs completo (cliente ativado e contexto documentado)"
+
+  suporte:
+    routes_to: ["produto (feedback-loop)"]
+    receives_from: [cs-head, "clientes (tickets)"]
+    escalates_to: [cs-head]
+    gate: "support-report entregue com metricas e problemas recorrentes"
+
+  cs-retencao:
+    routes_to: ["vendas (sdr - upsell)", "produto (feedback-loop)"]
+    receives_from: [onboarding-specialist, cs-head]
+    escalates_to: [cs-head]
+    gate: "health-check scoring atualizado e acoes definidas"
+
+
+# -------------------------------------------------------------------------------
+# CROSS-SQUAD FLOWS
+# -------------------------------------------------------------------------------
+
+cross_squad_flows:
+  inbound:
+    - source: "vendas"
+      trigger: "Close Deal -- contrato assinado"
+      task: "welcome-client"
+      receives: "onboarding-specialist"
+      description: "Novo cliente fechado por Vendas entra no fluxo de onboarding"
+
+    - source: "produto"
+      trigger: "Feedback Loop -- experiencia do cliente"
+      receives: "cs-head"
+      description: "Feedback de qualidade de produto para alinhamento com CS"
+
+  outbound:
+    - target: "vendas (sdr)"
+      trigger: "Upsell Detection -- lead quente identificado"
+      task: "upsell-detection"
+      delivers: "cs-retencao"
+      description: "Oportunidade de expansao identificada, passa lead para SDR"
+
+    - target: "produto"
+      trigger: "Support Report -- problemas recorrentes"
+      task: "support-report"
+      delivers: "suporte"
+      description: "Problemas recorrentes de suporte reportados para Produto corrigir"
+
+    - target: "produto"
+      trigger: "Feedback de experiencia do cliente"
+      delivers: "cs-retencao"
+      description: "Feedback de experiencia do cliente para Feedback Loop do Produto"
+
+# -------------------------------------------------------------------------------
+# CROSS-CUTTING CONCERNS
+# -------------------------------------------------------------------------------
+
+cross_cutting:
+  external_dependencies:
+    description: "CS depende de Vendas (recebe clientes) e alimenta Produto e Vendas"
+    inbound:
+      - source: "vendas"
+        trigger: "Contrato assinado via Close Deal"
+        receives: "onboarding-specialist via cs-head"
+    outbound:
+      - target: "vendas (sdr)"
+        trigger: "Upsell detectado em cliente satisfeito"
+        delivers: "Lead quente com contexto de uso"
+      - target: "produto"
+        trigger: "Problemas recorrentes identificados em Support Report"
+        delivers: "Lista de problemas com frequencia e impacto"
+
+  tools_ecosystem:
+    description: "Ferramentas externas SaaS utilizadas pelo squad"
+    tools:
+      - CRM (HubSpot/Pipedrive)
+      - ClickUp
+      - Slack
+      - Intercom
+      - Zendesk
+      - Freshdesk
+      - Email
+      - WhatsApp
+      - Zoom
+      - Loom
+      - Notion
+      - Google Sheets
+
+  quality_standards:
+    default_threshold: 70
+    description: "Cada task deve atingir >70% no quality gate para ser considerada entregue"

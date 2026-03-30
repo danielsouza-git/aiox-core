@@ -1,0 +1,67 @@
+# Pipeline State Template
+# Copy this file to .aiox/branding/{client}/pipeline-state.yaml when initializing a pipeline
+
+pipeline:
+  client: "{client_name}"
+  mode: "full"  # full | express | refresh
+  status: "not_started"  # not_started | in_progress | completed | failed | paused
+  started_at: null
+  completed_at: null
+  current_phase: null
+
+phases:
+  research:
+    status: "pending"  # pending | running | passed | failed | skipped
+    started_at: null
+    completed_at: null
+    agent: "market-researcher"
+    gate_score: null
+    outputs: []
+    error: null
+
+  discovery:
+    status: "pending"
+    started_at: null
+    completed_at: null
+    agent: "brand-strategist"
+    gate_score: null
+    outputs: []
+    error: null
+
+  design-system:
+    status: "pending"
+    started_at: null
+    completed_at: null
+    agent: "ds-architect"
+    gate_score: null
+    outputs: []
+    error: null
+
+  visual:
+    status: "pending"
+    started_at: null
+    completed_at: null
+    agent: "art-director"
+    gate_score: null
+    outputs: []
+    error: null
+
+  content:
+    status: "pending"
+    started_at: null
+    completed_at: null
+    agent: "copy-chief"
+    gate_score: null
+    outputs: []
+    error: null
+
+  qa:
+    status: "pending"
+    started_at: null
+    completed_at: null
+    agent: "visual-qa"
+    gate_score: null
+    outputs: []
+    error: null
+
+retry_log: []

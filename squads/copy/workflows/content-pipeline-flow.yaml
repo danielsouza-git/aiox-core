@@ -1,0 +1,154 @@
+# Content Pipeline Flow
+# SEO content production at scale
+
+name: content-pipeline-flow
+version: 1.0.0
+description: Scalable SEO content production pipeline from brief to publication
+
+trigger:
+  command: "*content-pipeline"
+  agent: seo-writer
+
+phases:
+  - id: brief
+    name: Content Brief
+    agent: seo-writer
+    task: content-brief-create
+    inputs:
+      - topic_keywords
+      - content_goals
+      - competitor_analysis
+    outputs:
+      - content_brief
+      - keyword_map
+      - outline_structure
+    next: research
+
+  - id: research
+    name: Research & Planning
+    agent: seo-writer
+    inputs:
+      - content_brief
+      - keyword_map
+    outputs:
+      - research_notes
+      - source_links
+      - data_points
+    next: outline
+
+  - id: outline
+    name: Detailed Outline
+    agent: seo-writer
+    inputs:
+      - content_brief
+      - research_notes
+    outputs:
+      - detailed_outline
+      - section_keywords
+      - internal_links
+    next: write
+
+  - id: write
+    name: Content Writing
+    agent: seo-writer
+    task: dynamic
+    inputs:
+      - detailed_outline
+      - research_notes
+    outputs:
+      - draft_content
+    routing:
+      blog: blog-post-create
+      pillar: pillar-content
+      guide: pillar-content
+    next: edit
+
+  - id: edit
+    name: Edit & Polish
+    agent: copy-editor
+    task: copy-edit
+    inputs:
+      - draft_content
+    outputs:
+      - edited_content
+    next: seo
+
+  - id: seo
+    name: SEO Optimization
+    agent: seo-writer
+    task: seo-meta-write
+    inputs:
+      - edited_content
+      - keyword_map
+    outputs:
+      - optimized_content
+      - meta_tags
+      - schema_markup
+    next: review
+
+  - id: review
+    name: Final Review
+    agent: copy-chief
+    task: copy-review-final
+    inputs:
+      - optimized_content
+      - content_brief
+    outputs:
+      - final_content
+      - review_notes
+    decisions:
+      approved: publish
+      needs_edit: edit
+      needs_rewrite: write
+
+  - id: publish
+    name: Publish Ready
+    agent: seo-writer
+    outputs:
+      - publication_ready_content
+      - cms_metadata
+      - promotion_plan
+
+content_types:
+  blog_post:
+    length: "1500-2500 words"
+    sections: 5-8
+    images: 3-5
+
+  pillar_page:
+    length: "3000-5000 words"
+    sections: 8-12
+    images: 5-10
+
+  how_to_guide:
+    length: "2000-3500 words"
+    sections: 6-10
+    images: 5-8
+
+seo_requirements:
+  keyword_density: "1-2%"
+  heading_structure: "H1 > H2 > H3"
+  internal_links: "3-5 per 1000 words"
+  external_links: "2-3 authoritative sources"
+  meta_title: "50-60 characters"
+  meta_description: "150-160 characters"
+
+quality_gates:
+  - phase: write
+    checklist: seo-copy-checklist
+  - phase: edit
+    checklist: copy-quality-checklist
+  - phase: seo
+    checklist: seo-copy-checklist
+
+metrics:
+  - brief_to_publish_time
+  - keyword_coverage
+  - readability_score
+  - seo_score
+
+tags:
+  - content
+  - seo
+  - blog
+  - pipeline

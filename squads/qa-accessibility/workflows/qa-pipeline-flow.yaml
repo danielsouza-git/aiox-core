@@ -1,0 +1,184 @@
+# QA Pipeline Flow
+# Complete design QA pipeline from manifest validation through build, export, and compliance
+
+name: qa-pipeline-flow
+version: 2.0.0
+description: End-to-end design QA pipeline covering manifest validation, Next.js build, static export, visual accuracy, accessibility, brand compliance, and performance
+
+trigger:
+  command: "*qa-pipeline"
+  agent: visual-qa
+
+phases:
+  # --- Phase 1: Manifest Validation (before build) ---
+  - id: manifest-validate
+    name: Pipeline Manifest Validation
+    agent: brand-compliance
+    task: manifest-validate
+    outputs:
+      - manifest_validation_report
+      - orphan_references
+    next: next-build-validate
+
+  # --- Phase 2: Build Validation (after code generation) ---
+  - id: next-build-validate
+    name: Next.js Build Validation
+    agent: performance-auditor
+    task: next-build-validate
+    inputs:
+      - manifest_validation_report
+    outputs:
+      - build_validation_report
+      - build_errors
+    next: static-export-validate
+
+  # --- Phase 3: Static Export Validation (after build) ---
+  - id: static-export-validate
+    name: Static Export Validation
+    agent: performance-auditor
+    task: static-export-validate
+    inputs:
+      - build_validation_report
+    outputs:
+      - static_export_report
+      - broken_links
+      - missing_assets
+    next: visual-review
+
+  # --- Phase 4: Visual & Accessibility Checks ---
+  - id: visual-review
+    name: Visual Review
+    agent: visual-qa
+    task: visual-review
+    inputs:
+      - static_export_report
+    outputs:
+      - visual_review_report
+      - screenshots
+      - discrepancies
+    next: cross-browser
+
+  - id: cross-browser
+    name: Cross-Browser Test
+    agent: visual-qa
+    task: cross-browser-test
+    inputs:
+      - visual_review_report
+    outputs:
+      - browser_comparison
+      - browser_screenshots
+    next: responsive
+
+  - id: responsive
+    name: Responsive Test
+    agent: visual-qa
+    task: responsive-test
+    inputs:
+      - visual_review_report
+    outputs:
+      - responsive_report
+      - breakpoint_screenshots
+    next: accessibility
+
+  - id: accessibility
+    name: WCAG Accessibility Audit
+    agent: a11y-tester
+    task: wcag-test
+    inputs:
+      - visual_review_report
+    outputs:
+      - wcag_audit_report
+      - a11y_issues
+    next: brand-compliance
+
+  # --- Phase 5: Brand Compliance (final, includes token + animation checks) ---
+  - id: brand-compliance
+    name: Brand Compliance Check
+    agent: brand-compliance
+    task: brand-compliance-check
+    inputs:
+      - visual_review_report
+      - manifest_validation_report
+    outputs:
+      - compliance_report
+      - compliance_score
+    next: performance
+
+  - id: performance
+    name: Performance Audit
+    agent: performance-auditor
+    task: lighthouse-audit
+    inputs:
+      - visual_review_report
+      - static_export_report
+    outputs:
+      - lighthouse_report
+      - performance_scores
+    next: report
+
+  # --- Phase 6: Final Report ---
+  - id: report
+    name: Final QA Report
+    agent: visual-qa
+    outputs:
+      - consolidated_qa_report
+      - pass_fail_verdict
+      - remediation_priorities
+    summary:
+      sections:
+        - manifest_validation_score
+        - build_health_score
+        - static_export_health_score
+        - visual_accuracy_score
+        - cross_browser_compatibility
+        - responsive_compliance
+        - wcag_compliance_level
+        - brand_compliance_score
+        - component_token_compliance
+        - animation_compliance
+        - lighthouse_scores
+
+quality_gates:
+  - phase: manifest-validate
+    pass_criteria: "All required manifests present, cross-references valid"
+  - phase: next-build-validate
+    pass_criteria: "TypeScript zero errors, next build exit code 0"
+  - phase: static-export-validate
+    pass_criteria: "All routes have HTML, zero broken links"
+  - phase: visual-review
+    checklist: visual-qa-checklist
+  - phase: accessibility
+    checklist: a11y-wcag-checklist
+  - phase: brand-compliance
+    checklist: brand-compliance-checklist
+  - phase: performance
+    checklist: performance-checklist
+
+execution_order:
+  description: |
+    The pipeline executes in strict order:
+    1. manifest-validate (first, before build -- catches config errors)
+    2. next-build-validate (after all code is generated)
+    3. static-export-validate (after build produces out/)
+    4. visual-review, cross-browser, responsive (visual checks on static output)
+    5. accessibility (WCAG audit on static output)
+    6. brand-compliance (final compliance with token + animation checks)
+    7. performance (Lighthouse on static output)
+    8. report (consolidated final report)
+
+metrics:
+  - total_pipeline_time
+  - issues_found_count
+  - critical_issues_count
+  - overall_qa_score
+  - build_health_score
+  - static_export_health_score
+  - manifest_health_score
+
+tags:
+  - qa-pipeline
+  - end-to-end
+  - design-qa
+  - nextjs
+  - static-export
+  - manifest-validation

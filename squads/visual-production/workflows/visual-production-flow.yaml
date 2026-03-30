@@ -1,0 +1,119 @@
+# Visual Production Flow
+# End-to-end visual production from direction to organized delivery
+
+name: visual-production-flow
+version: 1.0.0
+description: Complete visual production workflow from art direction through generation, editing, optimization, and asset organization
+
+trigger:
+  command: "*visual-production"
+  agent: art-director
+
+phases:
+  - id: direction
+    name: Visual Direction
+    agent: art-director
+    task: visual-direction
+    inputs:
+      - project_brief
+      - brand_profile
+    outputs:
+      - visual_direction
+      - moodboard
+      - color_usage_guide
+    next: generate
+
+  - id: generate
+    name: Image Generation
+    agent: ai-image-specialist
+    task: ai-image-generate
+    inputs:
+      - visual_direction
+      - brand_palette
+    outputs:
+      - raw_images
+      - prompt_log
+    next: edit
+
+  - id: edit
+    name: Photo Editing
+    agent: photo-editor
+    task: dynamic
+    inputs:
+      - raw_images
+      - visual_direction
+    outputs:
+      - edited_images
+    routing:
+      retouch: photo-retouch
+      composite: photo-composite
+    next: optimize
+
+  - id: optimize
+    name: Image Optimization
+    agent: photo-editor
+    task: image-optimize
+    inputs:
+      - edited_images
+      - target_platforms
+    outputs:
+      - optimized_images
+      - srcset_snippets
+    next: organize
+
+  - id: organize
+    name: Asset Organization
+    agent: asset-manager
+    task: asset-organize
+    inputs:
+      - optimized_images
+      - project_name
+    outputs:
+      - organized_library
+      - asset_manifest
+    next: review
+
+  - id: review
+    name: Brand Consistency Review
+    agent: art-director
+    task: style-guide-enforce
+    inputs:
+      - organized_library
+      - visual_direction
+    outputs:
+      - compliance_report
+      - fix_recommendations
+    decisions:
+      approved: deliver
+      needs_fixes: edit
+      direction_issue: direction
+
+  - id: deliver
+    name: Delivery
+    agent: asset-manager
+    task: cdn-optimize
+    outputs:
+      - cdn_manifest
+      - integration_snippets
+      - delivery_report
+
+quality_gates:
+  - phase: generate
+    checklist: visual-quality-checklist
+  - phase: edit
+    checklist: brand-consistency-checklist
+  - phase: optimize
+    checklist: asset-delivery-checklist
+  - phase: review
+    checklist: brand-consistency-checklist
+
+metrics:
+  - direction_to_delivery_time
+  - generation_acceptance_rate
+  - optimization_savings_percent
+  - brand_compliance_score
+
+tags:
+  - production
+  - end-to-end
+  - visual

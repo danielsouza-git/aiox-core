@@ -1,0 +1,398 @@
+# ===============================================================================
+# Squad: Auditoria -- Structural Auditing
+# Domain: Auditoria Estrutural de Squads
+# Created: 2026-03-29
+# Version: 1.0.0
+# ===============================================================================
+
+squad:
+  name: auditoria
+  display_name: "Auditoria Squad -- Structural Auditing"
+  version: "1.0.0"
+  domain: "Auditoria Estrutural de Squads"
+  description: |
+    Squad independente responsavel por auditar a ESTRUTURA de todos os outros squads:
+    completude de agentes e tasks, cobertura de funcoes de negocio, correcao de delegacoes,
+    deteccao de overlaps entre squads e conformidade de quality gates.
+    NAO audita processos (isso e do OPS) -- audita se os squads estao completos,
+    corretos e sem lacunas.
+
+  philosophy: |
+    "O que nao e auditado, nao e confiavel."
+    Auditoria independente garante que a estrutura de squads permanece integra,
+    completa e sem duplicacoes nao-intencionais. Cada squad deve ter todos os agentes
+    registrados, todas as tasks existentes, todas as secoes obrigatorias presentes
+    e quality gates configurados corretamente.
+
+  keywords:
+    - auditoria
+    - completude
+    - cobertura
+    - delegacao
+    - overlap
+    - quality-gates
+    - validacao-estrutural
+    - independencia
+
+  entry_agent: auditoria-head
+  created_by: "dex-builder"
+  created_at: "2026-03-29"
+
+# -------------------------------------------------------------------------------
+# INDEPENDENCE DECLARATION
+# -------------------------------------------------------------------------------
+#
+# O Squad Auditoria opera de forma INDEPENDENTE:
+# - NAO reporta a nenhum outro squad
+# - Tem acesso de LEITURA a todos os squads (config.yaml, agents/, tasks/)
+# - Pode ser acionado periodicamente ou sob demanda
+# - Seus findings sao reportados diretamente aos Builders/CEO
+# - Escopo: audita ESTRUTURA (agentes, tasks, cobertura, completude)
+# - NAO audita PROCESSOS (isso e responsabilidade do OPS)
+#
+# Squads auditados:
+# - 7 squads tecnicos: claude-code-mastery, branding, design-system, copy,
+#   visual-production, qa-accessibility, brand-pipeline, research-intelligence
+# - 6 squads de negocio: ops, vendas, administracao, produto, customer-success,
+#   marketing
+# - Qualquer squad futuro adicionado a squads/
+#
+# Domain Auditors (14 auditors housed IN this squad for structural independence):
+# Business squads (7):
+# - ops-domain-auditor -- audits squads/ops/
+# - vendas-domain-auditor -- audits squads/vendas/
+# - admin-domain-auditor -- audits squads/administracao/
+# - produto-domain-auditor -- audits squads/produto/
+# - cs-domain-auditor -- audits squads/customer-success/
+# - marketing-domain-auditor -- audits squads/marketing/
+# - orchestration-domain-auditor -- audits squads/orchestration/
+# Technical squads (7):
+# - branding-domain-auditor -- audits squads/branding/
+# - copy-domain-auditor -- audits squads/copy/
+# - ds-domain-auditor -- audits squads/design-system/
+# - qa-meta-domain-auditor -- audits squads/qa-accessibility/
+# - vp-domain-auditor -- audits squads/visual-production/
+# - bp-domain-auditor -- audits squads/brand-pipeline/
+# - ri-domain-auditor -- audits squads/research-intelligence/
+# All report DIRECTLY to auditoria-head. All live in this squad, NOT in domain squads.
+# -------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------
+# TIER ARCHITECTURE
+# -------------------------------------------------------------------------------
+
+tiers:
+  tier_0:
+    name: "Coordenacao de Auditoria"
+    agents:
+      - auditoria-head
+    purpose: "Comissiona auditorias, revisa relatorios, escala findings, acompanha remediacoes"
+
+  tier_1:
+    name: "Auditoria de Estrutura"
+    agents:
+      - squad-auditor
+    purpose: "Valida completude estrutural de cada squad e conformidade de quality gates"
+
+  tier_2:
+    name: "Analise e Alinhamento"
+    agents:
+      - coverage-analyst
+      - alignment-checker
+    purpose: "Analise de cobertura, deteccao de overlaps e validacao de delegacoes"
+
+  tier_3:
+    name: "Domain Auditors"
+    agents:
+      # Business squads (7)
+      - ops-domain-auditor
+      - vendas-domain-auditor
+      - admin-domain-auditor
+      - produto-domain-auditor
+      - cs-domain-auditor
+      - marketing-domain-auditor
+      - orchestration-domain-auditor
+      # Technical squads (7)
+      - branding-domain-auditor
+      - copy-domain-auditor
+      - ds-domain-auditor
+      - qa-meta-domain-auditor
+      - vp-domain-auditor
+      - bp-domain-auditor
+      - ri-domain-auditor
+    purpose: "Auditores especializados por dominio -- cada um conhece profundamente o squad que audita e reporta findings ao auditoria-head"
+
+# -------------------------------------------------------------------------------
+# AGENT REGISTRY
+# -------------------------------------------------------------------------------
+
+agents:
+  auditoria-head:
+    file: agents/auditoria-head.md
+    tier: 0
+    focus: "Comissiona auditorias, consolida findings, escala para Builders/CEO"
+
+  squad-auditor:
+    file: agents/squad-auditor.md
+    tier: 1
+    focus: "Completude estrutural (agentes, tasks, secoes) e conformidade de quality gates"
+
+  coverage-analyst:
+    file: agents/coverage-analyst.md
+    tier: 2
+    focus: "Cobertura de funcoes de negocio e deteccao de overlap entre squads"
+
+  alignment-checker:
+    file: agents/alignment-checker.md
+    tier: 2
+    focus: "Validacao de delegacoes e consolidacao de relatorio executivo"
+
+  # --- Domain Auditors (Tier 3) --- Business squads ---
+  ops-domain-auditor:
+    file: agents/ops-domain-auditor.md
+    tier: 3
+    focus: "Auditoria do fluxo sequencial, quality gates e integridade de handoffs do squad OPS"
+    audits: squads/ops/
+
+  vendas-domain-auditor:
+    file: agents/vendas-domain-auditor.md
+    tier: 3
+    focus: "Auditoria do funil comercial, handoffs SDR/Closer e cross-squad flows do squad Vendas"
+    audits: squads/vendas/
+
+  admin-domain-auditor:
+    file: agents/admin-domain-auditor.md
+    tier: 3
+    focus: "Auditoria de delegacoes, aprovacoes e compliance das 5 areas funcionais do squad Administracao"
+    audits: squads/administracao/
+
+  produto-domain-auditor:
+    file: agents/produto-domain-auditor.md
+    tier: 3
+    focus: "Auditoria do ciclo de vida do produto, delegacoes e feedback loops do squad Produto"
+    audits: squads/produto/
+
+  cs-domain-auditor:
+    file: agents/cs-domain-auditor.md
+    tier: 3
+    focus: "Auditoria do ciclo do cliente, onboarding, suporte e cross-squad flows do squad CS"
+    audits: squads/customer-success/
+
+  marketing-domain-auditor:
+    file: agents/marketing-domain-auditor.md
+    tier: 3
+    focus: "Auditoria de delegacoes, budget e compliance de canais do squad Marketing"
+    audits: squads/marketing/
+
+  orchestration-domain-auditor:
+    file: agents/orchestration-domain-auditor.md
+    tier: 3
+    focus: "Auditoria de roteamento, cobertura da routing_matrix e fluxos cross-squad do squad Orchestration"
+    audits: squads/orchestration/
+
+  # --- Domain Auditors (Tier 3) --- Technical squads ---
+  branding-domain-auditor:
+    file: agents/branding-domain-auditor.md
+    tier: 3
+    focus: "Auditoria de tokens, brand book, WCAG, assets criativos e fluxo do squad Branding"
+    audits: squads/branding/
+
+  copy-domain-auditor:
+    file: agents/copy-domain-auditor.md
+    tier: 3
+    focus: "Auditoria de tom de voz, SEO, editorial consistency e frameworks do squad Copy"
+    audits: squads/copy/
+
+  ds-domain-auditor:
+    file: agents/ds-domain-auditor.md
+    tier: 3
+    focus: "Auditoria de Atomic Design, token fidelity, a11y e documentacao do squad Design System"
+    audits: squads/design-system/
+
+  qa-meta-domain-auditor:
+    file: agents/qa-meta-domain-auditor.md
+    tier: 3
+    focus: "Meta-auditoria dos processos de QA, cobertura de testes e robustez do squad QA Accessibility"
+    audits: squads/qa-accessibility/
+
+  vp-domain-auditor:
+    file: agents/vp-domain-auditor.md
+    tier: 3
+    focus: "Auditoria de specs tecnicas de assets, qualidade AI e CDN do squad Visual Production"
+    audits: squads/visual-production/
+
+  bp-domain-auditor:
+    file: agents/bp-domain-auditor.md
+    tier: 3
+    focus: "Auditoria de integridade do pipeline, dependencias entre fases e handoffs do squad Brand Pipeline"
+    audits: squads/brand-pipeline/
+
+  ri-domain-auditor:
+    file: agents/ri-domain-auditor.md
+    tier: 3
+    focus: "Auditoria de rastreabilidade de dados, fontes verificaveis e cobertura do squad Research Intelligence"
+    audits: squads/research-intelligence/
+
+# -------------------------------------------------------------------------------
+# HANDOFF MATRIX
+# -------------------------------------------------------------------------------
+
+handoffs:
+  auditoria-head:
+    routes_to:
+      - squad-auditor
+      - coverage-analyst
+      - alignment-checker
+      # Domain Auditors (Tier 3)
+      - ops-domain-auditor
+      - vendas-domain-auditor
+      - admin-domain-auditor
+      - produto-domain-auditor
+      - cs-domain-auditor
+      - marketing-domain-auditor
+      - orchestration-domain-auditor
+      - branding-domain-auditor
+      - copy-domain-auditor
+      - ds-domain-auditor
+      - qa-meta-domain-auditor
+      - vp-domain-auditor
+      - bp-domain-auditor
+      - ri-domain-auditor
+    receives_from: ["builders", "ceo", "on-demand", "periodic", "domain-auditors"]
+
+  squad-auditor:
+    routes_to: [auditoria-head]
+    receives_from: [auditoria-head]
+    escalates_to: [auditoria-head]
+    delivers: "Relatorios de completude e conformidade de quality gates"
+
+  coverage-analyst:
+    routes_to: [auditoria-head]
+    receives_from: [auditoria-head]
+    escalates_to: [auditoria-head]
+    delivers: "Matriz de cobertura e relatorio de overlaps"
+
+  alignment-checker:
+    routes_to: [auditoria-head]
+    receives_from: [auditoria-head]
+    escalates_to: [auditoria-head]
+    delivers: "Relatorio de validacao de delegacoes e relatorio consolidado"
+
+  # --- Domain Auditors handoffs ---
+  ops-domain-auditor:
+    routes_to: [auditoria-head]
+    receives_from: [auditoria-head]
+
+  vendas-domain-auditor:
+    routes_to: [auditoria-head]
+    receives_from: [auditoria-head]
+
+  admin-domain-auditor:
+    routes_to: [auditoria-head]
+    receives_from: [auditoria-head]
+
+  produto-domain-auditor:
+    routes_to: [auditoria-head]
+    receives_from: [auditoria-head]
+
+  cs-domain-auditor:
+    routes_to: [auditoria-head]
+    receives_from: [auditoria-head]
+
+  marketing-domain-auditor:
+    routes_to: [auditoria-head]
+    receives_from: [auditoria-head]
+
+  orchestration-domain-auditor:
+    routes_to: [auditoria-head]
+    receives_from: [auditoria-head]
+
+  branding-domain-auditor:
+    routes_to: [auditoria-head]
+    receives_from: [auditoria-head]
+
+  copy-domain-auditor:
+    routes_to: [auditoria-head]
+    receives_from: [auditoria-head]
+
+  ds-domain-auditor:
+    routes_to: [auditoria-head]
+    receives_from: [auditoria-head]
+
+  qa-meta-domain-auditor:
+    routes_to: [auditoria-head]
+    receives_from: [auditoria-head]
+
+  vp-domain-auditor:
+    routes_to: [auditoria-head]
+    receives_from: [auditoria-head]
+
+  bp-domain-auditor:
+    routes_to: [auditoria-head]
+    receives_from: [auditoria-head]
+
+  ri-domain-auditor:
+    routes_to: [auditoria-head]
+    receives_from: [auditoria-head]
+
+# -------------------------------------------------------------------------------
+# CROSS-CUTTING CONCERNS
+# -------------------------------------------------------------------------------
+
+cross_cutting:
+  independence:
+    description: "Auditoria opera independente de todos os squads"
+    access: "Leitura a todos os squads em squads/"
+    reports_to: "Builders / CEO (direto)"
+    scope: "ESTRUTURA (agentes, tasks, cobertura, completude) -- NAO processos"
+
+  scope_distinction:
+    description: "Diferenca clara entre Auditoria e OPS"
+    auditoria: "Audita se squads estao COMPLETOS e CORRETOS (estrutura)"
+    ops: "Audita se PROCESSOS funcionam corretamente (execucao)"
+
+  tools_ecosystem:
+    description: "Ferramentas utilizadas pelo squad"
+    tools:
+      - Notion
+      - Sheets
+      - Markdown
+
+  quality_standards:
+    default_threshold: 70
+    description: "Cada auditoria gera um relatorio com score de conformidade"
+
+# -------------------------------------------------------------------------------
+# AUDIT WORKFLOW
+# -------------------------------------------------------------------------------
+
+audit_workflow:
+  description: |
+    Fluxo de auditoria nao e sequencial com gates (diferente do OPS).
+    Os 3 agentes especializados podem trabalhar em paralelo.
+    O Alignment Checker consolida TODOS os outputs no relatorio final.
+
+  stages:
+    - stage: 1
+      agent: squad-auditor
+      tasks: [squad-completeness-audit, quality-gate-compliance-check]
+      description: "Valida estrutura e quality gates de cada squad"
+
+    - stage: 2
+      agent: coverage-analyst
+      tasks: [task-coverage-analysis, cross-squad-overlap-detection]
+      description: "Mapeia cobertura e detecta overlaps"
+
+    - stage: 3
+      agent: alignment-checker
+      tasks: [agent-delegation-validation, audit-report]
+      description: "Valida delegacoes e consolida relatorio final"
+
+    - stage: 4
+      agent: "*-domain-auditor"
+      tasks: [domain-audit]
+      description: "Auditoria de dominio por especialistas internos (14 domain auditors em paralelo)"
+      parallel: true
+      note: "Cada domain auditor executa a task domain-audit no squad que audita (campo audits:)"
+
+  final_output: "Relatorio consolidado de auditoria com severidade e acoes recomendadas"

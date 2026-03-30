@@ -59,6 +59,21 @@ squads/*
 !squads/_example/
 # Published squads (whitelisted for repository)
 !squads/claude-code-mastery/
+!squads/ops/
+!squads/vendas/
+!squads/administracao/
+!squads/produto/
+!squads/customer-success/
+!squads/marketing/
+!squads/auditoria/
+!squads/orchestration/
+!squads/research-intelligence/
+!squads/branding/
+!squads/copy/
+!squads/design-system/
+!squads/visual-production/
+!squads/qa-accessibility/
+!squads/brand-pipeline/
 keys/
 *.secret
 *.credentials

@@ -1,0 +1,137 @@
+# Email Campaign Flow
+# Email sequence creation and optimization
+
+name: email-campaign-flow
+version: 1.0.0
+description: Complete email campaign workflow from strategy to deployment
+
+trigger:
+  command: "*email-campaign"
+  agent: email-specialist
+
+phases:
+  - id: strategy
+    name: Campaign Strategy
+    agent: copy-chief
+    task: copy-strategy-create
+    inputs:
+      - campaign_brief
+      - audience_data
+    outputs:
+      - email_strategy
+      - sequence_plan
+      - conversion_goals
+    next: sequence
+
+  - id: sequence
+    name: Sequence Planning
+    agent: email-specialist
+    task: email-sequence-create
+    inputs:
+      - email_strategy
+      - sequence_plan
+    outputs:
+      - email_outline
+      - email_count
+      - timing_schedule
+    next: write
+
+  - id: write
+    name: Write Emails
+    agent: email-specialist
+    task: dynamic
+    inputs:
+      - email_outline
+    outputs:
+      - email_drafts
+    routing:
+      welcome: email-sequence-create
+      newsletter: email-newsletter
+      promotional: email-promotional
+      transactional: email-transactional
+    next: subjects
+
+  - id: subjects
+    name: Subject Lines
+    agent: email-specialist
+    task: subject-line-generate
+    inputs:
+      - email_drafts
+    outputs:
+      - subject_lines
+      - preview_texts
+      - ab_variants
+    next: edit
+
+  - id: edit
+    name: Edit & Polish
+    agent: copy-editor
+    task: copy-edit
+    inputs:
+      - email_drafts
+      - subject_lines
+    outputs:
+      - edited_emails
+    next: test
+
+  - id: test
+    name: Test & Review
+    agent: copy-chief
+    task: copy-review-final
+    inputs:
+      - edited_emails
+      - conversion_goals
+    outputs:
+      - final_emails
+      - test_results
+    decisions:
+      approved: deliver
+      needs_revision: edit
+      strategy_issue: strategy
+
+  - id: deliver
+    name: Campaign Delivery
+    agent: email-specialist
+    outputs:
+      - final_campaign
+      - deployment_notes
+      - tracking_setup
+
+email_types:
+  welcome:
+    emails: 3-5
+    spacing: "1-2 days"
+    goal: onboarding
+
+  nurture:
+    emails: 5-7
+    spacing: "2-3 days"
+    goal: engagement
+
+  launch:
+    emails: 7-10
+    spacing: "1 day"
+    goal: conversion
+
+  promotional:
+    emails: 3-5
+    spacing: "1-2 days"
+    goal: sales
+
+quality_gates:
+  - phase: write
+    checklist: email-copy-checklist
+  - phase: edit
+    checklist: copy-quality-checklist
+
+metrics:
+  - open_rate_target
+  - click_rate_target
+  - conversion_target
+  - sequence_completion
+
+tags:
+  - email
+  - campaign
+  - sequence
+  - automation

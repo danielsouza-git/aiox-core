@@ -1,0 +1,115 @@
+# Asset Pipeline Flow
+# Asset ingestion through processing, optimization, and CDN deployment
+
+name: asset-pipeline-flow
+version: 1.0.0
+description: Automated asset pipeline from ingestion through validation, processing, optimization, and CDN deployment
+
+trigger:
+  command: "*asset-pipeline"
+  agent: asset-manager
+
+phases:
+  - id: ingest
+    name: Asset Ingestion
+    agent: asset-manager
+    task: asset-organize
+    inputs:
+      - asset_source
+      - project_name
+    outputs:
+      - raw_inventory
+      - categorized_assets
+    next: validate
+
+  - id: validate
+    name: Asset Validation
+    agent: art-director
+    task: style-guide-enforce
+    inputs:
+      - categorized_assets
+      - brand_guidelines
+    outputs:
+      - validation_report
+      - approved_assets
+      - rejected_assets
+    decisions:
+      all_approved: process
+      has_rejections: fix
+    next: process
+
+  - id: fix
+    name: Fix Rejected Assets
+    agent: photo-editor
+    task: photo-retouch
+    inputs:
+      - rejected_assets
+      - fix_recommendations
+    outputs:
+      - fixed_assets
+    next: validate
+
+  - id: process
+    name: Format Processing
+    agent: photo-editor
+    task: image-optimize
+    inputs:
+      - approved_assets
+      - format_specs
+    outputs:
+      - processed_assets
+      - optimization_report
+    next: export
+
+  - id: export
+    name: Multi-Format Export
+    agent: asset-manager
+    task: asset-export
+    inputs:
+      - processed_assets
+      - export_profiles
+    outputs:
+      - exported_variants
+      - export_manifest
+    next: deploy
+
+  - id: deploy
+    name: CDN Deployment
+    agent: asset-manager
+    task: cdn-optimize
+    inputs:
+      - exported_variants
+      - cdn_config
+    outputs:
+      - cdn_manifest
+      - cdn_urls
+      - deployment_report
+    next: verify
+
+  - id: verify
+    name: Deployment Verification
+    agent: asset-manager
+    outputs:
+      - verification_report
+      - integration_snippets
+      - final_manifest
+
+quality_gates:
+  - phase: validate
+    checklist: brand-consistency-checklist
+  - phase: process
+    checklist: visual-quality-checklist
+  - phase: export
+    checklist: asset-delivery-checklist
+
+metrics:
+  - ingestion_to_cdn_time
+  - validation_pass_rate
+  - total_size_reduction_percent
+  - cdn_ttfb_average
+
+tags:
+  - pipeline
+  - automation
+  - cdn
+  - asset-management
