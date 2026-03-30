@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= it.currentPage.title %> - <%= it.title %></title>
+  <% if (it.typography && it.typography.meta && it.typography.meta.embedTag) { %>
+  <%~ it.typography.meta.embedTag %>
+  <% } %>
+  <% if (it.breadcrumbs && it.breadcrumbs.jsonLd) { %>
+  <%~ it.breadcrumbs.jsonLd %>
+  <% } %>
+  <link rel="stylesheet" href="./assets/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/fuse.js@7/dist/fuse.min.js" defer></script>
+  <script src="./assets/search.js" defer></script>
+</head>
+<body>
+  <input type="checkbox" id="hamburger-toggle" class="hamburger-toggle" aria-hidden="true">
+
+  <header class="mobile-header" role="banner">
+    <label for="hamburger-toggle" class="hamburger-label" aria-label="Toggle navigation menu">
+      <span></span>
+    </label>
+    <span class="mobile-header__title"><%= it.brand.clientName %></span>
+  </header>
+
+  <div class="page-wrapper">
+    <aside class="sidebar" role="navigation" aria-label="Brand book sections">
+      <div class="sidebar__brand">
+        <img src="./assets/logo.svg" alt="<%= it.brand.clientName %> logo" class="sidebar__logo" width="40" height="40">
+        <div class="sidebar__brand-name"><%= it.brand.clientName %></div>
+        <% if (it.brand.tagline) { %>
+        <div class="sidebar__brand-tagline"><%= it.brand.tagline %></div>
+        <% } %>
+      </div>
+
+      <div class="search-container" style="position: relative;">
+        <label for="brand-search" class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);">Search brand book</label>
+        <input type="search" id="brand-search" class="search-input" placeholder="Search..." aria-label="Search brand book">
+        <div id="search-results" class="search-results" role="listbox" aria-label="Search results"></div>
+      </div>
+
+      <nav>
+        <% if (it.navigationTree && it.navigationTree.length > 0) { %>
+        <ul class="nav-tree" role="list">
+          <% for (const section of it.navigationTree) { %>
+          <% const sectionActive = section.children.some(c => c.slug === it.currentPage.slug); %>
+          <li class="nav-section<%= sectionActive ? ' nav-section--active' : '' %>">
+            <% if (section.children.length === 1 && section.id === 'home') { %>
+            <a href="<%= section.children[0].path %>" class="nav-section__header nav-section__header--link<%= it.currentPage.slug === section.children[0].slug ? ' nav-item--active' : '' %>"<% if (it.currentPage.slug === section.children[0].slug) { %> aria-current="page"<% } %>>
+              <span class="nav-section__icon"><%~ section.icon %></span>
+              <span class="nav-section__title"><%= section.children[0].title %></span>
+            </a>
+            <% } else { %>
+            <details class="nav-section__details"<%= sectionActive ? ' open' : '' %>>
+              <summary class="nav-section__header">
+                <span class="nav-section__icon"><%~ section.icon %></span>
+                <span class="nav-section__title"><%= section.title %></span>
+                <span class="nav-section__chevron" aria-hidden="true"></span>
+              </summary>
+              <ul class="nav-section__items" role="list">
+                <% for (const child of section.children) { %>
+                <li>
+                  <a href="<%= child.path %>" class="nav-item<%= it.currentPage.slug === child.slug ? ' nav-item--active' : '' %><%= child.placeholder ? ' nav-item--placeholder' : '' %>"<% if (it.currentPage.slug === child.slug) { %> aria-current="page"<% } %><% if (child.placeholder) { %> aria-disabled="true"<% } %>>
+                    <%= child.title %>
+                    <% if (child.placeholder) { %><span class="nav-item__badge">Soon</span><% } %>
+                  </a>
+                </li>
+                <% } %>
+              </ul>
+            </details>
+            <% } %>
+          </li>
+          <% } %>
+        </ul>
+        <% } else { %>
+        <ul role="list">
+          <% for (const page of it.pages) { %>
+          <li>
+            <a href="./<%= page.slug %>.html"<% if (it.currentPage.slug === page.slug) { %> class="active" aria-current="page"<% } %>>
+              <%= page.title %>
+            </a>
+          </li>
+          <% } %>
+        </ul>
+        <% } %>
+      </nav>
+    </aside>
+
+    <main class="main-content" id="main-content" role="main">
+      <% if (it.breadcrumbs && it.breadcrumbs.items && it.breadcrumbs.items.length > 1) { %>
+      <nav class="breadcrumb" aria-label="Breadcrumb">
+        <ol class="breadcrumb__list">
+          <% for (let i = 0; i < it.breadcrumbs.items.length; i++) { %>
+          <% const crumb = it.breadcrumbs.items[i]; %>
+          <li class="breadcrumb__item">
+            <% if (i < it.breadcrumbs.items.length - 1) { %>
+            <a href="<%= crumb.href %>" class="breadcrumb__link"><%= crumb.label %></a>
+            <span class="breadcrumb__separator" aria-hidden="true">/</span>
+            <% } else { %>
+            <span class="breadcrumb__current" aria-current="page"><%= crumb.label %></span>
+            <% } %>
+          </li>
+          <% } %>
+        </ol>
+      </nav>
+      <% } %>
+      <%~ it.content %>
+    </main>
+  </div>
+
+  <footer role="contentinfo" style="margin-left: var(--sidebar-width); padding: 24px 64px; border-top: 1px solid var(--color-border); font-size: 13px; color: var(--color-text-secondary);">
+    <% if (it.brand.websiteUrl) { %>
+    <a href="<%= it.brand.websiteUrl %>"><%= it.brand.clientName %></a> &mdash;
+    <% } %>
+    Generated by Brand System Service
+  </footer>
+
+  <script>
+  /* Navigation toggle for file:// protocol compatibility */
+  (function() {
+    'use strict';
+    var details = document.querySelectorAll('.nav-section__details');
+    for (var i = 0; i < details.length; i++) {
+      details[i].addEventListener('toggle', function() {
+        /* Accessibility: ensure expanded state is announced */
+      });
+    }
+  })();
+  </script>
+</body>
+</html>

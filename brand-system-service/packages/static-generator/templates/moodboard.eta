@@ -1,0 +1,44 @@
+<section aria-labelledby="moodboard-title">
+  <h1 id="moodboard-title">Moodboard</h1>
+  <p class="section-intro">
+    Visual direction and design principles for the <%= it.brand.clientName %> brand.
+    Reference imagery and aesthetic guidelines for all design work.
+  </p>
+
+  <% if (it.moodboard && it.moodboard.categories) { %>
+  <% for (const cat of it.moodboard.categories) { %>
+  <h2><%= cat.name %></h2>
+  <p><%= cat.description %></p>
+  <div class="moodboard-grid">
+    <% for (const slot of cat.slots) { %>
+    <div class="moodboard-slot">
+      <% if (slot.imageUrl) { %>
+      <div class="moodboard-slot__image" style="background-image: url('<%= slot.imageUrl %>');" role="img" aria-label="<%= slot.caption %>"></div>
+      <% } else { %>
+      <div class="moodboard-slot__pattern" style="background: <%= slot.cssPattern %>; background-size: 20px 20px;" role="img" aria-label="<%= slot.caption %>">
+        <span class="moodboard-slot__placeholder"><%= slot.description %></span>
+      </div>
+      <% } %>
+      <div class="moodboard-slot__caption"><%= slot.caption %></div>
+      <span class="moodboard-slot__tag"><%= slot.categoryTag %></span>
+    </div>
+    <% } %>
+  </div>
+  <% } %>
+  <% } %>
+
+  <h2>Core Design Principles</h2>
+  <% if (it.moodboard && it.moodboard.designPrinciples) { %>
+  <div class="design-principles-grid">
+    <% for (const dp of it.moodboard.designPrinciples) { %>
+    <div class="design-principle-card">
+      <div class="design-principle-card__swatch" style="background: <%= dp.swatchColor %>;"></div>
+      <div class="design-principle-card__content">
+        <h3 class="design-principle-card__title"><%= dp.title %></h3>
+        <p class="design-principle-card__desc"><%= dp.description %></p>
+      </div>
+    </div>
+    <% } %>
+  </div>
+  <% } %>
+</section>

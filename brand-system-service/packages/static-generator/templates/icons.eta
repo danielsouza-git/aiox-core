@@ -1,0 +1,108 @@
+<section aria-labelledby="icons-title">
+  <h1 id="icons-title">Icon System</h1>
+  <p class="section-intro">
+    Complete icon system for the <%= it.brand.clientName %> brand.
+    All icons use consistent stroke weight, sizing, and color adaptation.
+  </p>
+
+  <h2>Grid Sizes</h2>
+  <p>Icons are designed on a 24px grid and scale to 4 standard sizes.</p>
+  <div class="icon-size-showcase">
+    <% if (it.iconSystem && it.iconSystem.gridSizes) { %>
+    <% const demoIcon = it.iconSystem.icons && it.iconSystem.icons[0] ? it.iconSystem.icons[0] : null; %>
+    <% for (const gs of it.iconSystem.gridSizes) { %>
+    <div class="icon-size-card">
+      <div class="icon-size-card__preview" style="width: <%= gs.size %>px; height: <%= gs.size %>px;" aria-label="Icon at <%= gs.size %>px">
+        <% if (demoIcon) { %>
+        <span style="display:inline-flex;width:<%= gs.size %>px;height:<%= gs.size %>px;" role="img" aria-label="<%= demoIcon.name %> at <%= gs.size %>px"><%~ demoIcon.svg.replace(/width="24"/g, 'width="' + gs.size + '"').replace(/height="24"/g, 'height="' + gs.size + '"') %></span>
+        <% } %>
+      </div>
+      <div class="icon-size-card__label"><%= gs.label %></div>
+    </div>
+    <% } %>
+    <% } %>
+  </div>
+
+  <h2>Icon Library</h2>
+  <p>Search and browse all available icons. Each uses <code>currentColor</code> for automatic color adaptation.</p>
+  <div class="icon-search-wrapper">
+    <input type="text" class="icon-search-input" id="icon-filter" placeholder="Filter icons by name..." aria-label="Filter icons">
+  </div>
+  <div class="icon-grid" id="icon-grid">
+    <% if (it.iconSystem && it.iconSystem.icons) { %>
+    <% for (const ic of it.iconSystem.icons) { %>
+    <div class="icon-card" data-icon-name="<%= ic.name %>">
+      <div class="icon-card__preview" role="img" aria-label="<%= ic.name %> icon"><%~ ic.svg %></div>
+      <div class="icon-card__name"><%= ic.name %></div>
+    </div>
+    <% } %>
+    <% } %>
+  </div>
+
+  <h2>Stroke Rules</h2>
+  <p>All icons follow consistent stroke specifications for visual harmony.</p>
+  <% if (it.iconSystem && it.iconSystem.strokeRules) { %>
+  <div class="stroke-rules-grid">
+    <div class="stroke-rule-card">
+      <div class="stroke-rule-card__label">Stroke Width</div>
+      <div class="stroke-rule-card__value"><%= it.iconSystem.strokeRules.width %></div>
+    </div>
+    <div class="stroke-rule-card">
+      <div class="stroke-rule-card__label">Stroke Cap</div>
+      <div class="stroke-rule-card__value"><%= it.iconSystem.strokeRules.cap %></div>
+    </div>
+    <div class="stroke-rule-card">
+      <div class="stroke-rule-card__label">Stroke Join</div>
+      <div class="stroke-rule-card__value"><%= it.iconSystem.strokeRules.join %></div>
+    </div>
+  </div>
+  <% } %>
+
+  <h2>Accessibility</h2>
+  <% if (it.iconSystem && it.iconSystem.accessibilityGuidelines) { %>
+  <div class="accessibility-guidelines">
+    <article>
+      <h3>Touch Targets</h3>
+      <p>Interactive icons must have a minimum touch target of <strong><%= it.iconSystem.accessibilityGuidelines.minTouchTarget %></strong> (WCAG 2.1 Success Criterion 2.5.5). Add padding if the icon is smaller than this threshold.</p>
+    </article>
+    <article>
+      <h3>ARIA Labels</h3>
+      <p>Decorative icons: use <code>aria-hidden="true"</code>. Interactive icons: provide <code>aria-label</code> describing the action.</p>
+    </article>
+  </div>
+  <% } %>
+
+  <h2>Color Variants</h2>
+  <p>Icons adapt to context through CSS <code>color</code> property. Here are the 6 standard color variants.</p>
+  <% if (it.iconSystem && it.iconSystem.colorVariants && it.iconSystem.icons && it.iconSystem.icons[0]) { %>
+  <% const colorDemoIcon = it.iconSystem.icons[0]; %>
+  <div class="color-variants-grid">
+    <% for (const cv of it.iconSystem.colorVariants) { %>
+    <div class="color-variant-card">
+      <div class="color-variant-card__preview" style="color: <%= cv.value %>;" role="img" aria-label="<%= colorDemoIcon.name %> in <%= cv.name %> color"><%~ colorDemoIcon.svg %></div>
+      <div class="color-variant-card__info">
+        <div class="color-variant-card__name"><%= cv.name %></div>
+        <code class="color-variant-card__css"><%= cv.cssVar %></code>
+        <div class="color-variant-card__value"><%= cv.value %></div>
+      </div>
+    </div>
+    <% } %>
+  </div>
+  <% } %>
+
+  <script>
+  (function() {
+    var input = document.getElementById('icon-filter');
+    var grid = document.getElementById('icon-grid');
+    if (!input || !grid) return;
+    input.addEventListener('input', function() {
+      var q = input.value.toLowerCase().trim();
+      var cards = grid.querySelectorAll('.icon-card');
+      for (var i = 0; i < cards.length; i++) {
+        var name = cards[i].getAttribute('data-icon-name') || '';
+        cards[i].style.display = (!q || name.indexOf(q) !== -1) ? '' : 'none';
+      }
+    });
+  })();
+  </script>
+</section>

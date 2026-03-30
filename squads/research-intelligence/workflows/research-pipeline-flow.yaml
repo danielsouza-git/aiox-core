@@ -1,0 +1,108 @@
+# Research Pipeline Flow
+# Full market research from data collection to insight delivery
+
+name: research-pipeline-flow
+version: 1.0.0
+description: End-to-end research pipeline from market analysis through competitive audit to trend spotting and final report
+
+trigger:
+  command: "*research-pipeline"
+  agent: market-researcher
+
+phases:
+  - id: market-research
+    name: Market Research
+    agent: market-researcher
+    task: market-research
+    inputs:
+      - industry
+      - geography
+      - scope
+    outputs:
+      - market_sizing
+      - key_players
+      - growth_trends
+    next: audience
+
+  - id: audience
+    name: Audience Analysis
+    agent: market-researcher
+    task: audience-analysis
+    inputs:
+      - market_sizing
+      - industry
+    outputs:
+      - audience_segments
+      - personas
+      - pain_points
+    next: competitive
+
+  - id: competitive
+    name: Competitive Audit
+    agent: competitive-analyst
+    task: competitive-audit
+    inputs:
+      - key_players
+      - industry
+    outputs:
+      - competitive_matrix
+      - visual_evidence
+      - differentiation_opportunities
+    next: trends
+
+  - id: trends
+    name: Trend Spotting
+    agent: trend-spotter
+    task: trend-report
+    inputs:
+      - industry
+      - competitive_matrix
+    outputs:
+      - trend_report
+      - trend_applicability
+      - action_recommendations
+    next: synthesis
+
+  - id: synthesis
+    name: Final Report Synthesis
+    agent: market-researcher
+    inputs:
+      - market_sizing
+      - audience_segments
+      - competitive_matrix
+      - trend_report
+    outputs:
+      - research_intelligence_report
+      - executive_summary
+      - strategic_recommendations
+    decisions:
+      complete: deliver
+      gaps_found: market-research
+
+  - id: deliver
+    name: Delivery Ready
+    agent: market-researcher
+    outputs:
+      - final_research_package
+      - presentation_deck_outline
+      - data_appendix
+
+quality_gates:
+  - phase: market-research
+    checklist: research-quality-checklist
+  - phase: competitive
+    checklist: competitive-audit-checklist
+  - phase: synthesis
+    checklist: research-quality-checklist
+
+metrics:
+  - pipeline_completion_time
+  - data_source_count
+  - insight_quality_score
+  - actionability_rating
+
+tags:
+  - research
+  - pipeline
+  - end-to-end
+  - market-intelligence

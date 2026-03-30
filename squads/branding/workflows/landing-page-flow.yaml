@@ -1,0 +1,205 @@
+# landing-page-flow.yaml
+# Workflow: Create and deploy landing page
+# Squad: branding
+
+name: landing-page-flow
+description: "Create conversion-focused landing page from brief to deployment"
+version: "1.0.0"
+squad: branding
+
+trigger:
+  manual: true
+  command: "*landing-flow"
+  agent: web-builder
+
+inputs:
+  - name: client_id
+    type: string
+    required: true
+  - name: page_brief
+    type: LandingPageBrief
+    required: true
+  - name: deploy_platform
+    type: enum
+    values: [vercel, netlify, cloudflare, github, none]
+    default: vercel
+
+outputs:
+  - name: landing_page
+    type: directory
+    path: .aiox/branding/{client_id}/web/landing/{page_id}/
+  - name: deploy_url
+    type: url
+    condition: $inputs.deploy_platform != "none"
+
+# Workflow Steps
+steps:
+  # Step 1: Generate Copy
+  - id: copy-generate
+    task: copy-generate.md
+    agent: ai-orchestrator
+    inputs:
+      content_brief:
+        type: landing_page
+        brief: $inputs.page_brief
+    outputs:
+      copy: $context.copy
+    on_success: landing-page-create
+    on_failure: retry(2)
+
+  # Step 2: Create Landing Page
+  - id: landing-page-create
+    task: landing-page-create.md
+    agent: web-builder
+    inputs:
+      page_brief: $inputs.page_brief
+      copy: $context.copy
+    outputs:
+      landing_page: $context.page
+      figma_link: $context.figma
+    on_success: seo-metadata-generate
+    on_failure: abort
+
+  # Step 3: Generate SEO Metadata
+  - id: seo-metadata-generate
+    task: seo-metadata-generate.md
+    agent: web-builder
+    inputs:
+      page_content: $context.page
+    outputs:
+      seo_metadata: $context.seo
+    on_success: accessibility-check
+    on_failure: retry(1)
+
+  # Step 4: Accessibility Check
+  - id: accessibility-check
+    task: accessibility-check.md
+    agent: qa-reviewer
+    inputs:
+      deliverable: $context.page
+      compliance_level: AA
+    outputs:
+      a11y_report: $context.a11y
+    on_success: check-a11y-pass
+    on_failure: abort
+
+  # Step 5: Check Accessibility Pass
+  - id: check-a11y-pass
+    type: decision
+    condition: $context.a11y.lighthouse_score >= 95
+    on_true: review-deliverable
+    on_false: fix-accessibility
+
+  # Step 5b: Fix Accessibility Issues
+  - id: fix-accessibility
+    task: landing-page-create.md
+    agent: web-builder
+    inputs:
+      page: $context.page
+      fixes: $context.a11y.issues
+      mode: fix
+    outputs:
+      landing_page: $context.page
+    on_success: accessibility-check  # Re-check
+    max_iterations: 2
+
+  # Step 6: QA Review
+  - id: review-deliverable
+    task: review-deliverable.md
+    agent: qa-reviewer
+    inputs:
+      deliverable: $context.page
+      deliverable_type: landing_page
+    outputs:
+      review: $context.review
+    on_success: check-review-pass
+    on_failure: abort
+
+  # Step 7: Check Review Pass
+  - id: check-review-pass
+    type: decision
+    condition: $context.review.verdict in ["PASS", "CONCERNS"]
+    on_true: final-approval
+    on_false: return-for-fixes
+
+  # Step 7b: Return for Fixes
+  - id: return-for-fixes
+    type: notification
+    message: "Landing page requires fixes"
+    notify:
+      - agent: web-builder
+    next: landing-page-create
+
+  # Step 8: Final Approval
+  - id: final-approval
+    task: final-approval.md
+    agent: qa-reviewer
+    inputs:
+      deliverables: [$context.page]
+      review_reports: [$context.review, $context.a11y]
+    outputs:
+      approval: $context.approval
+    on_success: check-deploy
+    on_failure: return-for-fixes
+
+  # Step 9: Check if Deploy Requested
+  - id: check-deploy
+    type: decision
+    condition: $inputs.deploy_platform != "none"
+    on_true: static-deploy
+    on_false: complete
+
+  # Step 10: Deploy to Platform
+  - id: static-deploy
+    task: static-deploy.md
+    agent: web-builder
+    inputs:
+      static_package: $context.page
+      deploy_config:
+        platform: $inputs.deploy_platform
+        project_name: "{client_id}-landing"
+    outputs:
+      deploy_url: $outputs.deploy_url
+    on_success: complete
+    on_failure: notify-deploy-failure
+
+  # Step 10b: Notify Deploy Failure
+  - id: notify-deploy-failure
+    type: notification
+    message: "Deployment failed - page ready for manual deploy"
+    notify:
+      - agent: web-builder
+    next: complete
+
+# Workflow Configuration
+config:
+  timeout: 60_minutes
+  retry_policy:
+    max_retries: 2
+    backoff: linear
+
+  notifications:
+    on_complete:
+      - clickup: update_task_status
+    on_failure:
+      - slack: alert_channel
+
+# Quality Gates
+quality_gates:
+  accessibility:
+    lighthouse_score: ">= 95"
+    wcag_level: AA
+  performance:
+    lighthouse_performance: ">= 90"
+  seo:
+    lighthouse_seo: ">= 95"
+
+# PRD References
+prd_refs:
+  - FR-3.1  # Landing Page Copy
+  - FR-3.2  # Landing Page Design
+  - FR-3.4  # Responsive Design
+  - FR-3.5  # Static Delivery
+  - FR-3.6  # Deployment
+  - FR-3.7  # SEO Metadata
+  - NFR-2.1 # WCAG AA

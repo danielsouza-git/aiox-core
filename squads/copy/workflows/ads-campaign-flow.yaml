@@ -1,0 +1,128 @@
+# Ads Campaign Flow
+# Multi-platform ad copy production
+
+name: ads-campaign-flow
+version: 1.0.0
+description: Multi-platform advertising copy production workflow
+
+trigger:
+  command: "*ads-campaign"
+  agent: ads-writer
+
+phases:
+  - id: angles
+    name: Angle Generation
+    agent: ads-writer
+    task: ad-angles-generate
+    inputs:
+      - campaign_brief
+      - audience_data
+      - competitor_ads
+    outputs:
+      - ad_angles
+      - hook_variations
+      - value_props
+    next: platform
+
+  - id: platform
+    name: Platform Copy
+    agent: ads-writer
+    task: dynamic
+    inputs:
+      - ad_angles
+      - platform_specs
+    outputs:
+      - platform_copy
+    routing:
+      meta: meta-ads-copy
+      google: google-ads-copy
+      linkedin: linkedin-ads-copy
+      youtube: youtube-ads-script
+    parallel: true
+    next: variants
+
+  - id: variants
+    name: A/B Variants
+    agent: copy-editor
+    task: ab-variants
+    inputs:
+      - platform_copy
+    outputs:
+      - copy_variants
+      - test_matrix
+    next: review
+
+  - id: review
+    name: Review & Approve
+    agent: copy-chief
+    task: copy-review-final
+    inputs:
+      - copy_variants
+      - campaign_brief
+    outputs:
+      - approved_copy
+      - feedback
+    decisions:
+      approved: deliver
+      needs_revision: platform
+      angle_issue: angles
+
+  - id: deliver
+    name: Campaign Delivery
+    agent: ads-writer
+    outputs:
+      - final_ads
+      - platform_specs
+      - testing_plan
+
+platform_specs:
+  meta:
+    primary_text: 125
+    headline: 40
+    description: 30
+    formats:
+      - feed
+      - stories
+      - reels
+
+  google:
+    headlines: 30
+    descriptions: 90
+    formats:
+      - search
+      - display
+      - performance_max
+
+  linkedin:
+    introductory_text: 600
+    headline: 200
+    formats:
+      - single_image
+      - carousel
+      - video
+
+  youtube:
+    hook: "5 seconds"
+    script: "15-60 seconds"
+    formats:
+      - bumper
+      - skippable
+      - non_skippable
+
+quality_gates:
+  - phase: platform
+    checklist: conversion-copy-checklist
+  - phase: variants
+    checklist: copy-quality-checklist
+
+metrics:
+  - angles_generated
+  - variants_per_platform
+  - approval_rate
+  - production_time
+
+tags:
+  - ads
+  - paid
+  - campaign
+  - multiplatform

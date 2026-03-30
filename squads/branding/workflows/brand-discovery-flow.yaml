@@ -1,0 +1,125 @@
+# Brand Discovery Flow
+# Complete brand discovery from intake to tokens
+
+name: brand-discovery-flow
+version: 1.0.0
+description: "Complete brand discovery from intake to design tokens"
+
+trigger:
+  manual: true
+  command: "*run-workflow brand-discovery-flow"
+
+steps:
+  - id: discovery
+    name: Brand Discovery
+    agent: brand-strategist
+    task: brand-discovery.md
+    inputs:
+      - intake_form
+      - competitor_urls
+    outputs:
+      - brand_profile
+      - personality_scores
+
+  - id: audit
+    name: Digital Audit (Optional)
+    agent: brand-strategist
+    task: digital-audit.md
+    optional: true
+    condition: "client_urls.length > 0"
+    inputs:
+      - client_urls[]
+    outputs:
+      - audit_report
+      - recommendations
+
+  - id: moodboard
+    name: Moodboard Generation
+    agent: brand-strategist
+    task: moodboard-generate.md
+    depends_on: [discovery]
+    inputs:
+      - brand_profile
+      - visual_preferences
+    outputs:
+      - moodboard_urls[]
+
+  - id: voice-guide
+    name: Voice Guide Generation
+    agent: brand-strategist
+    task: voice-guide-generator.md
+    depends_on: [discovery]
+    inputs:
+      - brand_profile
+    outputs:
+      - voice_guide.md
+
+  - id: manifesto
+    name: Manifesto Generation
+    agent: brand-strategist
+    task: manifesto-generator.md
+    depends_on: [discovery]
+    inputs:
+      - brand_profile
+    outputs:
+      - manifesto.md
+      - taglines[]
+
+  - id: palette
+    name: Color Palette Generation
+    agent: token-engineer
+    task: color-palette-generate.md
+    depends_on: [discovery]
+    inputs:
+      - brand_profile
+      - primary_colors
+    outputs:
+      - palette.json
+      - wcag_report
+
+  - id: typography
+    name: Typography Pairing
+    agent: token-engineer
+    task: typography-pairing.md
+    depends_on: [discovery]
+    inputs:
+      - brand_profile
+      - mood
+    outputs:
+      - typography.json
+      - type_scale
+
+  - id: tokens
+    name: Token Schema Creation
+    agent: token-engineer
+    task: token-schema-create.md
+    depends_on: [palette, typography]
+    inputs:
+      - brand_profile
+      - palette.json
+      - typography.json
+    outputs:
+      - tokens.json
+
+  - id: build
+    name: Style Dictionary Build
+    agent: token-engineer
+    task: style-dictionary-build.md
+    depends_on: [tokens]
+    inputs:
+      - tokens.json
+    outputs:
+      - CSS
+      - SCSS
+      - Tailwind
+      - JSON
+
+artifacts:
+  - brand_profile
+  - voice_guide.md
+  - manifesto.md
+  - moodboard_urls[]
+  - tokens.json
+  - CSS/SCSS/Tailwind exports
+
+estimated_duration: "2-4 hours"

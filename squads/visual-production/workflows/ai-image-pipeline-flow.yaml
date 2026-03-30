@@ -1,0 +1,130 @@
+# AI Image Pipeline Flow
+# Prompt engineering through generation, curation, editing, and delivery
+
+name: ai-image-pipeline-flow
+version: 1.0.0
+description: AI-powered image generation pipeline from prompt engineering through curation, editing, and final delivery
+
+trigger:
+  command: "*ai-image-pipeline"
+  agent: ai-image-specialist
+
+phases:
+  - id: prompt
+    name: Prompt Engineering
+    agent: ai-image-specialist
+    task: ai-prompt-engineer
+    inputs:
+      - concept_brief
+      - brand_style
+      - visual_direction
+    outputs:
+      - prompt_templates
+      - style_tokens
+      - negative_prompts
+    next: generate
+
+  - id: generate
+    name: Image Generation
+    agent: ai-image-specialist
+    task: dynamic
+    inputs:
+      - prompt_templates
+      - generation_params
+    outputs:
+      - raw_generations
+      - generation_log
+    routing:
+      single: ai-image-generate
+      batch: batch-image-generate
+    next: curate
+
+  - id: curate
+    name: Image Curation
+    agent: art-director
+    task: style-guide-enforce
+    inputs:
+      - raw_generations
+      - visual_direction
+      - brand_guidelines
+    outputs:
+      - selected_images
+      - rejected_images
+      - curation_feedback
+    decisions:
+      sufficient: edit
+      need_more: regenerate
+      direction_change: prompt
+
+  - id: regenerate
+    name: Targeted Regeneration
+    agent: ai-image-specialist
+    task: ai-image-generate
+    inputs:
+      - curation_feedback
+      - prompt_templates
+    outputs:
+      - additional_generations
+    max_iterations: 3
+    next: curate
+
+  - id: edit
+    name: Post-Processing
+    agent: photo-editor
+    task: photo-retouch
+    inputs:
+      - selected_images
+      - brand_palette
+    outputs:
+      - edited_images
+    next: optimize
+
+  - id: optimize
+    name: Optimization
+    agent: photo-editor
+    task: image-optimize
+    inputs:
+      - edited_images
+      - target_platforms
+    outputs:
+      - optimized_images
+    next: deliver
+
+  - id: deliver
+    name: Asset Delivery
+    agent: asset-manager
+    task: asset-organize
+    inputs:
+      - optimized_images
+      - project_name
+    outputs:
+      - organized_assets
+      - asset_manifest
+      - prompt_archive
+
+quality_gates:
+  - phase: curate
+    checklist: brand-consistency-checklist
+  - phase: edit
+    checklist: visual-quality-checklist
+  - phase: optimize
+    checklist: asset-delivery-checklist
+
+ai_config:
+  default_model: flux-1.1-pro
+  fallback_model: dall-e-3
+  max_generations_per_concept: 20
+  curation_threshold: 0.7
+  max_regeneration_cycles: 3
+
+metrics:
+  - prompt_to_delivery_time
+  - generation_acceptance_rate
+  - regeneration_count
+  - cost_per_accepted_image
+
+tags:
+  - ai
+  - generation
+  - pipeline
+  - automated

@@ -1,0 +1,108 @@
+# ===============================================================================
+# Squad: Orchestration Layer
+# Domain: Business Squad Orchestration
+# Created: 2026-03-29
+# Version: 1.0.0
+# ===============================================================================
+
+squad:
+  name: orchestration
+  display_name: "Orchestration Layer"
+  version: "1.0.0"
+  domain: "Business Squad Orchestration"
+  description: |
+    Camada de orquestracao entre os Builders e os squads operacionais.
+    O Chief Orchestrator recebe demandas, analisa, classifica e roteia
+    para o squad head correto.
+  entry_agent: chief-orchestrator
+
+# ---------------------------------------------------------------------------
+# TIER ARCHITECTURE
+# ---------------------------------------------------------------------------
+
+tiers:
+  tier_0:
+    name: "Orchestration"
+    agents:
+      - chief-orchestrator
+    purpose: "Recebe demandas dos Builders e roteia para squads"
+
+# ---------------------------------------------------------------------------
+# AGENT REGISTRY
+# ---------------------------------------------------------------------------
+
+agents:
+  chief-orchestrator:
+    file: agents/chief-orchestrator.md
+    tier: 0
+    focus: "Routing, priorizacao, acompanhamento cross-squad"
+
+
+# ---------------------------------------------------------------------------
+# TASK REGISTRY
+# ---------------------------------------------------------------------------
+
+components:
+  tasks:
+    # chief-orchestrator
+    - route-demand.md
+
+
+# ---------------------------------------------------------------------------
+# ROUTING MATRIX
+# ---------------------------------------------------------------------------
+
+routing_matrix:
+  # Business squads
+  ops: "Processos, mapeamento, arquitetura ClickUp, automacoes, QA de processo"
+  vendas: "Leads, pipeline, propostas, fechamento, forecast"
+  administracao: "Financeiro, RH, juridico, facilities, compliance"
+  produto: "Roadmap, specs, conteudo de produto, qualidade"
+  customer-success: "Onboarding, suporte, retencao, upsell, churn"
+  marketing: "Social media, trafego pago, email, SEO, pesquisa"
+  auditoria: "Auditoria estrutural de squads (sob demanda)"
+  # Brand ecosystem squads
+  branding: "Brand identity, design tokens, brand book, creative production, analytics"
+  copy: "Copywriting: landing pages, emails, ads, social media, sales copy"
+  design-system: "Design tokens para component libraries, atomic design, acessibilidade"
+  visual-production: "Producao visual: art direction, AI images, photo editing, motion design"
+  qa-accessibility: "QA de acessibilidade, brand compliance, visual regression testing"
+  brand-pipeline: "Pipeline de integracao entre squads de marca (orquestracao de brand)"
+  research-intelligence: "Pesquisa de mercado, analise competitiva, tendencias, brand audit"
+
+# ---------------------------------------------------------------------------
+# HANDOFF MATRIX
+# ---------------------------------------------------------------------------
+
+handoffs:
+  chief-orchestrator:
+    routes_to:
+      # Business squads
+      - ops
+      - vendas
+      - administracao
+      - produto
+      - customer-success
+      - marketing
+      - auditoria
+      # Brand ecosystem squads
+      - branding
+      - copy
+      - design-system
+      - visual-production
+      - qa-accessibility
+      - brand-pipeline
+      - research-intelligence
+    receives_from:
+      - builders
+      - squad-heads
+
+
+# ---------------------------------------------------------------------------
+# SETTINGS
+# ---------------------------------------------------------------------------
+
+settings:
+  greeting:
+    level: archetypal
+    show_project_status: true

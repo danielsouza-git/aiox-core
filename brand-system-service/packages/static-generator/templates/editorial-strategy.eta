@@ -1,0 +1,253 @@
+<section aria-labelledby="editorial-strategy-title">
+  <h1 id="editorial-strategy-title">Editorial Strategy</h1>
+  <p class="section-intro">
+    Brand voice, visual system, personality traits, audience personas, and editorial approach
+    for <%= it.brand.clientName %>.
+  </p>
+
+  <nav class="editorial-toc" aria-label="Editorial section navigation">
+    <ul>
+      <li><a href="#visual-system">Visual System</a></li>
+      <li><a href="#brand-traits">Brand Traits</a></li>
+      <li><a href="#audience-personas">Audience Personas</a></li>
+      <li><a href="#editorial-approach">Editorial Strategy</a></li>
+    </ul>
+  </nav>
+
+  <% if (it.editorialStrategy) { %>
+
+  <!-- Visual System (editorial context, not duplicate of color palette) -->
+  <h2 id="visual-system">Visual System</h2>
+  <p>
+    How the core brand colors are used in editorial content. For the complete color palette,
+    see the <a href="./colors.html">Colors</a> page.
+  </p>
+
+  <% if (it.editorialStrategy.visualSystem) { %>
+  <p class="editorial-visual-desc"><%= it.editorialStrategy.visualSystem.description %></p>
+  <div class="editorial-colors-grid">
+    <% for (const color of it.editorialStrategy.visualSystem.colors) { %>
+    <div class="editorial-color-card">
+      <div class="editorial-color-card__swatch" style="background: <%= color.hex %>;"></div>
+      <div class="editorial-color-card__content">
+        <h3 class="editorial-color-card__name"><%= color.name %></h3>
+        <div class="editorial-color-card__hex"><code><%= color.hex %></code></div>
+        <div class="editorial-color-card__role"><%= color.role %></div>
+        <p class="editorial-color-card__usage"><%= color.editorialUsage %></p>
+      </div>
+    </div>
+    <% } %>
+  </div>
+  <% } %>
+
+  <!-- Brand Traits Showcase -->
+  <h2 id="brand-traits">Brand Traits</h2>
+  <p>
+    The personality traits that define how <%= it.brand.clientName %> communicates.
+    These traits shape every piece of content, from headlines to micro-copy.
+  </p>
+
+  <% if (it.editorialStrategy.brandTraits) { %>
+  <div class="editorial-traits-grid">
+    <% for (const trait of it.editorialStrategy.brandTraits.traits) { %>
+    <div class="editorial-trait-card">
+      <div class="editorial-trait-card__icon"><%~ trait.icon %></div>
+      <div class="editorial-trait-card__content">
+        <h3 class="editorial-trait-card__name"><%= trait.name %></h3>
+        <p class="editorial-trait-card__desc"><%= trait.description %></p>
+      </div>
+    </div>
+    <% } %>
+  </div>
+  <% } %>
+
+  <!-- Audience Personas -->
+  <h2 id="audience-personas">Audience Personas</h2>
+  <p>
+    Target audience profiles that guide content creation for <%= it.brand.clientName %>.
+    Understanding these personas ensures every message resonates with the right people.
+  </p>
+
+  <% if (it.editorialStrategy.audiencePersonas) { %>
+  <% if (it.editorialStrategy.audiencePersonas.fallbackMessage) { %>
+  <div class="editorial-fallback-notice" role="note">
+    <strong>Note:</strong> <%= it.editorialStrategy.audiencePersonas.fallbackMessage %>
+  </div>
+  <% } %>
+  <div class="editorial-personas-grid">
+    <% for (const persona of it.editorialStrategy.audiencePersonas.personas) { %>
+    <div class="editorial-persona-card">
+      <h3 class="editorial-persona-card__title"><%= persona.title %></h3>
+      <% if (persona.subtitle) { %>
+      <div class="editorial-persona-card__subtitle"><%= persona.subtitle %></div>
+      <% } %>
+      <p class="editorial-persona-card__desc"><%= persona.description %></p>
+      <% if (persona.characteristics && persona.characteristics.length > 0) { %>
+      <ul class="editorial-persona-card__traits">
+        <% for (const char of persona.characteristics) { %>
+        <li><%= char %></li>
+        <% } %>
+      </ul>
+      <% } %>
+    </div>
+    <% } %>
+  </div>
+  <% } %>
+
+  <!-- Editorial Strategy Documentation -->
+  <h2 id="editorial-approach">Editorial Approach</h2>
+
+  <% if (it.editorialStrategy.editorialStrategy) { %>
+  <div class="editorial-strategy-content">
+    <% for (const para of it.editorialStrategy.editorialStrategy.paragraphs) { %>
+    <p><%= para %></p>
+    <% } %>
+  </div>
+
+  <% if (it.editorialStrategy.editorialStrategy.principles && it.editorialStrategy.editorialStrategy.principles.length > 0) { %>
+  <h3>Editorial Principles</h3>
+  <div class="editorial-principles-list">
+    <% for (const principle of it.editorialStrategy.editorialStrategy.principles) { %>
+    <div class="editorial-principle-item">
+      <div class="editorial-principle-item__marker"></div>
+      <p><%= principle %></p>
+    </div>
+    <% } %>
+  </div>
+  <% } %>
+  <% } %>
+
+  <% } %>
+</section>
+
+<style>
+/* Editorial Strategy page styles — CSS Grid per CON-22 (no CDN) */
+.editorial-toc {
+  margin-bottom: 32px;
+  padding: 16px 24px;
+  background: var(--color-bg-subtle);
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+}
+.editorial-toc ul { list-style: none; display: flex; gap: 24px; flex-wrap: wrap; }
+.editorial-toc a { font-size: 14px; font-weight: 500; }
+
+/* Visual System Colors Grid */
+.editorial-visual-desc { color: var(--color-text-secondary); margin-bottom: 20px; }
+.editorial-colors-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
+}
+.editorial-color-card {
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.editorial-color-card__swatch { height: 80px; width: 100%; }
+.editorial-color-card__content { padding: 16px; }
+.editorial-color-card__name { font-size: 16px; font-weight: 600; margin: 0 0 4px; }
+.editorial-color-card__hex { font-family: var(--font-mono); font-size: 13px; color: var(--color-text-secondary); margin-bottom: 4px; }
+.editorial-color-card__role { font-size: 13px; font-weight: 500; color: var(--brand-primary); margin-bottom: 8px; }
+.editorial-color-card__usage { font-size: 13px; color: var(--color-text-secondary); margin: 0; }
+
+/* Brand Traits Grid */
+.editorial-traits-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
+}
+.editorial-trait-card {
+  display: flex;
+  gap: 16px;
+  padding: 20px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+}
+.editorial-trait-card__icon {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg-subtle);
+  border-radius: 8px;
+  color: var(--brand-primary);
+}
+.editorial-trait-card__icon svg { width: 20px; height: 20px; }
+.editorial-trait-card__content { flex: 1; }
+.editorial-trait-card__name { font-size: 16px; font-weight: 600; margin: 0 0 4px; }
+.editorial-trait-card__desc { font-size: 13px; color: var(--color-text-secondary); margin: 0; }
+
+/* Audience Personas Grid */
+.editorial-fallback-notice {
+  padding: 12px 16px;
+  background: #fef3c7;
+  border: 1px solid #f59e0b;
+  border-radius: 8px;
+  font-size: 13px;
+  margin-bottom: 16px;
+}
+.editorial-personas-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
+}
+.editorial-persona-card {
+  padding: 24px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-bg-subtle);
+}
+.editorial-persona-card__title { font-size: 18px; font-weight: 600; margin: 0 0 4px; }
+.editorial-persona-card__subtitle { font-size: 13px; color: var(--brand-primary); font-weight: 500; margin-bottom: 12px; }
+.editorial-persona-card__desc { font-size: 14px; margin-bottom: 12px; }
+.editorial-persona-card__traits {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.editorial-persona-card__traits li {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  padding: 4px 0;
+  border-top: 1px solid var(--color-border);
+}
+.editorial-persona-card__traits li:first-child { border-top: none; padding-top: 0; }
+
+/* Editorial Strategy Content */
+.editorial-strategy-content { margin-bottom: 24px; }
+.editorial-strategy-content p { max-width: 680px; line-height: 1.7; }
+
+/* Editorial Principles */
+.editorial-principles-list { margin-bottom: 32px; }
+.editorial-principle-item {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--color-border);
+}
+.editorial-principle-item:last-child { border-bottom: none; }
+.editorial-principle-item__marker {
+  flex-shrink: 0;
+  width: 8px;
+  height: 8px;
+  background: var(--brand-primary);
+  border-radius: 50%;
+  margin-top: 7px;
+}
+.editorial-principle-item p { font-size: 14px; margin: 0; max-width: 680px; }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .editorial-toc ul { flex-direction: column; gap: 8px; }
+  .editorial-colors-grid { grid-template-columns: 1fr; }
+  .editorial-traits-grid { grid-template-columns: 1fr; }
+  .editorial-personas-grid { grid-template-columns: 1fr; }
+}
+</style>

@@ -1,0 +1,244 @@
+# ===============================================================================
+# Squad: Marketing -- Growth Engine
+# Domain: Estrategia de Marketing, Midia Paga, Email, SEO e Inteligencia Competitiva
+# Created: 2026-03-29
+# Version: 1.0.0
+# ===============================================================================
+
+squad:
+  name: marketing
+  display_name: "Squad Marketing -- Growth Engine"
+  version: "1.0.0"
+  domain: "Estrategia de Marketing, Midia Paga, Email, SEO e Inteligencia Competitiva"
+  description: |
+    Squad responsavel por toda a maquina de crescimento do negocio: gestao de redes sociais,
+    trafego pago (Meta, Google, TikTok), email marketing com segmentacao comportamental,
+    conteudo organico com foco em SEO e inteligencia competitiva que alimenta todo o time.
+    O Research Analyst delega pesquisas profundas para o squad research-intelligence
+    (Tessa/Cyrus/Maya).
+
+  philosophy: |
+    "Dados guiam criatividade, nao a substituem."
+    Cada canal tem dono, cada metrica tem responsavel, cada real investido tem
+    rastreabilidade. O Head define estrategia e budget, os especialistas executam
+    com autonomia dentro dos limites aprovados. Research alimenta todos com
+    inteligencia de mercado. Ninguem opera no escuro.
+
+  keywords:
+    - marketing
+    - social-media
+    - trafego-pago
+    - media-buyer
+    - email-marketing
+    - seo
+    - conteudo-organico
+    - research
+    - competitor-analysis
+    - trend-hunting
+    - leads
+    - growth
+
+  entry_agent: marketing-head
+  created_by: "dex-builder"
+  created_at: "2026-03-29"
+
+# -------------------------------------------------------------------------------
+# TIER ARCHITECTURE
+# -------------------------------------------------------------------------------
+
+tiers:
+  tier_0:
+    name: "Estrategia e Coordenacao"
+    agents:
+      - marketing-head
+    purpose: "Define estrategia, aprova calendario, distribui budget, alinha metas, cobra metricas"
+
+  tier_1:
+    name: "Execucao de Canais"
+    agents:
+      - social-media-manager
+      - media-buyer
+      - email-strategist
+    purpose: "Execucao operacional dos canais: social, trafego pago e email"
+
+  tier_2:
+    name: "Conteudo e Inteligencia"
+    agents:
+      - content-manager
+      - research-analyst
+    purpose: "Planejamento SEO, conteudo organico e inteligencia competitiva"
+
+# -------------------------------------------------------------------------------
+# AGENT REGISTRY
+# -------------------------------------------------------------------------------
+
+agents:
+  marketing-head:
+    file: agents/marketing-head.md
+    tier: 0
+    focus: "Estrategia de marketing, budget, calendario geral, cobranca de metricas"
+
+  social-media-manager:
+    file: agents/social-media-manager.md
+    tier: 1
+    focus: "Calendario de redes sociais, publicacao, engajamento de comunidade"
+
+  media-buyer:
+    file: agents/media-buyer.md
+    tier: 1
+    focus: "Campanhas de trafego pago, otimizacao de anuncios, escalada de vencedores"
+
+  email-strategist:
+    file: agents/email-strategist.md
+    tier: 1
+    focus: "Segmentacao de email, sequencias automatizadas, analise de metricas"
+
+  content-manager:
+    file: agents/content-manager.md
+    tier: 2
+    focus: "Pesquisa SEO, calendario editorial, publicacao e metricas de conteudo organico"
+
+  research-analyst:
+    file: agents/research-analyst.md
+    tier: 2
+    focus: "Analise competitiva, trend hunting, swipe file -- delega para research-intelligence squad"
+
+
+# -------------------------------------------------------------------------------
+# TASK REGISTRY
+# -------------------------------------------------------------------------------
+
+components:
+  tasks:
+    # social-media-manager
+    - create-social-content.md
+    - schedule-posts.md
+    - engage-community.md
+    # media-buyer
+    - create-campaign.md
+    - optimize-ads.md
+    - scale-winners.md
+    # email-strategist
+    - write-email.md
+    - build-sequence.md
+    - analyze-email-metrics.md
+    # content-manager
+    - seo-research.md
+    - content-planning.md
+    - publish-content.md
+    - content-report.md
+    # research-analyst
+    - competitor-analysis.md
+    - trend-hunting.md
+    - swipe-file.md
+
+
+# -------------------------------------------------------------------------------
+# HANDOFF MATRIX
+# -------------------------------------------------------------------------------
+
+handoffs:
+  marketing-head:
+    routes_to: [social-media-manager, media-buyer, email-strategist, content-manager, research-analyst]
+
+  social-media-manager:
+    collaborates_with: [research-analyst, content-manager]
+    escalates_to: [marketing-head]
+    handoff_output: "Oportunidades de leads -> Vendas (SDR)"
+
+  media-buyer:
+    collaborates_with: [research-analyst]
+    escalates_to: [marketing-head]
+    handoff_output: "Leads gerados por campanhas -> Vendas (SDR)"
+
+  email-strategist:
+    collaborates_with: [content-manager]
+    escalates_to: [marketing-head]
+    handoff_output: "Leads nutridos prontos para abordagem -> Vendas (SDR)"
+
+  content-manager:
+    collaborates_with: [research-analyst, email-strategist]
+    escalates_to: [marketing-head]
+
+  research-analyst:
+    collaborates_with: [social-media-manager, media-buyer, content-manager]
+    escalates_to: [marketing-head]
+    delegation: "Delega pesquisas profundas para research-intelligence squad (Tessa/Cyrus/Maya)"
+
+
+# -------------------------------------------------------------------------------
+# CROSS-SQUAD FLOWS
+# -------------------------------------------------------------------------------
+
+cross_squad_flows:
+  to_vendas_leads:
+    trigger: "Lead gerado por campanha, social media ou email"
+    target_squad: vendas
+    target_agent: sdr
+    payload: "Lead bruto com origem do canal para scoring e qualificacao"
+
+  from_vendas_cold:
+    trigger: "Lead frio devolvido por Vendas para nurture"
+    source_squad: vendas
+    target_agent: email-strategist
+    payload: "Lead com historico de interacoes para fluxo de nurture"
+
+  from_produto_launch:
+    trigger: "Lancamento de produto coordenado pelo Produto squad"
+    source_squad: produto
+    target_agent: marketing-head
+    payload: "Briefing de lancamento com datas, publico e materiais"
+
+  to_ops_process:
+    trigger: "Necessidade de criar ou otimizar processo"
+    target_squad: ops
+    target_agent: ops-head
+    payload: "Pedido de mapeamento ou criacao de processo"
+
+  research_delegation:
+    trigger: "Pesquisa profunda necessaria para analise competitiva ou tendencias"
+    target_squad: research-intelligence
+    target_agent: tessa
+    payload: "Briefing de pesquisa com escopo, setor e objetivos"
+
+# -------------------------------------------------------------------------------
+# CROSS-CUTTING CONCERNS
+# -------------------------------------------------------------------------------
+
+cross_cutting:
+  tools_ecosystem:
+    description: "Ferramentas externas SaaS utilizadas pelo squad"
+    tools:
+      - ClickUp
+      - Notion
+      - Slack
+      - Google Sheets
+      - mLabs
+      - Meta Business
+      - Later
+      - Instagram
+      - WhatsApp
+      - Meta Ads
+      - Google Ads
+      - TikTok Ads
+      - Ads Manager
+      - ActiveCampaign
+      - Ahrefs
+      - Semrush
+      - WordPress
+      - YouTube Studio
+      - TikTok
+      - Twitter
+      - SimilarWeb
+
+  quality_standards:
+    default_threshold: 70
+    description: "Cada entrega deve atingir >70% no quality gate para ser considerada aprovada"
+
+  delegation_rules:
+    description: "Regras de delegacao para squads externos"
+    rules:
+      - "Research Analyst delega pesquisas profundas para research-intelligence squad (Tessa/Cyrus/Maya)"
+      - "Copy e arte sao pedidos a COPY squad -- Marketing nao cria conteudo textual ou visual"
+      - "Automacoes externas ao email sao pedidas a OPS"
+      - "Media Buyer NAO aumenta budget sozinho -- pede aprovacao do Head"

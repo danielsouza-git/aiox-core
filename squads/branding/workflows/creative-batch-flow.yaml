@@ -1,0 +1,150 @@
+# creative-batch-flow.yaml
+# Workflow: Generate batch of social media content
+# Squad: branding
+
+name: creative-batch-flow
+description: "Generate batch of social media content with copy, images, and templates"
+version: "1.0.0"
+squad: branding
+
+trigger:
+  manual: true
+  command: "*batch-flow"
+  agent: creative-producer
+
+inputs:
+  - name: client_id
+    type: string
+    required: true
+  - name: batch_size
+    type: number
+    default: 30
+  - name: platforms
+    type: array
+    default: [instagram, linkedin]
+
+outputs:
+  - name: batch_package
+    type: directory
+    path: .aiox/branding/{client_id}/social/batch-{batch_id}/
+
+# Workflow Steps
+steps:
+  # Step 1: Content Planning
+  - id: content-calendar
+    task: content-calendar.md
+    agent: creative-producer
+    inputs:
+      client_id: $inputs.client_id
+      duration: 4_weeks
+    outputs:
+      calendar: $context.calendar
+    on_success: copy-generate
+    on_failure: abort
+
+  # Step 2: Copy Generation
+  - id: copy-generate
+    task: copy-generate.md
+    agent: ai-orchestrator
+    inputs:
+      content_calendar: $context.calendar
+      batch_size: $inputs.batch_size
+    outputs:
+      copy_collection: $context.copies
+    parallel: true
+    max_concurrency: 10
+    on_success: image-generate
+    on_failure: retry(3)
+
+  # Step 3: Image Generation
+  - id: image-generate
+    task: image-generate.md
+    agent: ai-orchestrator
+    inputs:
+      copy_collection: $context.copies
+      platforms: $inputs.platforms
+    outputs:
+      image_collection: $context.images
+    parallel: true
+    max_concurrency: 5
+    on_success: batch-generate
+    on_failure: retry(2)
+
+  # Step 4: Batch Assembly & Rendering
+  - id: batch-generate
+    task: batch-generate.md
+    agent: creative-producer
+    inputs:
+      copies: $context.copies
+      images: $context.images
+      platforms: $inputs.platforms
+    outputs:
+      batch_package: $context.batch
+    on_success: review-deliverable
+    on_failure: abort
+
+  # Step 5: QA Review
+  - id: review-deliverable
+    task: review-deliverable.md
+    agent: qa-reviewer
+    inputs:
+      deliverable: $context.batch
+      deliverable_type: social_post
+    outputs:
+      review_report: $context.review
+    on_success: check-approval
+    on_failure: abort
+
+  # Step 6: Check Approval Status
+  - id: check-approval
+    type: decision
+    condition: $context.review.verdict == "PASS"
+    on_true: final-approval
+    on_false: return-for-fixes
+
+  # Step 7a: Final Approval (if passed)
+  - id: final-approval
+    task: final-approval.md
+    agent: qa-reviewer
+    inputs:
+      deliverables: $context.batch
+      review_reports: [$context.review]
+    outputs:
+      approval: $outputs.approval
+    on_success: complete
+    on_failure: return-for-fixes
+
+  # Step 7b: Return for Fixes (if failed)
+  - id: return-for-fixes
+    type: notification
+    message: "Batch requires fixes before approval"
+    notify:
+      - agent: creative-producer
+        action: review $context.review.failed_items
+    next: copy-generate  # Loop back
+
+# Workflow Configuration
+config:
+  timeout: 30_minutes
+  retry_policy:
+    max_retries: 3
+    backoff: exponential
+
+  notifications:
+    on_complete:
+      - clickup: update_task_status
+      - email: notify_team
+    on_failure:
+      - slack: alert_channel
+
+# Performance Targets
+targets:
+  duration: "< 15 minutes for 30 posts"
+  success_rate: "> 95%"
+
+# PRD References
+prd_refs:
+  - FR-2.6  # Content Calendar
+  - FR-2.7  # Batch Generation Pipeline
+  - FR-2.9  # Caption Copy
+  - NFR-1.3 # 30 posts in 10 minutes

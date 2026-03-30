@@ -1,0 +1,8 @@
+{
+  "version": "1.0",
+  "projects": {
+    "pauta-automation": "feat/pauta-6.5",
+    "brand-system-service": "feat/bss-1",
+    "session-branch-manager": "feat/session-branch-manager"
+  }
+}

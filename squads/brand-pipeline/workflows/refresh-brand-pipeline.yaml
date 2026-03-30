@@ -1,0 +1,119 @@
+# Refresh Brand Pipeline
+# Re-run only phases where inputs have changed
+
+name: refresh-brand-pipeline
+version: 1.0.0
+description: "Incremental brand pipeline: only re-run phases whose input files are newer than their output files."
+
+trigger:
+  manual: true
+  command: "*pipeline {client_name} --refresh"
+
+strategy: incremental
+
+# Refresh logic:
+# 1. Load pipeline-state.yaml for the client
+# 2. For each phase, compare input file timestamps vs output file timestamps
+# 3. If ANY input is newer than ANY output, mark phase as "stale" and re-run
+# 4. If phase is re-run, all downstream phases must also re-run
+# 5. Respect dependency chain: if discovery re-runs, build phases + QA must re-run
+
+change_detection:
+  method: file_timestamp
+  state_file: ".aiox/branding/{client}/pipeline-state.yaml"
+  rules:
+    - phase: research
+      watch_inputs:
+        - ".aiox/branding/{client}/inputs/industry.md"
+        - ".aiox/branding/{client}/inputs/competitors.yaml"
+      watch_outputs:
+        - ".aiox/branding/{client}/research/market_report.md"
+        - ".aiox/branding/{client}/research/competitive_report.md"
+        - ".aiox/branding/{client}/research/trend_data.md"
+        - ".aiox/branding/{client}/research/audience_personas.md"
+
+    - phase: discovery
+      watch_inputs:
+        - ".aiox/branding/{client}/research/*"
+        - ".aiox/branding/{client}/inputs/brand-brief.md"
+      watch_outputs:
+        - ".aiox/branding/{client}/discovery/brand_profile.json"
+        - ".aiox/branding/{client}/discovery/voice_guide.md"
+        - ".aiox/branding/{client}/discovery/tokens.json"
+
+    - phase: design-system
+      watch_inputs:
+        - ".aiox/branding/{client}/discovery/tokens.json"
+      watch_outputs:
+        - ".aiox/branding/{client}/design-system/css-vars.css"
+        - ".aiox/branding/{client}/design-system/tailwind.config.js"
+        - ".aiox/branding/{client}/design-system/components/"
+
+    - phase: visual
+      watch_inputs:
+        - ".aiox/branding/{client}/discovery/brand_profile.json"
+        - ".aiox/branding/{client}/discovery/moodboard_urls.json"
+        - ".aiox/branding/{client}/discovery/palette.json"
+      watch_outputs:
+        - ".aiox/branding/{client}/visual/generated_images/"
+        - ".aiox/branding/{client}/visual/organized_assets/"
+
+    - phase: content
+      watch_inputs:
+        - ".aiox/branding/{client}/discovery/brand_profile.json"
+        - ".aiox/branding/{client}/discovery/voice_guide.md"
+        - ".aiox/branding/{client}/research/audience_personas.md"
+      watch_outputs:
+        - ".aiox/branding/{client}/content/copy_strategy.md"
+        - ".aiox/branding/{client}/content/landing_copy.md"
+        - ".aiox/branding/{client}/content/social_posts/"
+
+    - phase: qa
+      watch_inputs:
+        - ".aiox/branding/{client}/design-system/"
+        - ".aiox/branding/{client}/visual/"
+        - ".aiox/branding/{client}/content/"
+      watch_outputs:
+        - ".aiox/branding/{client}/qa/delivery_report.md"
+
+execution:
+  steps:
+    - id: detect-changes
+      description: "Compare file timestamps for each phase"
+      action: |
+        For each phase in dependency order:
+        1. Get max mtime of all watch_inputs files
+        2. Get min mtime of all watch_outputs files
+        3. If max_input_mtime > min_output_mtime: mark phase as "stale"
+        4. If phase is stale, mark all downstream phases as stale too
+
+    - id: plan-execution
+      description: "Build execution plan from stale phases"
+      action: |
+        1. Collect all stale phases
+        2. Add transitive dependencies (if discovery is stale, build+QA are stale)
+        3. Display plan to user:
+           - Phases to re-run (with reason: "inputs changed" or "upstream dependency")
+           - Phases to skip (unchanged)
+        4. Estimate duration based on stale phase count
+
+    - id: execute-stale
+      description: "Execute only stale phases"
+      action: |
+        1. Run stale phases using same logic as full-brand-pipeline.yaml
+        2. Respect parallel_group for build phases
+        3. Run gate checklist after each phase
+        4. Update pipeline-state.yaml with new timestamps
+
+    - id: finalize
+      description: "Update state and report"
+      action: |
+        1. Update pipeline-state.yaml
+        2. Log which phases were refreshed vs skipped
+        3. If QA was refreshed, regenerate delivery report
+
+artifacts:
+  # Same as full pipeline, but only for refreshed phases
+  _note: "Only stale phase artifacts are regenerated"
+
+estimated_duration: "Variable (depends on changed phases)"

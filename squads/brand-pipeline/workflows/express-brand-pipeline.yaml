@@ -1,0 +1,154 @@
+# Express Brand Pipeline
+# Fast pipeline: skip research, minimal visual, minimal copy, basic QA
+
+name: express-brand-pipeline
+version: 1.0.0
+description: "Fast brand pipeline: skip research, streamlined build, basic QA. For quick brand refreshes."
+
+trigger:
+  manual: true
+  command: "*pipeline {client_name} --express"
+
+phases:
+  - id: discovery
+    name: Brand Discovery & Foundation
+    squad: branding
+    steps:
+      - id: brand-discovery
+        agent: brand-strategist
+        task: brand-discovery.md
+        inputs: [client_name]
+        outputs: [brand_profile]
+      - id: voice-guide
+        agent: brand-strategist
+        task: voice-guide-generator.md
+        depends_on: [brand-discovery]
+        outputs: [voice_guide]
+      - id: moodboard
+        agent: brand-strategist
+        task: moodboard-generate.md
+        depends_on: [brand-discovery]
+        outputs: [moodboard_urls]
+      - id: palette
+        agent: token-engineer
+        task: color-palette-generate.md
+        depends_on: [brand-discovery]
+        outputs: [palette]
+      - id: typography
+        agent: token-engineer
+        task: typography-pairing.md
+        depends_on: [brand-discovery]
+        outputs: [typography]
+      - id: tokens
+        agent: token-engineer
+        task: token-schema-create.md
+        depends_on: [palette, typography]
+        outputs: [tokens]
+    gate:
+      checklist: pipeline-gate-checklist.md
+      minimum_score: 7
+
+  # Phases 2-3-4 run in PARALLEL (streamlined)
+  - id: design-system
+    name: Design System Build (Streamlined)
+    squad: design-system
+    depends_on: [discovery]
+    parallel_group: build
+    steps:
+      - id: token-transform
+        agent: token-transformer
+        task: token-transform.md
+        inputs: [tokens]
+        outputs: [css_vars, tailwind_config, scss_vars]
+      - id: component-build
+        agent: component-builder
+        task: component-build.md
+        depends_on: [token-transform]
+        outputs: [component_library]
+    gate:
+      checklist: pipeline-gate-checklist.md
+      minimum_score: 6
+
+  - id: visual
+    name: Visual Asset Production (Minimal)
+    squad: visual-production
+    depends_on: [discovery]
+    parallel_group: build
+    steps:
+      - id: visual-direction
+        agent: art-director
+        task: visual-direction.md
+        inputs: [brand_profile, moodboard_urls, palette]
+        outputs: [visual_direction_doc]
+      - id: ai-image-generate
+        agent: ai-image-specialist
+        task: ai-image-generate.md
+        depends_on: [visual-direction]
+        outputs: [generated_images]
+    gate:
+      checklist: pipeline-gate-checklist.md
+      minimum_score: 6
+
+  - id: content
+    name: Content & Copy (Minimal)
+    squad: copy
+    depends_on: [discovery]
+    parallel_group: build
+    steps:
+      - id: copy-strategy
+        agent: copy-chief
+        task: copy-strategy-create.md
+        inputs: [brand_profile, voice_guide]
+        outputs: [copy_strategy]
+      - id: landing-page-copy
+        agent: conversion-writer
+        task: landing-page-copy.md
+        depends_on: [copy-strategy]
+        outputs: [landing_copy]
+    gate:
+      checklist: pipeline-gate-checklist.md
+      minimum_score: 6
+
+  - id: qa
+    name: Basic Quality Check
+    squad: qa-accessibility
+    depends_on: [design-system, visual, content]
+    steps:
+      - id: brand-compliance-check
+        agent: brand-compliance
+        task: brand-compliance-check.md
+        inputs: [brand_profile, all_deliverables]
+        outputs: [compliance_report]
+      - id: lighthouse-audit
+        agent: performance-auditor
+        task: lighthouse-audit.md
+        outputs: [performance_report]
+    gate:
+      checklist: pipeline-gate-checklist.md
+      minimum_score: 6
+
+artifacts:
+  discovery: [brand_profile, voice_guide, moodboard_urls, palette, typography, tokens]
+  design_system: [css_vars, tailwind_config, scss_vars, component_library]
+  visual: [visual_direction_doc, generated_images]
+  content: [copy_strategy, landing_copy]
+  qa: [compliance_report, performance_report]
+
+skipped_phases:
+  - research: "Express mode skips research phase"
+
+skipped_steps:
+  - manifesto: "Express mode skips manifesto generation"
+  - component-variants: "Express mode skips variant generation"
+  - a11y-audit: "Express mode defers a11y to basic QA"
+  - ds-document: "Express mode skips documentation generation"
+  - photo-retouch: "Express mode uses raw AI images"
+  - motion-create: "Express mode skips motion assets"
+  - asset-organize: "Express mode defers organization"
+  - social-post-create: "Express mode skips social content"
+  - seo-meta-write: "Express mode skips SEO"
+  - email-sequence: "Express mode skips email sequences"
+  - visual-review: "Express mode uses compliance check only"
+  - wcag-test: "Express mode defers WCAG to future run"
+
+estimated_duration: "1-2 hours"
