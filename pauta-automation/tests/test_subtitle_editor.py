@@ -348,7 +348,7 @@ class TestSubtitleStyle:
     def test_default_values(self):
         style = SubtitleStyle()
         assert style.font_name == "Arial"
-        assert style.font_size == 21
+        assert style.font_size == 80
         assert style.bold is True
         assert style.color == "&H00FFFFFF"
         assert style.outline_color == "&H00000000"

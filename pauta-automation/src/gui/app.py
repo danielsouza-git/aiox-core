@@ -826,7 +826,8 @@ class PautaBridge:
             return {"status": "error", "message": str(e)}
 
     def embed_subtitles_standalone(
-        self, video_path: str, srt_path: str, style: dict[str, Any]
+        self, video_path: str, srt_path: str, style: dict[str, Any],
+        audio_boost: float | None = None,
     ) -> dict[str, Any]:
         """Embute legendas no video com estilo customizado.
 
@@ -834,6 +835,7 @@ class PautaBridge:
             video_path: Caminho do arquivo de video.
             srt_path: Caminho do arquivo SRT.
             style: Dict com font_size, bold, color, outline_width, position.
+            audio_boost: Audio volume multiplier (e.g. 1.5 for 150%). None = no change.
 
         Returns:
             Status dict.
@@ -845,13 +847,13 @@ class PautaBridge:
             # Convert style dict to SubtitleStyle
             subtitle_style = SubtitleStyle(
                 font_name="Arial",
-                font_size=style.get("font_size", 21),
+                font_size=style.get("font_size", 80),
                 bold=style.get("bold", True),
                 color=style.get("color", "&H00FFFFFF"),  # JS will send in ASS format
                 outline_width=style.get("outline_width", 2),
                 position=style.get("position", "bottom"),
                 border_style=style.get("border_style", 3),
-                background_color=style.get("background_color", "&H80000000"),
+                background_color=style.get("background_color", "&H00000000"),
             )
 
             # Determine output path
@@ -895,6 +897,7 @@ class PautaBridge:
                         subtitle_path=ass_path_or_error,
                         output_path=output_path,
                         progress_callback=on_progress,
+                        audio_boost=audio_boost,
                     )
                     if not success:
                         raise RuntimeError(f"Erro ao embutir legendas: {result}")
@@ -1135,7 +1138,8 @@ class PautaBridge:
             return {"status": "error", "message": str(e)}
 
     def save_subtitles(
-        self, subtitles: list[dict[str, Any]], style: dict[str, Any] | None = None
+        self, subtitles: list[dict[str, Any]], style: dict[str, Any] | None = None,
+        audio_boost: float | None = None,
     ) -> dict[str, Any]:
         """Save edited subtitles, generate ASS, and embed into video.
 
@@ -1143,6 +1147,7 @@ class PautaBridge:
             subtitles: List of subtitle dicts with index, start_seconds, end_seconds, text.
             style: Optional style dict with font_size, bold, color (ASS format),
                    outline_width, position.
+            audio_boost: Audio volume multiplier (e.g. 1.5 for 150%). None = no change.
 
         Returns:
             Status dict.
@@ -1177,7 +1182,7 @@ class PautaBridge:
             # Build style
             subtitle_style = SubtitleStyle(
                 font_name="Arial",
-                font_size=style.get("font_size", 21) if style else 21,
+                font_size=style.get("font_size", 80) if style else 80,
                 bold=style.get("bold", True) if style else True,
                 color=style.get("color", "&H00FFFFFF") if style else "&H00FFFFFF",
                 outline_width=style.get("outline_width", 2) if style else 2,
@@ -1227,6 +1232,7 @@ class PautaBridge:
                         subtitle_path=ass_path_or_error,
                         output_path=output_path,
                         progress_callback=on_progress,
+                        audio_boost=audio_boost,
                     )
                     if not success:
                         raise RuntimeError(f"Erro ao embutir legendas: {result}")

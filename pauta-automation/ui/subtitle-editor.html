@@ -114,7 +114,7 @@
       transform: translateX(-50%);
       max-width: 90%;
       text-align: center;
-      font-size: 21px;
+      font-size: 24px; /* Issue 2: reasonable default; dynamically scaled in applyOverlayStyle */
       font-weight: bold;
       color: #fff;
       text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000;
@@ -139,6 +139,30 @@
     .speed-controls {
       display: flex;
       gap: 4px;
+    }
+
+    .volume-controls {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+      margin-left: 8px;
+    }
+
+    .volume-controls label {
+      font-size: 0.72rem;
+      color: var(--text-soft);
+    }
+
+    .volume-controls input[type="range"] {
+      width: 80px;
+      accent-color: var(--brand-cyan);
+    }
+
+    .volume-controls .volume-val {
+      font-size: 0.72rem;
+      color: var(--text-soft);
+      min-width: 32px;
+      text-align: center;
     }
 
     .video-time {
@@ -173,7 +197,6 @@
       border: 1px solid var(--line-soft);
       border-radius: 6px;
       overflow: hidden;
-      cursor: pointer;
     }
 
     .timeline-wrap canvas {
@@ -467,13 +490,18 @@
         <div id="subtitle-overlay" class="subtitle-overlay"></div>
       </div>
 
-      <!-- Video speed controls -->
+      <!-- Video speed + volume controls -->
       <div class="video-controls">
         <div class="speed-controls">
           <button class="btn btn--ghost btn--sm" onclick="setSpeed(0.5)">0.5x</button>
           <button class="btn btn--ghost btn--sm" onclick="setSpeed(1)">1x</button>
           <button class="btn btn--ghost btn--sm" onclick="setSpeed(1.5)">1.5x</button>
           <button class="btn btn--ghost btn--sm" onclick="setSpeed(2)">2x</button>
+        </div>
+        <div class="volume-controls">
+          <label>Vol:</label>
+          <input type="range" id="volume-slider" min="0.5" max="3.0" step="0.1" value="1.0" oninput="onVolumeChange()" />
+          <span id="volume-val" class="volume-val">1.0x</span>
         </div>
         <span id="video-time" class="video-time">00:00:00 / 00:00:00</span>
       </div>
@@ -498,8 +526,8 @@
         <h4>Estilo da Legenda</h4>
         <div class="style-grid">
           <label>
-            Tamanho: <span id="font-size-val">21</span>px
-            <input type="range" id="style-font-size" min="14" max="42" value="21" oninput="onStyleChange()" />
+            Tamanho: <span id="font-size-val">80</span>px
+            <input type="range" id="style-font-size" min="14" max="120" value="80" oninput="onStyleChange()" />
           </label>
           <label>
             Cor do Texto
@@ -533,8 +561,8 @@
             <input type="color" id="style-bg-color" value="#000000" onchange="onStyleChange()" />
           </label>
           <label>
-            Opacidade: <span id="bg-opacity-val">50</span>%
-            <input type="range" id="style-bg-opacity" min="0" max="100" value="50" oninput="onStyleChange()" />
+            Opacidade: <span id="bg-opacity-val">100</span>%
+            <input type="range" id="style-bg-opacity" min="0" max="100" value="100" oninput="onStyleChange()" />
           </label>
         </div>
       </div>
@@ -580,9 +608,12 @@ let hasUnsavedChanges = false;
 let timelineZoom = 1;
 let isEmbedding = false;
 let embedPollTimer = null;
+let activeSubtitleIdx = -1; /* Bug 3: Track selected subtitle for timeline highlight */
+let userSelectedIdx = -1; /* Issue 3: Track manual user selection separately from playback */
 
+/* Feature 1: Default font_size=80, background opacity 100% */
 const style = {
-  font_size: 21,
+  font_size: 80,
   bold: true,
   color: "#ffffff",
   outline_color: "#000000",
@@ -590,12 +621,45 @@ const style = {
   position: "bottom",
   background_enabled: true,
   background_color: "#000000",
-  background_opacity: 50
+  background_opacity: 100
 };
+
+/* Feature 2: Audio volume boost state */
+let audioBoost = 1.0;
+let audioContext = null;
+let gainNode = null;
+let mediaSource = null;
 
 /* ── API ── */
 function api() {
   return window.pywebview ? window.pywebview.api : null;
+}
+
+/* Feature 2: Web Audio API volume control for preview */
+function initAudioBoost() {
+  const video = document.getElementById("video-player");
+  if (!video || audioContext) return;
+  try {
+    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    mediaSource = audioContext.createMediaElementSource(video);
+    gainNode = audioContext.createGain();
+    gainNode.gain.value = audioBoost;
+    mediaSource.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+  } catch (e) {
+    // Web Audio not available; fall back to no boost
+    audioContext = null;
+  }
+}
+
+function onVolumeChange() {
+  const slider = document.getElementById("volume-slider");
+  audioBoost = parseFloat(slider.value);
+  document.getElementById("volume-val").textContent = audioBoost.toFixed(1) + "x";
+  if (gainNode) {
+    gainNode.gain.value = audioBoost;
+  }
+  hasUnsavedChanges = true;
 }
 
 /* ── Initialization ── */
@@ -634,7 +698,19 @@ function initEditor() {
     videoEl.addEventListener("loadedmetadata", () => {
       drawTimeline();
       updateVideoTime();
+      applyOverlayStyle(); /* Issue 2: compute font size once video dimensions are known */
     });
+
+    // Issue 3: Clear user selection when video starts playing so playback takes over
+    videoEl.addEventListener("play", () => {
+      userSelectedIdx = -1;
+    });
+
+    // Issue 2: Recalculate preview font size when window/video resizes
+    window.addEventListener("resize", () => { applyOverlayStyle(); });
+
+    // Feature 2: Initialize Web Audio API volume on first user interaction
+    videoEl.addEventListener("play", () => { initAudioBoost(); }, { once: true });
   }
 
   renderSubtitles();
@@ -744,29 +820,61 @@ function seekToEntry(idx) {
   if (video && subtitles[idx]) {
     video.currentTime = subtitles[idx].start_seconds;
   }
+  // Issue 3: Set both active and user-selected indices
+  activeSubtitleIdx = idx;
+  userSelectedIdx = idx;
+  updateActiveHighlight(idx);
   updateOverlayForEntry(idx);
+  drawTimeline();
 }
 
+/* Feature 6: addEntry inserts at cursor position (timeline playhead) with 3s gap */
 function addEntry() {
-  const lastEntry = subtitles.length > 0 ? subtitles[subtitles.length - 1] : null;
-  const newStart = lastEntry ? lastEntry.end_seconds : 0;
-  const newEnd = newStart + 3;
+  const video = document.getElementById("video-player");
+  const cursorTime = (video && video.currentTime) ? video.currentTime : 0;
 
-  subtitles.push({
-    index: subtitles.length + 1,
+  // Find insertion index: first subtitle whose start is after cursorTime
+  let insertIdx = subtitles.length;
+  for (let i = 0; i < subtitles.length; i++) {
+    if (subtitles[i].start_seconds > cursorTime) {
+      insertIdx = i;
+      break;
+    }
+  }
+
+  const newStart = cursorTime;
+  // Ensure 3s gap: end at cursorTime+3, but clamp to next subtitle start if needed
+  let newEnd = newStart + 3;
+  if (insertIdx < subtitles.length) {
+    newEnd = Math.min(newEnd, subtitles[insertIdx].start_seconds);
+  }
+  // Ensure minimum duration of 0.5s
+  if (newEnd - newStart < 0.5) {
+    newEnd = newStart + 0.5;
+  }
+
+  const newEntry = {
+    index: insertIdx + 1,
     start_seconds: newStart,
     end_seconds: newEnd,
     text: ""
-  });
+  };
+
+  subtitles.splice(insertIdx, 0, newEntry);
+
+  // Re-index all entries
+  subtitles.forEach((sub, i) => { sub.index = i + 1; });
 
   hasUnsavedChanges = true;
   renderSubtitles();
   updateCount();
   drawTimeline();
 
-  // Scroll to bottom
-  const container = document.getElementById("subtitle-list");
-  container.scrollTop = container.scrollHeight;
+  // Scroll to the new entry
+  const targetEl = document.getElementById("sub-" + insertIdx);
+  if (targetEl) {
+    targetEl.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
 }
 
 function deleteEntry(idx) {
@@ -797,26 +905,39 @@ function onTimeUpdate() {
   // Update time display
   updateVideoTime();
 
-  // Find current subtitle
-  let currentIdx = -1;
+  // Find current subtitle by playhead position
+  let playheadIdx = -1;
   for (let i = 0; i < subtitles.length; i++) {
     if (currentTime >= subtitles[i].start_seconds && currentTime <= subtitles[i].end_seconds) {
-      currentIdx = i;
+      playheadIdx = i;
       break;
     }
   }
 
-  // Update overlay
+  // Update overlay text based on playhead (always reflects what is heard)
   const overlay = document.getElementById("subtitle-overlay");
-  if (currentIdx >= 0) {
-    overlay.textContent = subtitles[currentIdx].text;
+  if (playheadIdx >= 0) {
+    overlay.textContent = subtitles[playheadIdx].text;
+    applyOverlayStyle();
   } else {
     overlay.textContent = "";
   }
 
-  // Highlight in list
+  // Issue 3: Only update activeSubtitleIdx from playback if user has not manually selected
+  if (userSelectedIdx < 0) {
+    activeSubtitleIdx = playheadIdx;
+    updateActiveHighlight(activeSubtitleIdx);
+  }
+  // If user selected, keep activeSubtitleIdx as userSelectedIdx (already set in seekToEntry)
+
+  // Update timeline playhead
+  drawTimeline();
+}
+
+/* Issue 3: Helper to update the active class on subtitle list entries */
+function updateActiveHighlight(highlightIdx) {
   document.querySelectorAll(".sub-entry").forEach((div, idx) => {
-    if (idx === currentIdx) {
+    if (idx === highlightIdx) {
       div.classList.add("active");
       // Scroll into view if not visible
       const container = document.getElementById("subtitle-list");
@@ -829,9 +950,6 @@ function onTimeUpdate() {
       div.classList.remove("active");
     }
   });
-
-  // Update timeline playhead
-  drawTimeline();
 }
 
 function updateVideoTime() {
@@ -843,6 +961,16 @@ function updateVideoTime() {
 }
 
 /* ── Timeline canvas ── */
+/* Timeline block constants */
+const BLOCK_TOP = 20;
+const BLOCK_HEIGHT = 40;
+const BORDER_HIT_ZONE = 6; /* pixels for resize handle */
+
+function getTimelineDuration() {
+  const video = document.getElementById("video-player");
+  return (video && video.duration && isFinite(video.duration)) ? video.duration : 60;
+}
+
 function drawTimeline() {
   const canvas = document.getElementById("timeline-canvas");
   const wrap = document.getElementById("timeline-wrap");
@@ -856,7 +984,7 @@ function drawTimeline() {
 
   ctx.clearRect(0, 0, w, h);
 
-  const duration = (video && video.duration && isFinite(video.duration)) ? video.duration : 60;
+  const duration = getTimelineDuration();
 
   // Background
   ctx.fillStyle = "rgba(9, 17, 29, 0.8)";
@@ -879,14 +1007,21 @@ function drawTimeline() {
     const x1 = (sub.start_seconds / duration) * w;
     const x2 = (sub.end_seconds / duration) * w;
     ctx.fillStyle = colors[i % 2];
-    ctx.fillRect(x1, 20, Math.max(x2 - x1, 2), 40);
+    ctx.fillRect(x1, BLOCK_TOP, Math.max(x2 - x1, 2), BLOCK_HEIGHT);
+
+    // Bug 3: Draw highlight border on the selected/active subtitle block
+    if (i === activeSubtitleIdx) {
+      ctx.strokeStyle = "#00AAFF";
+      ctx.lineWidth = 2;
+      ctx.strokeRect(x1, BLOCK_TOP, Math.max(x2 - x1, 2), BLOCK_HEIGHT);
+    }
 
     // Label
     if ((x2 - x1) > 20) {
       ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
       ctx.font = "9px sans-serif";
       const label = "#" + sub.index;
-      ctx.fillText(label, x1 + 3, 44);
+      ctx.fillText(label, x1 + 3, BLOCK_TOP + 24);
     }
   });
 
@@ -906,30 +1041,210 @@ function drawTimeline() {
   }
 }
 
-// Timeline click to seek
+/* ── Timeline interaction: Features 3, 4, 5, 7 ── */
+/* Feature 3: Fix click-to-select (use canvas-relative coords, account for scroll)
+   Feature 4: Drag subtitle blocks on timeline
+   Feature 5: Resize blocks by dragging borders
+   Feature 7: Contextual cursors */
+
+let tlDragState = null; // { type: 'seek' | 'move' | 'resize-start' | 'resize-end', idx, startX, origStart, origEnd }
+
+function hitTestTimeline(canvasX, canvasY) {
+  /* Returns { type: 'border-start' | 'border-end' | 'block' | 'empty', idx } */
+  /* Bug 2 fix: First find which block contains the point, then check if the
+     point is near that block's own borders. This prevents the border hit zone
+     of an adjacent block from stealing clicks meant for the next block. */
+  const canvas = document.getElementById("timeline-canvas");
+  const w = canvas.width;
+  const duration = getTimelineDuration();
+
+  if (canvasY < BLOCK_TOP || canvasY > BLOCK_TOP + BLOCK_HEIGHT) {
+    return { type: "empty", idx: -1 };
+  }
+
+  // First pass: find the block whose interior contains the click point
+  let hitIdx = -1;
+  for (let i = 0; i < subtitles.length; i++) {
+    const x1 = (subtitles[i].start_seconds / duration) * w;
+    const x2 = (subtitles[i].end_seconds / duration) * w;
+    if (canvasX >= x1 && canvasX <= x2) {
+      hitIdx = i;
+      break;
+    }
+  }
+
+  if (hitIdx >= 0) {
+    // Point is inside a block -- check if near its own borders for resize
+    const x1 = (subtitles[hitIdx].start_seconds / duration) * w;
+    const x2 = (subtitles[hitIdx].end_seconds / duration) * w;
+
+    if (Math.abs(canvasX - x1) <= BORDER_HIT_ZONE) {
+      return { type: "border-start", idx: hitIdx };
+    }
+    if (Math.abs(canvasX - x2) <= BORDER_HIT_ZONE) {
+      return { type: "border-end", idx: hitIdx };
+    }
+    return { type: "block", idx: hitIdx };
+  }
+
+  // Second pass: point is NOT inside any block -- check border zones of nearby blocks
+  for (let i = 0; i < subtitles.length; i++) {
+    const x1 = (subtitles[i].start_seconds / duration) * w;
+    const x2 = (subtitles[i].end_seconds / duration) * w;
+
+    if (Math.abs(canvasX - x1) <= BORDER_HIT_ZONE) {
+      return { type: "border-start", idx: i };
+    }
+    if (Math.abs(canvasX - x2) <= BORDER_HIT_ZONE) {
+      return { type: "border-end", idx: i };
+    }
+  }
+
+  return { type: "empty", idx: -1 };
+}
+
+function canvasCoords(e) {
+  const canvas = document.getElementById("timeline-canvas");
+  const rect = canvas.getBoundingClientRect();
+  const scaleX = canvas.width / rect.width;
+  const scaleY = canvas.height / rect.height;
+  return {
+    x: (e.clientX - rect.left) * scaleX,
+    y: (e.clientY - rect.top) * scaleY
+  };
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   const wrap = document.getElementById("timeline-wrap");
-  wrap.addEventListener("click", (e) => {
-    const video = document.getElementById("video-player");
-    if (!video || !video.duration) return;
-    const rect = wrap.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const ratio = x / rect.width;
-    video.currentTime = ratio * video.duration;
+  const canvas = document.getElementById("timeline-canvas");
+
+  /* Feature 7: Contextual cursors on mousemove */
+  wrap.addEventListener("mousemove", (e) => {
+    if (tlDragState) return; // don't change cursor during drag
+    const coords = canvasCoords(e);
+    const hit = hitTestTimeline(coords.x, coords.y);
+    if (hit.type === "border-start" || hit.type === "border-end") {
+      wrap.style.cursor = "col-resize";
+    } else if (hit.type === "block") {
+      wrap.style.cursor = "grab";
+    } else {
+      wrap.style.cursor = "pointer";
+    }
   });
 
-  // Timeline drag
-  let isDragging = false;
-  wrap.addEventListener("mousedown", () => { isDragging = true; });
-  document.addEventListener("mouseup", () => { isDragging = false; });
-  document.addEventListener("mousemove", (e) => {
-    if (!isDragging) return;
+  wrap.addEventListener("mousedown", (e) => {
+    e.preventDefault();
+    const coords = canvasCoords(e);
+    const hit = hitTestTimeline(coords.x, coords.y);
     const video = document.getElementById("video-player");
-    if (!video || !video.duration) return;
-    const rect = wrap.getBoundingClientRect();
-    const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
-    const ratio = x / rect.width;
-    video.currentTime = ratio * video.duration;
+    const duration = getTimelineDuration();
+
+    if (hit.type === "border-start") {
+      /* Feature 5: Resize start border */
+      tlDragState = {
+        type: "resize-start",
+        idx: hit.idx,
+        startX: coords.x,
+        origStart: subtitles[hit.idx].start_seconds,
+        origEnd: subtitles[hit.idx].end_seconds
+      };
+      wrap.style.cursor = "col-resize";
+    } else if (hit.type === "border-end") {
+      /* Feature 5: Resize end border */
+      tlDragState = {
+        type: "resize-end",
+        idx: hit.idx,
+        startX: coords.x,
+        origStart: subtitles[hit.idx].start_seconds,
+        origEnd: subtitles[hit.idx].end_seconds
+      };
+      wrap.style.cursor = "col-resize";
+    } else if (hit.type === "block") {
+      /* Feature 4: Drag block */
+      tlDragState = {
+        type: "move",
+        idx: hit.idx,
+        startX: coords.x,
+        origStart: subtitles[hit.idx].start_seconds,
+        origEnd: subtitles[hit.idx].end_seconds
+      };
+      wrap.style.cursor = "grabbing";
+      /* Feature 3: Also select the block */
+      seekToEntry(hit.idx);
+    } else {
+      /* Feature 3: Click on empty area = seek */
+      tlDragState = { type: "seek", idx: -1, startX: coords.x, origStart: 0, origEnd: 0 };
+      /* Issue 3: Clear user selection when clicking empty timeline space */
+      userSelectedIdx = -1;
+      activeSubtitleIdx = -1;
+      updateActiveHighlight(-1);
+      if (video && duration) {
+        const w = canvas.width;
+        video.currentTime = (coords.x / w) * duration;
+      }
+    }
+  });
+
+  document.addEventListener("mousemove", (e) => {
+    if (!tlDragState) return;
+    const coords = canvasCoords(e);
+    const w = document.getElementById("timeline-canvas").width;
+    const duration = getTimelineDuration();
+    const video = document.getElementById("video-player");
+
+    if (tlDragState.type === "seek") {
+      /* Scrub seek */
+      if (video && duration) {
+        const clampedX = Math.max(0, Math.min(coords.x, w));
+        video.currentTime = (clampedX / w) * duration;
+      }
+    } else if (tlDragState.type === "move") {
+      /* Feature 4: Move block */
+      const dx = coords.x - tlDragState.startX;
+      const dt = (dx / w) * duration;
+      const blockDur = tlDragState.origEnd - tlDragState.origStart;
+      let newStart = tlDragState.origStart + dt;
+      // Clamp to [0, duration - blockDur]
+      newStart = Math.max(0, Math.min(newStart, duration - blockDur));
+      subtitles[tlDragState.idx].start_seconds = newStart;
+      subtitles[tlDragState.idx].end_seconds = newStart + blockDur;
+      hasUnsavedChanges = true;
+      drawTimeline();
+    } else if (tlDragState.type === "resize-start") {
+      /* Feature 5: Resize start */
+      const dx = coords.x - tlDragState.startX;
+      const dt = (dx / w) * duration;
+      let newStart = tlDragState.origStart + dt;
+      // Clamp: cannot go below 0 or past end - 0.5s
+      newStart = Math.max(0, Math.min(newStart, tlDragState.origEnd - 0.5));
+      subtitles[tlDragState.idx].start_seconds = newStart;
+      hasUnsavedChanges = true;
+      drawTimeline();
+    } else if (tlDragState.type === "resize-end") {
+      /* Feature 5: Resize end */
+      const dx = coords.x - tlDragState.startX;
+      const dt = (dx / w) * duration;
+      let newEnd = tlDragState.origEnd + dt;
+      // Clamp: cannot go before start + 0.5s or past duration
+      newEnd = Math.max(tlDragState.origStart + 0.5, Math.min(newEnd, duration));
+      subtitles[tlDragState.idx].end_seconds = newEnd;
+      hasUnsavedChanges = true;
+      drawTimeline();
+    }
+  });
+
+  document.addEventListener("mouseup", () => {
+    if (tlDragState && (tlDragState.type === "move" || tlDragState.type === "resize-start" || tlDragState.type === "resize-end")) {
+      // Bug 4: Resolve overlaps with neighboring subtitles after drag
+      if (tlDragState.type === "move" || tlDragState.type === "resize-end" || tlDragState.type === "resize-start") {
+        resolveOverlaps(tlDragState.idx);
+      }
+      // Re-render subtitle list to reflect new times
+      renderSubtitles();
+      drawTimeline();
+    }
+    tlDragState = null;
+    wrap.style.cursor = "pointer";
   });
 });
 
@@ -941,6 +1256,64 @@ function zoomTimeline(direction) {
   }
   document.getElementById("zoom-level").textContent = timelineZoom + "x";
   drawTimeline();
+}
+
+/* Issue 1: Resolve overlapping subtitles after drag by TRIMMING immediate neighbors.
+   - Forward: if dragged block's end overlaps next block, trim next block's START (end stays).
+   - Backward: if dragged block's start overlaps prev block, trim prev block's END (start stays).
+   - If trimming would make a block shorter than MIN_BLOCK_DURATION, delete it instead.
+   - Only affect immediate neighbors, no cascading. */
+function resolveOverlaps(draggedIdx) {
+  const GAP = 0.01; // minimum gap between adjacent subtitles in seconds
+  const MIN_BLOCK_DURATION = 0.3; // blocks shorter than this after trimming get deleted
+  let deletedBefore = false;
+
+  // Forward: trim next block's start if it overlaps with dragged block's end
+  const nextIdx = draggedIdx + 1;
+  if (nextIdx < subtitles.length) {
+    const dragged = subtitles[draggedIdx];
+    const next = subtitles[nextIdx];
+    if (dragged.end_seconds > next.start_seconds - GAP) {
+      const newStart = dragged.end_seconds + GAP;
+      if (next.end_seconds - newStart < MIN_BLOCK_DURATION) {
+        // Block would be too short -- delete it
+        subtitles.splice(nextIdx, 1);
+        subtitles.forEach((sub, i) => { sub.index = i + 1; });
+        hasUnsavedChanges = true;
+      } else {
+        next.start_seconds = newStart;
+        hasUnsavedChanges = true;
+      }
+    }
+  }
+
+  // Backward: trim prev block's end if it overlaps with dragged block's start
+  const prevIdx = draggedIdx - 1;
+  if (prevIdx >= 0) {
+    const dragged = subtitles[draggedIdx];
+    const prev = subtitles[prevIdx];
+    if (prev.end_seconds > dragged.start_seconds - GAP) {
+      const newEnd = dragged.start_seconds - GAP;
+      if (newEnd - prev.start_seconds < MIN_BLOCK_DURATION) {
+        // Block would be too short -- delete it
+        subtitles.splice(prevIdx, 1);
+        subtitles.forEach((sub, i) => { sub.index = i + 1; });
+        hasUnsavedChanges = true;
+        deletedBefore = true;
+      } else {
+        prev.end_seconds = newEnd;
+        hasUnsavedChanges = true;
+      }
+    }
+  }
+
+  // If we deleted the previous block, the draggedIdx shifted down by 1.
+  // Update userSelectedIdx / activeSubtitleIdx accordingly.
+  if (deletedBefore) {
+    const newIdx = draggedIdx - 1;
+    activeSubtitleIdx = newIdx;
+    if (userSelectedIdx === draggedIdx) userSelectedIdx = newIdx;
+  }
 }
 
 /* ── Style controls ── */
@@ -966,7 +1339,13 @@ function onStyleChange() {
 
 function applyOverlayStyle() {
   const overlay = document.getElementById("subtitle-overlay");
-  overlay.style.fontSize = style.font_size + "px";
+  // Issue 2: Scale ASS font size based on actual video element height vs 1080p.
+  // ASS fonts are authored for 1080p. The preview video is much smaller,
+  // so we scale proportionally: previewFontSize = assFontSize * (videoHeight / 1080).
+  const videoEl = document.getElementById("video-player");
+  const videoHeight = (videoEl && videoEl.clientHeight > 0) ? videoEl.clientHeight : 400;
+  const previewFontSize = Math.round(style.font_size * (videoHeight / 1080));
+  overlay.style.fontSize = Math.max(previewFontSize, 10) + "px";
   overlay.style.color = style.color;
   overlay.style.fontWeight = style.bold ? "bold" : "normal";
 
@@ -1069,7 +1448,7 @@ async function saveAndEmbed() {
   const assColor = "&H00" + b.toString(16).padStart(2, "0").toUpperCase() + g.toString(16).padStart(2, "0").toUpperCase() + r.toString(16).padStart(2, "0").toUpperCase();
 
   // Convert background hex color to ASS BGR format with opacity
-  let assBgColor = "&H80000000"; // default
+  let assBgColor = "&H00000000"; // default: fully opaque black
   let borderStyle = 1; // outline only by default
   if (style.background_enabled) {
     borderStyle = 3; // opaque box
@@ -1091,6 +1470,9 @@ async function saveAndEmbed() {
     background_color: assBgColor
   };
 
+  // Feature 2: Pass audio_boost if not 1.0
+  const boostParam = (audioBoost !== 1.0) ? audioBoost : null;
+
   // Show progress
   const progressEl = document.getElementById("embed-progress");
   progressEl.style.display = "";
@@ -1102,7 +1484,7 @@ async function saveAndEmbed() {
   showStatus("Embutindo legendas...", "");
 
   try {
-    const result = await pyApi.embed_subtitles_standalone(videoPath, srtPath, embedStyle);
+    const result = await pyApi.embed_subtitles_standalone(videoPath, srtPath, embedStyle, boostParam);
     if (result.status !== "ok") {
       showStatus("Erro: " + result.message, "err");
       isEmbedding = false;

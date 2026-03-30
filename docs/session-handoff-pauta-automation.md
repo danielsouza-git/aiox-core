@@ -1,102 +1,99 @@
-# Session Handoff -- Pauta Automation
-**Data:** 2026-03-26
-**Ultima sessao:** Story 6.7 (Subtitle Editor) implementada + QA PASS + cosmetic fix
-**Proxima sessao:** Push via @devops, rebuild .exe, testes manuais finais
----
+# Session Handoff — Pauta-Automation
 
-## Estado Atual do Projeto
-
-| Epic | Descricao | Status | Notas |
-|------|-----------|--------|-------|
-| Epic 1 | Foundation -- Parser + Infraestrutura | **100%** | 57 testes |
-| Epic 2 | Geracao Automatica de Slides | **100%** | 159 testes |
-| Epic 3 | Geracao Automatica de Tarjas | **100%** | Inclui PAUTA-3.3 (manual tarja type) |
-| Epic 4 | Processamento de Videos | **100%** | 55 testes |
-| Epic 5 | Interface e Orquestracao | **100%** | pywebview GUI, .exe buildado |
-| **Epic 6** | **Video Downloader Migration** | **100% (7/7)** | Inclui Story 6.7 (Subtitle Editor) |
-
-**Total: 489 testes passando. Ruff 0 issues.**
+**Date:** 2026-03-28
+**Status:** EM USO — 7 features reimplementadas + 4 bugfixes + config.json criado
+**Next:** Testar .exe com transcricao + editor de legendas
 
 ---
 
-## Epic 6 — Video Downloader Migration
+## Estado Atual
 
-**Epic file:** `docs/stories/pauta-automation/PAUTA-6.0.epic-video-downloader-migration.md`
+**Branch:** `main` (mudancas uncommitted em pauta-automation/)
+**Testes:** 496/496 passando
+**.exe:** `pauta-automation/dist/Pauta-Automation.exe` (106MB, rebuilt 2026-03-28)
+**Config:** `pauta-automation/dist/config.json` (com OpenAI API key)
 
-| Story | Titulo | Status | Testes | QA |
-|-------|--------|--------|--------|----|
-| 6.1 | Internalize Video Downloader Engine | **DONE** | 48 | PASS |
-| 6.2 | Video Downloader Standalone UI (pywebview) | **DONE** | 0 (UI) | Pending |
-| 6.3 | Whisper Transcription + SRT Translation | **DONE** | 66 | PASS |
-| 6.4 | Web-Based Subtitle Editor | **DONE** | 0 (UI) | Pending |
-| 6.5 | Pauta Integration — Video Items to Downloader | **DONE** | 14 | PASS |
-| 6.6 | Replace VideoProcessor Wrapper + Cleanup | **DONE** | 4 (bridge) | PASS |
-| 6.7 | Subtitle Editor Window (HTML/JS) | **DONE** | 29 | PASS |
+## Limpeza Realizada
 
-### Branch e commits
+- Deletado `_projetos/pauta-automation/` (copia antiga Feb 25)
+- Deletado `_projetos/pauta-automation-copia/` (backup antigo com .exe Feb 24)
+- Unica versao agora: `pauta-automation/` (raiz do projeto)
 
-- **Branch:** `feat/pauta-6.5` no remote `fork` (danielsouza-git/aiox-core)
-- **Commits relevantes:**
-  - `2c121f4c` — feat: implement subtitle editor window [Story PAUTA-6.7]
-  - `5e7c5edb` — fix: local file detection + tuple unpacking [Story PAUTA-6.6]
-  - Pendente: QA gate 6.7 + cosmetic fix (canvas color)
+## Features Reimplementadas (7/7)
 
-### Estado atual do .exe
+As 7 features do PAUTA-6.7/6.8 foram PERDIDAS (estavam uncommitted na branch feat/bss-epic-a que foi mergida). Reimplementadas nesta sessao:
 
-- **Spec:** `console=False` (producao)
-- **main.py:** Limpo, sem debug prints
+| # | Feature | Arquivos |
+|---|---------|----------|
+| 1 | Default font_size=80, background opacity 100% | srt_utils.py, app.py, subtitle-editor.html |
+| 2 | Audio volume boost (0.5x-3.0x) com Web Audio API + FFmpeg | subtitle-editor.html, app.py, subtitle_processor.py |
+| 3 | Fix timeline click-to-select (off-by-one corrigido) | subtitle-editor.html |
+| 4 | Drag blocos de legenda na timeline | subtitle-editor.html |
+| 5 | Resize blocos (arrastar bordas) | subtitle-editor.html |
+| 6 | "+ Nova Entrada" insere na posicao do cursor (gap 3s) | subtitle-editor.html |
+| 7 | Cursores contextuais (col-resize, grab, pointer) | subtitle-editor.html |
 
----
+## Bugfixes Aplicados (4+3)
 
-## API Reference (Engine methods — all return tuples)
+### Rodada 1 (4 fixes)
+| Bug | Descricao | Correcao |
+|-----|-----------|----------|
+| Font preview mismatch | Preview CSS nao batia com ASS render | Escala dinamica `fontSize * (videoHeight / 1080)` |
+| Click off-by-one | Click em #3 selecionava #2 | Hit test 2-pass (body first, borders second) |
+| Sem borda selecionada | Bloco ativo sem indicador visual | Borda 2px cyan #00AAFF no bloco ativo |
+| Drag nao ajustava vizinho | Arrastar sobre vizinho nao fazia nada | resolveOverlaps() empurrava vizinho |
 
-| Metodo | Retorno |
-|--------|---------|
-| `VideoDownloaderEngine.download(url, output_dir, quality, filename, progress_callback)` | `tuple[bool, str, Optional[str]]` |
-| `VideoDownloaderEngine.clip_video(video_path, start_time, end_time, progress_callback)` | `tuple[bool, str]` |
-| `VideoDownloaderEngine.repeat_clip(video_path, count, progress_callback)` | `tuple[bool, str]` |
-| `VideoDownloaderEngine.merge_clips(clip_paths, output_path, progress_callback)` | `tuple[bool, str]` |
-| `SubtitleProcessor.transcribe(video_path, language, progress_callback)` | `tuple[bool, str]` |
-| `SubtitleProcessor.translate(srt_path, target_lang, progress_callback)` | `tuple[bool, str]` |
+### Rodada 2 (3 fixes)
+| Bug | Descricao | Correcao |
+|-----|-----------|----------|
+| Drag devia trimar, nao empurrar | Vizinho era empurrado inteiro | Agora trima start/end do vizinho (min 0.3s, senao deleta) |
+| Font preview ainda grande | Ratio 0.75 insuficiente | Escala `fontSize * (videoHeight / 1080)` + resize listener |
+| Selecao sumia ao clicar | onTimeUpdate resetava activeIdx | userSelectedIdx persiste; limpa so ao dar play ou clicar vazio |
 
----
+## Config Criado
 
-## Notas Tecnicas
+`pauta-automation/config.json` criado com OpenAI API key preenchida. Sem a key, transcricao era pulada silenciosamente (`app.py:566-567`).
 
-- **Fonte externa removida:** `D:\EPOCH\` — video_processor.py agora usa engine interna
-- **API key:** Vem de `config.json` -> `AppConfig.openai.api_key` — NUNCA hardcoded
-- **Bridge pattern:** PautaBridge (js_api) com EventBus polling 200ms
-- **Local file detection:** Drive letter check na main thread (`url[0].isalpha() and url[1] == ':'`)
-- **Subtitle Editor:** `ui/subtitle-editor.html` — standalone HTML/CSS/JS, 3 fases (list + video + timeline + style)
+## Arquivos Modificados (pauta-automation/)
 
----
+| Arquivo | Mudancas |
+|---------|----------|
+| `ui/subtitle-editor.html` | 7 features + 7 bugfixes (preview scale, hit test, selection, drag trim) |
+| `src/processors/video_downloader/srt_utils.py` | font_size 21->80, background_color opaco |
+| `src/gui/app.py` | Fallbacks 21->80, background opaco, audio_boost passthrough |
+| `src/processors/video_downloader/subtitle_processor.py` | audio_boost param, FFmpeg `-af volume=N -c:a aac` |
+| `tests/test_subtitle_editor.py` | font_size assertion 21->80 |
+| `tests/test_video_downloader/test_srt_utils.py` | font_size 21->80, background_color assertions |
+| `config.json` | CRIADO com OpenAI API key |
+| `dist/Pauta-Automation.exe` | Rebuilt 4x nesta sessao |
+| `dist/config.json` | Copiado para junto do .exe |
 
-## Documentacao Chave
+## NOTA IMPORTANTE
 
-| Documento | Path |
-|-----------|------|
-| PRD v1.1 | `docs/prd-pauta-automation.md` |
-| Arquitetura v2.0 | `docs/architecture-pauta-automation.md` |
-| Epic 6 | `docs/stories/pauta-automation/PAUTA-6.0.epic-video-downloader-migration.md` |
-| Config exemplo | `pauta-automation/config.example.json` |
+Todas as mudancas estao **uncommitted** na branch `main`. Para preservar:
+1. Criar branch `feat/pauta-fixes` e commitar
+2. Ou commitar direto em `feat/pauta-automation`
 
----
+
+
+
+
+
+
+## Agent Activity
+
+Last session (2026-03-29):
+- **@dev**: 0 stories, 0 files, <1m -- Agent switch to @dev detected in prompt
+- **@pm**: 0 stories, 0 files, <1m -- Agent switch to @pm detected in prompt
 
 ## Como Continuar
 
 ```
-Estou retomando o Pauta Automation. Leia o handoff em `docs/session-handoff-pauta-automation.md`.
-
-Projeto: `pauta-automation/` (Python/pywebview desktop app)
-Epic 6 COMPLETA (7/7 stories, inclui 6.7 Subtitle Editor). QA PASS em todas.
-
-Pendente:
-1. Push via @devops (branch feat/pauta-6.5 -> remote fork)
-2. Rebuild .exe final
-3. Testes manuais do subtitle editor
-
-489 testes passando. Ruff 0 issues. Branch: feat/pauta-6.5 (remote: fork).
+Continuar trabalho no Pauta Automation. Handoff: docs/session-handoff-pauta-automation.md
+Estado: 7 features reimplementadas + 7 bugfixes. .exe rebuilt. Mudancas uncommitted em main.
+Testar: abrir dist/Pauta-Automation.exe, fazer download de video, verificar transcricao + editor de legendas.
 ```
 
 ---
-*Handoff atualizado em 2026-03-26 — Epic 6: 7/7 stories, 489 testes, QA PASS*
+
+*Handoff atualizado 2026-03-28*
