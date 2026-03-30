@@ -32,7 +32,7 @@ agents:
     file: agents/component-builder.md
 
   - id: a11y-auditor
-    name: Ally
+    name: Asha
     file: agents/a11y-auditor.md
 
   - id: ds-documenter
