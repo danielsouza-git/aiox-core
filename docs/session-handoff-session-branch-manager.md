@@ -1,8 +1,8 @@
 # Session Handoff — Unified Session and Branch Manager (AIOX-SBM)
 
-**Data:** 2026-03-27
-**Ultima sessao:** Low-severity issues MNT-001+DOC-001 FIXED, pushed. Remote antigo deletado.
-**Next:** Projeto COMPLETO. Apenas merge para main pendente. Story 2.5 (YAML Serializer) deferida para v3.0.
+**Data:** 2026-03-30
+**Status:** MERGED via PR #3 (cf1f6acd) — branch deletada
+**Next:** Projeto COMPLETO. Story 2.5 (YAML Serializer) deferida para v3.0.
 
 ---
 

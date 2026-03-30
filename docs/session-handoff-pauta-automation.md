@@ -1,8 +1,8 @@
 # Session Handoff — Pauta-Automation
 
-**Date:** 2026-03-27
-**Status:** COMPLETO — 7 features implementadas, .exe rebuilt
-**Next:** Nenhuma acao pendente
+**Date:** 2026-03-30
+**Status:** MERGED via PR #6 — branch pode ser deletada
+**Next:** Nenhuma acao pendente. Rebuild .exe se necessario.
 
 ---
 
