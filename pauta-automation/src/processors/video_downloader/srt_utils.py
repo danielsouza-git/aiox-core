@@ -29,14 +29,14 @@ class SubtitleStyle:
     """Styling configuration for ASS subtitle rendering."""
 
     font_name: str = "Arial"
-    font_size: int = 21
+    font_size: int = 80
     bold: bool = True
     color: str = "&H00FFFFFF"  # White (ASS BGR format)
     outline_color: str = "&H00000000"  # Black
     outline_width: int = 2
     position: str = "bottom"  # bottom = Alignment 2 (bottom-center)
     border_style: int = 3  # 1=outline only, 3=opaque box (background strip)
-    background_color: str = "&H80000000"  # Black 50% transparent (ASS AABBGGRR)
+    background_color: str = "&H00000000"  # Fully opaque black (ASS AABBGGRR)
 
 
 def format_timestamp(seconds: float) -> str:

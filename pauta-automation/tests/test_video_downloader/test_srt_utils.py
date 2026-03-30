@@ -33,10 +33,10 @@ class TestSubtitleStyle:
     def test_default_values(self):
         style = SubtitleStyle()
         assert style.font_name == "Arial"
-        assert style.font_size == 21
+        assert style.font_size == 80
         assert style.bold is True
         assert style.border_style == 3
-        assert style.background_color == "&H80000000"
+        assert style.background_color == "&H00000000"
 
     def test_border_style_outline_only(self):
         style = SubtitleStyle(border_style=1)
@@ -349,7 +349,7 @@ class TestGenerateAss:
         assert "Dialogue:" in content
         # Default font
         assert "Arial" in content
-        assert "21" in content
+        assert ",80," in content
 
     def test_generate_ass_custom_style(self, tmp_path):
         srt_path = self._create_srt(tmp_path)
@@ -398,7 +398,7 @@ class TestGenerateAss:
         # Style line should contain BorderStyle=3
         style_line = [line for line in content.split("\n") if line.startswith("Style:")][0]
         assert ",3," in style_line  # BorderStyle=3
-        assert "&H80000000" in style_line  # Default BackColour
+        assert "&H00000000" in style_line  # Default BackColour (fully opaque black)
 
     def test_generate_ass_border_style_1_outline_only(self, tmp_path):
         """BorderStyle=1 when background disabled."""

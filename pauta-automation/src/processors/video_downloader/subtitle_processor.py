@@ -279,6 +279,7 @@ class SubtitleProcessor:
         subtitle_path: str,
         output_path: str | None = None,
         progress_callback: Optional[Callable[[float, str], None]] = None,
+        audio_boost: float | None = None,
     ) -> tuple[bool, str]:
         """Burn subtitles into video using FFmpeg.
 
@@ -290,6 +291,7 @@ class SubtitleProcessor:
             subtitle_path: Path to the subtitle file (.srt or .ass).
             output_path: Optional output path. If None, replaces original.
             progress_callback: Called with (percentage, status_text).
+            audio_boost: Audio volume multiplier (e.g. 1.5 for 150%). None = no change.
 
         Returns:
             Tuple of (success, output_path_or_error_message).
@@ -333,9 +335,15 @@ class SubtitleProcessor:
                     "-i", "input.mp4",
                     "-vf", vf_filter,
                     "-c:v", "libx264",
-                    "-c:a", "copy",
-                    "-y", "output.mp4",
                 ]
+
+                # Apply audio volume boost if specified
+                if audio_boost is not None and audio_boost != 1.0:
+                    cmd.extend(["-af", f"volume={audio_boost}", "-c:a", "aac"])
+                else:
+                    cmd.extend(["-c:a", "copy"])
+
+                cmd.extend(["-y", "output.mp4"])
 
                 if progress_callback:
                     progress_callback(0.30, "Burning subtitles into video...")
