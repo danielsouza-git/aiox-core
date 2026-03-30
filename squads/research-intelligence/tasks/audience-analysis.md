@@ -153,5 +153,18 @@ Per segment, map the journey:
 - [ ] Actionable recommendations provided
 - [ ] Data sources cited
 
+## Quality Gate
+
+| Criterio | Threshold | Obrigatorio |
+|----------|-----------|-------------|
+| Segmentos com demographics e psychographics | 100% dos segmentos | Sim |
+| Pain points ranqueados por severidade e frequencia | >70% coverage | Sim |
+| Buyer journey mapeado por segmento | 100% dos segmentos | Sim |
+| Language patterns documentados | >70% dos segmentos | Sim |
+| Fontes de dados citadas | 100% | Sim |
+| Completude do output | 100% | Sim |
+
+**Pass threshold:** >70% em todos os criterios obrigatorios
+
 ---
 *Research Intelligence Squad Task*

@@ -101,6 +101,38 @@ agents:
     tier: 2
     focus: "Auditorias internas, politicas ESG, conformidade LGPD"
 
+
+# -------------------------------------------------------------------------------
+# TASK REGISTRY
+# -------------------------------------------------------------------------------
+
+components:
+  tasks:
+    # financeiro
+    - contas-a-pagar.md
+    - contas-a-receber.md
+    - fluxo-de-caixa.md
+    - financial-report.md
+    # rh-people
+    - recrutamento.md
+    - onboarding-interno.md
+    - gestao-pessoas.md
+    - folha-pagamento.md
+    - offboarding.md
+    # juridico
+    - contratos.md
+    - compliance-legal.md
+    - disputas.md
+    # facilities
+    - ferramentas.md
+    - acessos.md
+    - fornecedores.md
+    # compliance
+    - auditorias-internas.md
+    - politicas.md
+    - lgpd.md
+
+
 # -------------------------------------------------------------------------------
 # HANDOFF MATRIX
 # -------------------------------------------------------------------------------
@@ -139,6 +171,7 @@ handoffs:
     receives_from: [admin-head]
     escalates_to: [admin-head]
     gate: "Politicas aprovadas pelo CEO"
+
 
 # -------------------------------------------------------------------------------
 # CROSS-CUTTING CONCERNS

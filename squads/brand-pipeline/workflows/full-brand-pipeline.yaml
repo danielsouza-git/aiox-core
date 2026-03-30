@@ -1,0 +1,325 @@
+# Full Brand Pipeline
+# Complete 7-phase brand creation orchestration (Next.js output)
+
+name: full-brand-pipeline
+version: 2.0.0
+description: "Complete brand creation pipeline: scaffold -> research -> discovery -> design system -> visual -> content -> QA. Produces a Next.js static brand book."
+
+tech_stack:
+  framework: "Next.js 15"
+  ui: "React 19"
+  styling: "Tailwind CSS 4"
+  animation: "Framer Motion 11"
+  language: "TypeScript 5.7+"
+  output: "Static export (out/)"
+
+trigger:
+  manual: true
+  command: "*pipeline {client_name}"
+
+phases:
+  # Phase 0: Scaffold Next.js project
+  - id: scaffold
+    name: Next.js Project Scaffold
+    squad: brand-pipeline
+    steps:
+      - id: create-project
+        agent: brand-orchestrator
+        task: run-pipeline.md#step-0
+        inputs: [client_name, pkg_manager]
+        outputs: [app_path, package_json, next_config, tsconfig]
+      - id: validate-scaffold
+        agent: brand-orchestrator
+        depends_on: [create-project]
+        task: run-pipeline.md#step-0-validate
+        inputs: [app_path]
+        outputs: [scaffold_valid]
+    gate:
+      type: pass_fail
+      description: "Scaffold validation: package.json valid, next.config.js has export, tsconfig has path alias, npm install succeeds"
+
+  - id: research
+    name: Market Research & Intelligence
+    squad: research-intelligence
+    depends_on: [scaffold]
+    steps:
+      - id: market-research
+        agent: market-researcher
+        task: market-research.md
+        inputs: [client_name, industry]
+        outputs: [market_report]
+      - id: competitive-audit
+        agent: competitive-analyst
+        task: competitive-audit.md
+        depends_on: [market-research]
+        inputs: [competitor_urls, industry]
+        outputs: [competitive_report]
+      - id: trend-report
+        agent: trend-spotter
+        task: trend-report.md
+        inputs: [industry]
+        outputs: [trend_data]
+      - id: audience-analysis
+        agent: market-researcher
+        task: audience-analysis.md
+        depends_on: [market-research]
+        inputs: [market_report]
+        outputs: [audience_personas]
+    gate:
+      checklist: pipeline-gate-checklist.md
+      minimum_score: 7
+
+  - id: discovery
+    name: Brand Discovery & Foundation
+    squad: branding
+    depends_on: [research]
+    steps:
+      - id: brand-discovery
+        agent: brand-strategist
+        task: brand-discovery.md
+        inputs: [client_name, market_report, audience_personas]
+        outputs: [brand_profile]
+      - id: voice-guide
+        agent: brand-strategist
+        task: voice-guide-generator.md
+        depends_on: [brand-discovery]
+        outputs: [voice_guide]
+      - id: manifesto
+        agent: brand-strategist
+        task: manifesto-generator.md
+        depends_on: [brand-discovery]
+        outputs: [manifesto]
+      - id: moodboard
+        agent: brand-strategist
+        task: moodboard-generate.md
+        depends_on: [brand-discovery]
+        outputs: [moodboard_urls]
+      - id: palette
+        agent: token-engineer
+        task: color-palette-generate.md
+        depends_on: [brand-discovery]
+        outputs: [palette]
+      - id: typography
+        agent: token-engineer
+        task: typography-pairing.md
+        depends_on: [brand-discovery]
+        outputs: [typography]
+      - id: tokens
+        agent: token-engineer
+        task: token-schema-create.md
+        depends_on: [palette, typography]
+        outputs: [tokens]
+    gate:
+      checklist: pipeline-gate-checklist.md
+      minimum_score: 8
+
+  # Phases 3-4-5 run in PARALLEL
+  - id: design-system
+    name: Design System Build (React + Tailwind)
+    squad: design-system
+    depends_on: [discovery]
+    parallel_group: build
+    steps:
+      - id: token-transform
+        agent: token-transformer
+        task: token-transform.md
+        inputs: [tokens, app_path]
+        outputs: [tokens_css, tokens_ts, tailwind_config]
+        description: "Transform tokens.json -> CSS custom properties + TS constants + Tailwind config"
+      - id: component-build
+        agent: component-builder
+        task: component-build.md
+        depends_on: [token-transform]
+        inputs: [app_path]
+        outputs: [component_library]
+        description: "Generate React TSX components in app/components/ui/"
+      - id: component-variants
+        agent: component-builder
+        task: component-variants.md
+        depends_on: [component-build]
+        outputs: [variant_library]
+        description: "Add size/color/style variants to each component"
+      - id: a11y-audit
+        agent: a11y-auditor
+        task: a11y-audit.md
+        depends_on: [component-build]
+        outputs: [a11y_report]
+        description: "Verify ARIA, keyboard nav, focus management"
+      - id: ds-document
+        agent: ds-documenter
+        task: ds-document.md
+        depends_on: [component-build, a11y-audit]
+        inputs: [app_path]
+        outputs: [component_docs]
+        description: "Generate brandbook/components/*/page.tsx with live demos"
+    gate:
+      checklist: pipeline-gate-checklist.md
+      minimum_score: 7
+
+  - id: visual
+    name: Visual Asset Production (Framer Motion)
+    squad: visual-production
+    depends_on: [discovery]
+    parallel_group: build
+    steps:
+      - id: visual-direction
+        agent: art-director
+        task: visual-direction.md
+        inputs: [brand_profile, moodboard_urls, palette]
+        outputs: [visual_direction_doc]
+      - id: ai-image-generate
+        agent: ai-image-specialist
+        task: ai-image-generate.md
+        depends_on: [visual-direction]
+        inputs: [app_path]
+        outputs: [generated_images]
+        description: "Generate images -> app/public/images/"
+      - id: photo-retouch
+        agent: photo-editor
+        task: photo-retouch.md
+        depends_on: [ai-image-generate]
+        inputs: [app_path]
+        outputs: [retouched_images]
+        description: "Retouch images -> app/public/images/"
+      - id: motion-create
+        agent: motion-designer
+        task: motion-create.md
+        depends_on: [visual-direction]
+        inputs: [app_path, brand_profile]
+        outputs: [motion_components, animation_presets, showcase_components]
+        description: "Generate Framer Motion components -> app/components/motion/ + showcase/"
+      - id: asset-organize
+        agent: asset-manager
+        task: asset-organize.md
+        depends_on: [photo-retouch, motion-create]
+        inputs: [app_path]
+        outputs: [organized_assets]
+        description: "Organize assets -> app/public/assets/ + manifest"
+    gate:
+      checklist: pipeline-gate-checklist.md
+      minimum_score: 7
+
+  - id: content
+    name: Content & Copy Production
+    squad: copy
+    depends_on: [discovery]
+    parallel_group: build
+    steps:
+      - id: copy-strategy
+        agent: copy-chief
+        task: copy-strategy-create.md
+        inputs: [brand_profile, voice_guide, audience_personas]
+        outputs: [copy_strategy]
+      - id: landing-page-copy
+        agent: conversion-writer
+        task: landing-page-copy.md
+        depends_on: [copy-strategy]
+        outputs: [landing_copy]
+      - id: social-post-create
+        agent: social-writer
+        task: social-post-create.md
+        depends_on: [copy-strategy]
+        outputs: [social_posts]
+      - id: seo-meta-write
+        agent: seo-writer
+        task: seo-meta-write.md
+        depends_on: [copy-strategy]
+        outputs: [seo_meta]
+      - id: email-sequence
+        agent: email-specialist
+        task: email-sequence-create.md
+        depends_on: [copy-strategy]
+        outputs: [email_sequences]
+      - id: content-inject
+        agent: brand-orchestrator
+        depends_on: [landing-page-copy, seo-meta-write]
+        inputs: [app_path, landing_copy, seo_meta, voice_guide, manifesto]
+        outputs: [pages_populated]
+        description: "Inject copy into Next.js pages and metadata"
+    gate:
+      checklist: pipeline-gate-checklist.md
+      minimum_score: 7
+
+  - id: qa
+    name: Quality Assurance & Certification
+    squad: qa-accessibility
+    depends_on: [design-system, visual, content]
+    steps:
+      - id: typescript-check
+        agent: brand-orchestrator
+        inputs: [app_path]
+        outputs: [ts_check_report]
+        description: "npx tsc --noEmit -- zero errors required"
+      - id: lint-check
+        agent: brand-orchestrator
+        depends_on: [typescript-check]
+        inputs: [app_path]
+        outputs: [lint_report]
+        description: "npx next lint -- zero errors required"
+      - id: build-export
+        agent: brand-orchestrator
+        depends_on: [lint-check]
+        inputs: [app_path]
+        outputs: [build_report, static_export]
+        description: "npx next build -- produces out/ with static HTML"
+      - id: export-validation
+        agent: brand-orchestrator
+        depends_on: [build-export]
+        inputs: [app_path]
+        outputs: [export_validation_report]
+        description: "Validate out/ has index.html, all routes, assets, no broken links"
+      - id: visual-review
+        agent: visual-qa
+        task: visual-review.md
+        depends_on: [build-export]
+        inputs: [component_library, organized_assets]
+        outputs: [visual_qa_report]
+      - id: wcag-test
+        agent: a11y-tester
+        task: wcag-test.md
+        depends_on: [visual-review]
+        inputs: [app_path]
+        outputs: [wcag_report]
+        description: "WCAG 2.1 AA compliance against out/ static files"
+      - id: brand-compliance-check
+        agent: brand-compliance
+        task: brand-compliance-check.md
+        inputs: [brand_profile, all_deliverables]
+        outputs: [compliance_report]
+      - id: lighthouse-audit
+        agent: performance-auditor
+        task: lighthouse-audit.md
+        depends_on: [build-export]
+        inputs: [app_path]
+        outputs: [lighthouse_report]
+        description: "Lighthouse CI on out/index.html -- thresholds: perf>=90, a11y>=90, seo>=90"
+      - id: link-validation
+        agent: brand-orchestrator
+        depends_on: [build-export]
+        inputs: [app_path]
+        outputs: [link_report]
+        description: "Parse all <a href> in out/**/*.html, verify internal links resolve"
+      - id: final-report
+        agent: brand-orchestrator
+        task: pipeline-report.md
+        depends_on: [visual-review, wcag-test, brand-compliance-check, lighthouse-audit, link-validation, export-validation]
+        outputs: [delivery_report]
+    gate:
+      checklist: delivery-checklist.md
+      minimum_score: 8
+
+artifacts:
+  scaffold: [app_path, package_json, next_config, tsconfig, scaffold_valid]
+  research: [market_report, competitive_report, trend_data, audience_personas]
+  discovery: [brand_profile, voice_guide, manifesto, moodboard_urls, palette, typography, tokens]
+  design_system: [tokens_css, tokens_ts, tailwind_config, component_library, variant_library, component_docs]
+  visual: [visual_direction_doc, generated_images, retouched_images, motion_components, animation_presets, showcase_components, organized_assets]
+  content: [copy_strategy, landing_copy, social_posts, seo_meta, email_sequences, pages_populated]
+  qa: [ts_check_report, lint_report, build_report, static_export, export_validation_report, visual_qa_report, wcag_report, compliance_report, lighthouse_report, link_report, delivery_report]
+
+output:
+  primary: ".aiox/branding/{client}/app/out/"
+  description: "Static HTML brand book. Open out/index.html in any browser."
+  preview_command: "cd .aiox/branding/{client}/app && npx serve out"
+
+estimated_duration: "4-8 hours (full)"

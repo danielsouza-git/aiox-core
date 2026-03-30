@@ -1,0 +1,117 @@
+# Brand Pipeline Squad - Meta-Orchestrator
+# Chains all brand-related squads into a single automated pipeline
+# Source: 6-phase brand creation workflow
+
+name: brand-pipeline
+version: 1.0.0
+display_name: Brand Pipeline
+description: "Meta-orchestrator that chains all brand squads into a single automated 6-phase pipeline: research, discovery, design system, visual production, content, QA"
+author: AIOX Framework
+license: MIT
+slashPrefix: brand-pipeline
+domain: brand-orchestration
+
+aiox:
+  minVersion: "2.1.0"
+  type: squad
+
+# ============================================
+# AGENTS
+# ============================================
+agents:
+  - id: brand-orchestrator
+    name: Maestro
+    file: agents/brand-orchestrator.md
+
+
+# ============================================
+# COMPONENTS
+# ============================================
+components:
+  tasks:
+    - run-pipeline.md
+    - run-phase.md
+    - pipeline-status.md
+    - resume-pipeline.md
+    - pipeline-report.md
+
+  workflows:
+    - full-brand-pipeline.yaml
+    - express-brand-pipeline.yaml
+    - refresh-brand-pipeline.yaml
+
+  checklists:
+    - pipeline-gate-checklist.md
+    - delivery-checklist.md
+
+  templates: []
+  tools: []
+  scripts: []
+
+# ============================================
+# CONFIG
+# ============================================
+config:
+  extends: extend
+  pipeline-config: config/pipeline-config.md
+  tech-stack: config/tech-stack.md
+
+# ============================================
+# DEPENDENCIES
+# ============================================
+dependencies:
+  node: []
+  python: []
+  squads:
+    - research-intelligence
+    - branding
+    - design-system
+    - visual-production
+    - copy
+    - qa-accessibility
+  integrations: []
+
+# ============================================
+# PIPELINE PHASES
+# ============================================
+pipeline:
+  phases:
+    - id: research
+      name: Market Research & Intelligence
+      squad: research-intelligence
+      order: 1
+    - id: discovery
+      name: Brand Discovery & Foundation
+      squad: branding
+      order: 2
+      depends_on: [research]
+    - id: design-system
+      name: Design System Build
+      squad: design-system
+      order: 3
+      depends_on: [discovery]
+      parallel_group: build
+    - id: visual
+      name: Visual Asset Production
+      squad: visual-production
+      order: 3
+      depends_on: [discovery]
+      parallel_group: build
+    - id: content
+      name: Content & Copy Production
+      squad: copy
+      order: 3
+      depends_on: [discovery]
+      parallel_group: build
+    - id: qa
+      name: Quality Assurance & Certification
+      squad: qa-accessibility
+      order: 4
+      depends_on: [design-system, visual, content]
+
+tags:
+  - orchestration
+  - brand-pipeline
+  - meta-squad
+  - automation
+  - end-to-end

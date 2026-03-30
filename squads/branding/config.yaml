@@ -1,0 +1,270 @@
+# Branding Squad - Full Digital Brand Presence
+# Generated from blueprint v1.1 by @squad-creator + @aiox-master
+# Source: Brand System Service PRD v1.2
+# Updated: 2026-03-10 - Added operations, analytics, figma-component agents for MVP
+
+name: branding
+version: 1.1.0
+display_name: Branding Squad
+description: "Full digital brand presence: discovery, tokens, brand book, creatives, web, AI pipeline, QA"
+author: AIOX Framework
+license: MIT
+slashPrefix: branding
+domain: brand-system-service
+
+aiox:
+  minVersion: "2.1.0"
+  type: squad
+
+# ============================================
+# AGENTS
+# ============================================
+agents:
+  - id: brand-strategist
+    name: Stella
+    file: agents/brand-strategist.md
+
+  - id: token-engineer
+    name: Toren
+    file: agents/token-engineer.md
+
+  - id: brand-book-builder
+    name: Paige
+    file: agents/brand-book-builder.md
+
+  - id: ai-orchestrator
+    name: Nova
+    file: agents/ai-orchestrator.md
+
+  - id: creative-producer
+    name: Cleo
+    file: agents/creative-producer.md
+
+  - id: web-builder
+    name: Webb
+    file: agents/web-builder.md
+
+  - id: qa-reviewer
+    name: Quentin
+    file: agents/qa-reviewer.md
+
+  # MVP Expansion (2026-03-10)
+  - id: operations-coordinator
+    name: Olive
+    file: agents/operations-coordinator.md
+
+  - id: analytics-specialist
+    name: Axel
+    file: agents/analytics-specialist.md
+
+  - id: figma-component-builder
+    name: Finn
+    file: agents/figma-component-builder.md
+
+
+# ============================================
+# COMPONENTS
+# ============================================
+components:
+  tasks:
+    # brand-strategist
+    - brand-discovery.md
+    - digital-audit.md
+    - voice-guide-generator.md
+    - manifesto-generator.md
+    - moodboard-generate.md
+    # token-engineer
+    - color-palette-generate.md
+    - typography-pairing.md
+    - token-schema-create.md
+    - style-dictionary-build.md
+    - token-export.md
+    - figma-sync.md
+    # ai-orchestrator
+    - copy-generate.md
+    - image-generate.md
+    - prompt-template-manage.md
+    - content-moderate.md
+    - cost-tracking-report.md
+    # brand-book-builder
+    - brand-book-generate.md
+    - brand-book-pdf.md
+    - brand-book-package.md
+    - brand-book-deploy.md
+    # creative-producer
+    - batch-generate.md
+    - carousel-create.md
+    - stories-create.md
+    - thumbnails-create.md
+    - content-calendar.md
+    # web-builder
+    - landing-page-create.md
+    - institutional-site.md
+    - biolink-create.md
+    - seo-metadata-generate.md
+    - static-export.md
+    - static-deploy.md
+    # qa-reviewer
+    - review-deliverable.md
+    - brand-consistency-check.md
+    - accessibility-check.md
+    - contrast-check.md
+    - final-approval.md
+    # operations-coordinator (MVP Expansion)
+    - clickup-project-setup.md
+    - client-onboarding.md
+    - r2-asset-upload.md
+    - revision-tracker.md
+    - metrics-report.md
+    - validation-reference-run.md
+    - validation-learnings-log.md
+    - handoff-documentation.md
+    # analytics-specialist (MVP Expansion)
+    - ga4-setup.md
+    - gtm-setup.md
+    - meta-pixel-setup.md
+    - google-ads-tracking.md
+    - utm-strategy.md
+    - search-console-setup.md
+    - web-vitals-audit.md
+    - analytics-report.md
+    # figma-component-builder (MVP Expansion)
+    - figma-library-init.md
+    - figma-primitives.md
+    - figma-feedback.md
+    - figma-navigation.md
+    - figma-data-display.md
+    - figma-layout.md
+    - figma-overlay.md
+    - figma-forms.md
+    - figma-advanced.md
+    - figma-icons.md
+    - figma-library-audit.md
+
+  workflows:
+    - brand-discovery-flow.yaml
+    - brand-book-delivery.yaml
+    - creative-batch-flow.yaml
+    - landing-page-flow.yaml
+
+  checklists:
+    - brand-identity-checklist.md
+    - social-media-checklist.md
+    - web-design-checklist.md
+
+  templates: []
+  tools: []
+  scripts: []
+
+# ============================================
+# HANDOFF MATRIX
+# ============================================
+handoffs:
+  brand-strategist:
+    routes_to: [token-engineer, ai-orchestrator, creative-producer, brand-book-builder]
+    receives_from: ["orchestrator", "client"]
+
+  token-engineer:
+    routes_to: [brand-book-builder, web-builder, figma-component-builder]
+    receives_from: [brand-strategist]
+    escalates_to: [brand-strategist]
+
+  ai-orchestrator:
+    routes_to: [creative-producer, web-builder]
+    receives_from: [brand-strategist]
+    escalates_to: [brand-strategist]
+
+  brand-book-builder:
+    routes_to: [qa-reviewer]
+    receives_from: [brand-strategist, token-engineer]
+    escalates_to: [brand-strategist]
+
+  creative-producer:
+    routes_to: [qa-reviewer]
+    receives_from: [ai-orchestrator, brand-strategist]
+    escalates_to: [brand-strategist]
+
+  web-builder:
+    routes_to: [qa-reviewer, analytics-specialist]
+    receives_from: [brand-strategist, ai-orchestrator, token-engineer]
+    escalates_to: [brand-strategist]
+
+  qa-reviewer:
+    receives_from: [brand-book-builder, creative-producer, web-builder, figma-component-builder]
+    escalates_to: [brand-strategist]
+    note: "Final gate -- reviews all deliverables before client delivery"
+
+  operations-coordinator:
+    routes_to: [qa-reviewer]
+    receives_from: [brand-strategist]
+    escalates_to: [brand-strategist]
+
+  analytics-specialist:
+    receives_from: [web-builder, operations-coordinator]
+    escalates_to: [brand-strategist]
+
+  figma-component-builder:
+    routes_to: [qa-reviewer]
+    receives_from: [token-engineer, brand-strategist]
+    escalates_to: [brand-strategist]
+
+# ============================================
+# CONFIG
+# ============================================
+config:
+  extends: extend
+  coding-standards: config/coding-standards.md
+  tech-stack: config/tech-stack.md
+
+# ============================================
+# DEPENDENCIES
+# ============================================
+dependencies:
+  node:
+    - style-dictionary@^4.0.0
+    - sharp@^0.33.0
+    - "@vercel/og@^0.6.0"  # Satori
+    - puppeteer@^22.0.0
+  python: []
+  squads: []
+  integrations:
+    - cloudflare-r2
+    - clickup
+    - figma
+    - vercel
+    - netlify
+    # analytics-specialist integrations
+    - google-analytics
+    - google-tag-manager
+    - meta-business
+    - google-ads
+    - google-search-console
+
+# ============================================
+# PRD TRACEABILITY
+# ============================================
+prd_refs:
+  document: docs/prd-brand-system-service.md
+  version: "1.2"
+  epics_covered:
+    - EPIC-BSS-2  # Design Tokens & Brand Book
+    - EPIC-BSS-3  # AI Pipeline
+    - EPIC-BSS-4  # Creative Production
+    - EPIC-BSS-5  # Landing Pages & Sites
+    - EPIC-BSS-6  # Figma Component Library (NEW - figma-component-builder)
+    - EPIC-BSS-7  # Client Onboarding & Operations (operations-coordinator)
+    - EPIC-BSS-8  # QA Pipeline
+    - EPIC-BSS-9  # Analytics & Tracking (NEW - analytics-specialist)
+    - EPIC-BSS-10 # Validation Program (NEW - operations-coordinator)
+
+tags:
+  - branding
+  - design-system
+  - brand-identity
+  - social-media
+  - web
+  - ai-pipeline
+  - analytics
+  - tracking
+  - operations
+  - figma-components

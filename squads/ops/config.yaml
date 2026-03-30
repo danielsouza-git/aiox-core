@@ -91,6 +91,7 @@ agents:
     tier: 2
     focus: "Design de quality gates, validacao final de processos, teste com leigo"
 
+
 # -------------------------------------------------------------------------------
 # HANDOFF MATRIX
 # -------------------------------------------------------------------------------
@@ -123,6 +124,7 @@ handoffs:
     receives_from: [automation-architect]
     escalates_to: [ops-head]
     gate: "design-qa-gates + test-qa-gates aprovados (>70%) = Quality Gate FINAL"
+
 
 # -------------------------------------------------------------------------------
 # CROSS-CUTTING CONCERNS

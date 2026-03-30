@@ -165,5 +165,19 @@ Deliver a comprehensive market research report covering market size, key players
 - [ ] Risk factors identified
 - [ ] Executive summary written
 
+## Quality Gate
+
+| Criterio | Threshold | Obrigatorio |
+|----------|-----------|-------------|
+| TAM/SAM/SOM calculados com metodologia | 100% | Sim |
+| Key players identificados com market share | >=5 | Sim |
+| Trends de mercado com dados de suporte | >=3 | Sim |
+| Growth projections com CAGR (3+ anos) | 100% | Sim |
+| Data points com fontes citadas | 100% | Sim |
+| Executive summary escrito | 100% | Sim |
+| Completude do output | 100% | Sim |
+
+**Pass threshold:** >70% em todos os criterios obrigatorios
+
 ---
 *Research Intelligence Squad Task*

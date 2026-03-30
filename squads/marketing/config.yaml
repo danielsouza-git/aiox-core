@@ -103,6 +103,36 @@ agents:
     tier: 2
     focus: "Analise competitiva, trend hunting, swipe file -- delega para research-intelligence squad"
 
+
+# -------------------------------------------------------------------------------
+# TASK REGISTRY
+# -------------------------------------------------------------------------------
+
+components:
+  tasks:
+    # social-media-manager
+    - create-social-content.md
+    - schedule-posts.md
+    - engage-community.md
+    # media-buyer
+    - create-campaign.md
+    - optimize-ads.md
+    - scale-winners.md
+    # email-strategist
+    - write-email.md
+    - build-sequence.md
+    - analyze-email-metrics.md
+    # content-manager
+    - seo-research.md
+    - content-planning.md
+    - publish-content.md
+    - content-report.md
+    # research-analyst
+    - competitor-analysis.md
+    - trend-hunting.md
+    - swipe-file.md
+
+
 # -------------------------------------------------------------------------------
 # HANDOFF MATRIX
 # -------------------------------------------------------------------------------
@@ -134,6 +164,7 @@ handoffs:
     collaborates_with: [social-media-manager, media-buyer, content-manager]
     escalates_to: [marketing-head]
     delegation: "Delega pesquisas profundas para research-intelligence squad (Tessa/Cyrus/Maya)"
+
 
 # -------------------------------------------------------------------------------
 # CROSS-SQUAD FLOWS

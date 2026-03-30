@@ -181,5 +181,19 @@ Per touchpoint, score:
 - [ ] Quick wins identified
 - [ ] Responsible teams/owners noted
 
+## Quality Gate
+
+| Criterio | Threshold | Obrigatorio |
+|----------|-----------|-------------|
+| Touchpoints catalogados no escopo | 100% | Sim |
+| Scoring em 6 dimensoes (incl. dark mode) | 100% dos touchpoints | Sim |
+| Non-compliant touchpoints flagged | >70% com issues especificos | Sim |
+| Summary statistics calculadas | 100% | Sim |
+| Remediation plan com timeline | >70% | Sim |
+| Quick wins identificados | >70% | Sim |
+| Completude do output | 100% | Sim |
+
+**Pass threshold:** >70% em todos os criterios obrigatorios
+
 ---
 *Research Intelligence Squad Task*

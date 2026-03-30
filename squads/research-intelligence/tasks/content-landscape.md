@@ -187,5 +187,19 @@ Per competitor:
 - [ ] Quick wins identified
 - [ ] All sources cited
 
+## Quality Gate
+
+| Criterio | Threshold | Obrigatorio |
+|----------|-----------|-------------|
+| Content inventory completo para todos competidores | 100% | Sim |
+| Topic coverage matrix construido | >70% dos topicos | Sim |
+| Gaps categorizados (table stakes, gaps, blue ocean) | 100% | Sim |
+| Tone e voice analisados por competidor | >70% | Sim |
+| Content pillars recomendados | >=3 | Sim |
+| Fontes citadas | 100% | Sim |
+| Completude do output | 100% | Sim |
+
+**Pass threshold:** >70% em todos os criterios obrigatorios
+
 ---
 *Research Intelligence Squad Task*

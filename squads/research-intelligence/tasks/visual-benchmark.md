@@ -156,5 +156,19 @@ Per competitor:
 - [ ] Differentiation opportunities recommended
 - [ ] All URLs and capture dates documented
 
+## Quality Gate
+
+| Criterio | Threshold | Obrigatorio |
+|----------|-----------|-------------|
+| Paginas dos competidores documentadas | 100% das paginas definidas | Sim |
+| Color palettes extraidas com hex values | >70% dos competidores | Sim |
+| Typography identificada por competidor | >70% | Sim |
+| Layout patterns catalogados por tipo de pagina | >70% | Sim |
+| Oportunidades de diferenciacao recomendadas | >=3 | Sim |
+| URLs e datas de captura documentados | 100% | Sim |
+| Completude do output | 100% | Sim |
+
+**Pass threshold:** >70% em todos os criterios obrigatorios
+
 ---
 *Research Intelligence Squad Task*

@@ -210,5 +210,19 @@ EMERGING          GROWING           PEAK              DECLINING
 - [ ] Industry-specific context applied
 - [ ] All sources cited
 
+## Quality Gate
+
+| Criterio | Threshold | Obrigatorio |
+|----------|-----------|-------------|
+| Photography style trends documentados | >=3 | Sim |
+| AI-generated imagery trends avaliados | >70% coverage | Sim |
+| Competidores imagery auditados | >=5 | Sim |
+| Direcoes de imagem recomendadas | >=3 | Sim |
+| Consideracoes eticas documentadas | 100% | Sim |
+| Fontes citadas | 100% | Sim |
+| Completude do output | 100% | Sim |
+
+**Pass threshold:** >70% em todos os criterios obrigatorios
+
 ---
 *Research Intelligence Squad Task*

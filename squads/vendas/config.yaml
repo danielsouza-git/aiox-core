@@ -89,6 +89,28 @@ agents:
     tier: 2
     focus: "Analise de pipeline, forecast de receita, reporting"
 
+
+# -------------------------------------------------------------------------------
+# TASK REGISTRY
+# -------------------------------------------------------------------------------
+
+components:
+  tasks:
+    # sdr
+    - lead-scoring.md
+    - lead-qualification.md
+    - first-contact.md
+    # closer
+    - discovery-call.md
+    - proposal.md
+    - negotiation.md
+    - close-deal.md
+    # sales-analyst
+    - pipeline-analysis.md
+    - forecast.md
+    - report.md
+
+
 # -------------------------------------------------------------------------------
 # HANDOFF MATRIX
 # -------------------------------------------------------------------------------
@@ -111,6 +133,7 @@ handoffs:
     collaborates_with: [vendas-head, sdr, closer]
     escalates_to: [vendas-head]
 
+
 # -------------------------------------------------------------------------------
 # CROSS-SQUAD FLOWS
 # -------------------------------------------------------------------------------
@@ -125,7 +148,7 @@ cross_squad_flows:
   to_marketing:
     trigger: "Lead frio identificado pelo Closer"
     target_squad: marketing
-    target_agent: nurture-specialist
+    target_agent: email-strategist
     payload: "Lead com historico de interacoes para fluxo de nurture"
 
   from_marketing:

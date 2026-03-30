@@ -178,5 +178,19 @@ For [target audience] who [need/want], [Brand] is the [category] that [key diffe
 - [ ] Positioning statement drafted
 - [ ] Required brand attributes defined
 
+## Quality Gate
+
+| Criterio | Threshold | Obrigatorio |
+|----------|-----------|-------------|
+| Eixos selecionados com justificativa | 100% | Sim |
+| Competidores avaliados com evidencia | 100% dos competidores | Sim |
+| Mapa 2D de posicionamento criado | 100% | Sim |
+| White spaces identificados e pontuados | >70% | Sim |
+| Positioning statement redigido | 100% | Sim |
+| Brand attributes definidos | >70% | Sim |
+| Completude do output | 100% | Sim |
+
+**Pass threshold:** >70% em todos os criterios obrigatorios
+
 ---
 *Research Intelligence Squad Task*

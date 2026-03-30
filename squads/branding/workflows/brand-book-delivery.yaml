@@ -1,0 +1,96 @@
+# Brand Book Delivery Flow
+# Generate and deliver brand book in 3 formats
+
+name: brand-book-delivery
+version: 1.0.0
+description: "Generate and deliver brand book in 3 formats (online, PDF, local package)"
+
+trigger:
+  manual: true
+  command: "*run-workflow brand-book-delivery"
+
+prerequisites:
+  - workflow: brand-discovery-flow
+    artifacts:
+      - tokens.json
+      - voice_guide.md
+      - manifesto.md
+      - moodboard_urls[]
+
+steps:
+  - id: generate
+    name: Generate Brand Book
+    agent: brand-book-builder
+    task: brand-book-generate.md
+    inputs:
+      - tokens.json
+      - voice_guide.md
+      - manifesto.md
+      - moodboard_urls[]
+      - assets
+    outputs:
+      - brand-book/
+
+  - id: pdf
+    name: Export PDF
+    agent: brand-book-builder
+    task: brand-book-pdf.md
+    depends_on: [generate]
+    inputs:
+      - brand-book/
+    outputs:
+      - brand-book.pdf
+
+  - id: package
+    name: Export Local Package
+    agent: brand-book-builder
+    task: brand-book-package.md
+    depends_on: [generate]
+    inputs:
+      - brand-book/
+    outputs:
+      - brand-book.zip
+
+  - id: review
+    name: Quality Review
+    agent: qa-reviewer
+    task: review-deliverable.md
+    depends_on: [generate, pdf, package]
+    inputs:
+      - brand-book/
+      - brand-book.pdf
+      - brand-book.zip
+    outputs:
+      - review_report
+      - verdict
+
+  - id: approval
+    name: Final Approval
+    agent: qa-reviewer
+    task: final-approval.md
+    depends_on: [review]
+    condition: "review.verdict != 'FAIL'"
+    inputs:
+      - review_report
+    outputs:
+      - approval_status
+
+  - id: deploy
+    name: Deploy Brand Book
+    agent: brand-book-builder
+    task: brand-book-deploy.md
+    depends_on: [approval]
+    condition: "approval_status == 'APPROVED'"
+    inputs:
+      - brand-book/
+      - host_config
+    outputs:
+      - deployed_url
+
+artifacts:
+  - brand-book/ (static HTML)
+  - brand-book.pdf (50-100 pages)
+  - brand-book.zip (local package)
+  - deployed_url
+
+estimated_duration: "1-2 hours"

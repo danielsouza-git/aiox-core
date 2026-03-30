@@ -1,0 +1,211 @@
+# ===============================================================================
+# Squad: Research Intelligence -- Brand Intelligence & Market Research
+# Domain: Competitive Analysis, Market Trends, Audience Research, Brand Perception
+# Created: 2026-03-29
+# Version: 1.1.0 (migrated to business schema)
+# ===============================================================================
+
+squad:
+  name: research-intelligence
+  display_name: "Research Intelligence Squad"
+  version: "1.1.0"
+  domain: "Competitive Analysis, Market Trends, Audience Research, Brand Perception"
+  description: |
+    Squad responsavel por inteligencia de marca e pesquisa de mercado: analise competitiva,
+    tendencias de mercado, pesquisa de audiencia e auditorias de percepcao de marca.
+    Recebe briefings de pesquisa do marketing/research-analyst e do branding squad.
+
+  philosophy: |
+    "Dados geram insights, insights geram vantagem."
+    Pesquisa rigorosa com fontes validadas. Cada insight deve ser acionavel e
+    rastreavel ate a fonte. Nao inventamos dados -- encontramos e interpretamos.
+
+  keywords:
+    - research
+    - intelligence
+    - competitive-analysis
+    - market-trends
+    - brand-audit
+    - audience-research
+    - trend-spotting
+    - seo-gap
+
+  entry_agent: trend-spotter
+  created_by: "dex-builder"
+  created_at: "2026-03-29"
+
+# -------------------------------------------------------------------------------
+# TIER ARCHITECTURE
+# -------------------------------------------------------------------------------
+
+tiers:
+  tier_1:
+    name: "Pesquisa e Analise"
+    agents:
+      - market-researcher
+      - competitive-analyst
+    purpose: "Pesquisa de mercado, audiencia, analise competitiva e benchmarks visuais"
+
+  tier_2:
+    name: "Auditoria e Tendencias"
+    agents:
+      - brand-auditor
+      - trend-spotter
+    purpose: "Auditoria de percepcao de marca, consistencia e tendencias de mercado"
+
+# -------------------------------------------------------------------------------
+# AGENT REGISTRY
+# -------------------------------------------------------------------------------
+
+agents:
+  market-researcher:
+    file: agents/market-researcher.md
+    name: Maya
+    tier: 1
+    focus: "Pesquisa de mercado, analise de audiencia e relatorios de industria"
+
+  competitive-analyst:
+    file: agents/competitive-analyst.md
+    name: Cyrus
+    tier: 1
+    focus: "Auditoria competitiva, benchmark visual, mapa de posicionamento, SEO gap analysis"
+
+  brand-auditor:
+    file: agents/brand-auditor.md
+    name: Blake
+    tier: 2
+    focus: "Auditoria de percepcao de marca, touchpoint audit e consistency score"
+
+  trend-spotter:
+    file: agents/trend-spotter.md
+    name: Tessa
+    tier: 2
+    focus: "Tendencias de mercado, previsao de cores, tendencias tipograficas, imagery trends"
+
+# -------------------------------------------------------------------------------
+# TASK REGISTRY
+# -------------------------------------------------------------------------------
+
+components:
+  tasks:
+    # market-researcher (Maya)
+    - market-research.md
+    - audience-analysis.md
+    - industry-report.md
+    - content-landscape.md
+    # competitive-analyst (Cyrus)
+    - competitive-audit.md
+    - visual-benchmark.md
+    - positioning-map.md
+    - seo-gap-analysis.md
+    # brand-auditor (Blake)
+    - brand-perception-audit.md
+    - touchpoint-audit.md
+    - consistency-score.md
+    # trend-spotter (Tessa)
+    - trend-report.md
+    - color-forecast.md
+    - typography-trends.md
+    - imagery-trends.md
+
+# -------------------------------------------------------------------------------
+# HANDOFF MATRIX
+# -------------------------------------------------------------------------------
+
+handoffs:
+  trend-spotter:
+    routes_to: [market-researcher, competitive-analyst, brand-auditor]
+    receives_from: ["marketing (research-analyst)", "branding (brand-strategist)"]
+
+  market-researcher:
+    collaborates_with: [competitive-analyst, brand-auditor]
+    escalates_to: [trend-spotter]
+
+  competitive-analyst:
+    collaborates_with: [market-researcher, trend-spotter]
+    escalates_to: [trend-spotter]
+
+  brand-auditor:
+    collaborates_with: [competitive-analyst, market-researcher]
+    escalates_to: [trend-spotter]
+
+# -------------------------------------------------------------------------------
+# CROSS-SQUAD FLOWS
+# -------------------------------------------------------------------------------
+
+cross_squad_flows:
+  from_marketing:
+    trigger: "Briefing de pesquisa profunda do marketing/research-analyst"
+    source_squad: marketing
+    target_agent: trend-spotter
+    payload: "Briefing com escopo, setor e objetivos de pesquisa"
+
+  from_branding:
+    trigger: "Pedido de pesquisa para brand discovery ou audit"
+    source_squad: branding
+    target_agent: brand-auditor
+    payload: "Brand profile, competitor URLs, industria"
+
+  to_branding:
+    trigger: "Resultados de pesquisa prontos para branding squad"
+    target_squad: branding
+    target_agent: brand-strategist
+    payload: "Market insights, competitive analysis, trend data, audience personas"
+
+  to_copy:
+    trigger: "Dados de audiencia e competidores para copy squad"
+    target_squad: copy
+    payload: "Audience language, pain points, competitor messaging"
+
+  to_marketing:
+    trigger: "Resultados de pesquisa profunda para marketing"
+    target_squad: marketing
+    target_agent: research-analyst
+    payload: "Deep research report, competitive intelligence, trend analysis"
+
+# -------------------------------------------------------------------------------
+# CROSS-CUTTING CONCERNS
+# -------------------------------------------------------------------------------
+
+cross_cutting:
+  tools_ecosystem:
+    description: "Ferramentas externas utilizadas pelo squad"
+    tools:
+      - EXA Search
+      - Apify
+      - SimilarWeb
+      - Ahrefs
+      - Semrush
+      - Google Trends
+      - Statista
+
+  quality_standards:
+    default_threshold: 70
+    description: "Cada task deve atingir >70% no quality gate para ser considerada completa"
+
+  integration:
+    receives_from_branding:
+      - brand_profile
+      - competitor_urls
+      - industry
+
+    receives_from_marketing:
+      - research_briefing
+      - keyword_research_request
+      - market_segment_query
+
+    provides_to_branding:
+      - market_insights
+      - competitive_analysis
+      - trend_data
+      - audience_personas
+
+    provides_to_copy:
+      - audience_language
+      - pain_points
+      - competitor_messaging
+
+    provides_to_marketing:
+      - deep_research_report
+      - competitive_intelligence
+      - trend_analysis

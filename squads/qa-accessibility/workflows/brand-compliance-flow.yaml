@@ -1,0 +1,124 @@
+# Brand Compliance Flow
+# Brand guideline verification across all deliverables
+
+name: brand-compliance-flow
+version: 1.0.0
+description: Complete brand compliance verification workflow covering logo, palette, typography, and overall score
+
+trigger:
+  command: "*brand-verify"
+  agent: brand-compliance
+
+phases:
+  - id: guidelines-load
+    name: Load Brand Guidelines
+    agent: brand-compliance
+    outputs:
+      - brand_guidelines
+      - logo_rules
+      - color_palette
+      - typography_spec
+    next: logo-check
+
+  - id: logo-check
+    name: Logo Usage Verification
+    agent: brand-compliance
+    task: logo-usage-verify
+    inputs:
+      - brand_guidelines
+      - logo_rules
+    outputs:
+      - logo_compliance_score
+      - logo_violations
+    next: palette-check
+
+  - id: palette-check
+    name: Color Palette Compliance
+    agent: brand-compliance
+    task: palette-compliance
+    inputs:
+      - brand_guidelines
+      - color_palette
+    outputs:
+      - palette_compliance_score
+      - unapproved_colors
+    next: typography-check
+
+  - id: typography-check
+    name: Typography Compliance
+    agent: brand-compliance
+    task: typography-compliance
+    inputs:
+      - brand_guidelines
+      - typography_spec
+    outputs:
+      - typography_compliance_score
+      - typography_violations
+    next: scoring
+
+  - id: scoring
+    name: Overall Compliance Score
+    agent: brand-compliance
+    inputs:
+      - logo_compliance_score
+      - palette_compliance_score
+      - typography_compliance_score
+    outputs:
+      - overall_compliance_score
+      - compliance_certificate
+      - violation_summary
+    decisions:
+      compliant: deliver
+      minor_violations: remediate
+      non_compliant: rework
+
+  - id: remediate
+    name: Remediation Guidance
+    agent: brand-compliance
+    outputs:
+      - violation_fixes
+      - priority_list
+      - recheck_plan
+
+  - id: deliver
+    name: Compliance Certificate
+    agent: brand-compliance
+    outputs:
+      - formal_certificate
+      - compliance_report
+      - brand_score_card
+
+scoring_weights:
+  logo_usage: 25
+  color_palette: 25
+  typography: 20
+  spacing_layout: 15
+  imagery_tone: 15
+
+verdicts:
+  compliant:
+    score_range: "95-100%"
+    action: "Approved for delivery"
+  minor_violations:
+    score_range: "85-94%"
+    action: "Fix before delivery"
+  non_compliant:
+    score_range: "< 85%"
+    action: "Major rework required"
+
+quality_gates:
+  - phase: logo-check
+    checklist: brand-compliance-checklist
+  - phase: scoring
+    checklist: brand-compliance-checklist
+
+metrics:
+  - overall_compliance_score
+  - violations_by_category
+  - fix_effort_estimate
+  - time_to_compliance
+
+tags:
+  - brand-compliance
+  - verification
+  - quality-assurance

@@ -210,5 +210,19 @@ Produce a color trend forecast that combines Pantone Color of the Year analysis,
 - [ ] Accessibility considerations included (light and dark modes)
 - [ ] All sources cited
 
+## Quality Gate
+
+| Criterio | Threshold | Obrigatorio |
+|----------|-----------|-------------|
+| Pantone COTY referenciado e analisado | 100% | Sim |
+| Paletas trend com hex codes | >=3 paletas | Sim |
+| Competidores mapeados no landscape | >=5 | Sim |
+| Dark mode palette strategy documentada | 100% | Sim |
+| Acessibilidade (contraste WCAG) verificada | >70% das combinacoes | Sim |
+| Fontes citadas | 100% | Sim |
+| Completude do output | 100% | Sim |
+
+**Pass threshold:** >70% em todos os criterios obrigatorios
+
 ---
 *Research Intelligence Squad Task*

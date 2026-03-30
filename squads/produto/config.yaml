@@ -90,6 +90,30 @@ agents:
     tier: 2
     focus: "Quality check, teste de experiencia, feedback loop e relatorio de qualidade"
 
+
+# -------------------------------------------------------------------------------
+# TASK REGISTRY
+# -------------------------------------------------------------------------------
+
+components:
+  tasks:
+    # product-manager
+    - discovery.md
+    - roadmap.md
+    - spec.md
+    - launch-coordination.md
+    # content-creator
+    - content-research.md
+    - content-create.md
+    - content-review.md
+    - content-publish.md
+    # cs-retencao-produto
+    - quality-check.md
+    - test-experience.md
+    - feedback-loop.md
+    - quality-report.md
+
+
 # -------------------------------------------------------------------------------
 # HANDOFF MATRIX
 # -------------------------------------------------------------------------------
@@ -118,6 +142,7 @@ handoffs:
     receives_from: [produto-head, content-creator]
     escalates_to: [produto-head]
     note: "Feedback de qualidade volta para PM (priorizacao) ou Content Creator (correcao)"
+
 
 # -------------------------------------------------------------------------------
 # CROSS-SQUAD FLOWS

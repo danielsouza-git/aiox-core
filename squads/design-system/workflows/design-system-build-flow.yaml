@@ -1,0 +1,148 @@
+# Design System Build Flow
+# Full pipeline from audit to documented, tested components
+
+name: design-system-build-flow
+version: 1.0.0
+description: "Complete design system build pipeline: audit, extract, transform, build, test, document"
+
+trigger:
+  manual: true
+  command: "*run-workflow design-system-build-flow"
+
+steps:
+  - id: audit
+    name: Atomic Audit
+    agent: ds-architect
+    task: atomic-audit.md
+    inputs:
+      - codebase_path
+      - framework
+    outputs:
+      - audit_report
+      - component_inventory
+
+  - id: extract
+    name: Pattern Extraction
+    agent: ds-architect
+    task: pattern-extract.md
+    depends_on: [audit]
+    inputs:
+      - audit_report
+      - component_inventory
+    outputs:
+      - pattern_specs
+      - extraction_plan
+
+  - id: transform
+    name: Token Transformation
+    agent: token-transformer
+    task: token-transform.md
+    inputs:
+      - tokens_source
+      - platforms
+    outputs:
+      - css_output
+      - scss_output
+      - tailwind_output
+      - transform_report
+
+  - id: build
+    name: Component Build
+    agent: component-builder
+    task: component-build.md
+    depends_on: [extract, transform]
+    inputs:
+      - pattern_specs
+      - tokens_css
+    outputs:
+      - component_html
+      - component_css
+      - component_js
+    loop: true
+    loop_over: extraction_plan.patterns
+
+  - id: variants
+    name: Variant Generation
+    agent: component-builder
+    task: component-variants.md
+    depends_on: [build]
+    inputs:
+      - component_name
+      - component_files
+    outputs:
+      - variant_css
+      - variant_showcase
+
+  - id: a11y
+    name: Accessibility Audit
+    agent: a11y-auditor
+    task: a11y-audit.md
+    depends_on: [variants]
+    inputs:
+      - target
+    outputs:
+      - audit_report
+      - issues_json
+    decisions:
+      no_issues: document
+      has_issues: remediate
+
+  - id: remediate
+    name: Accessibility Remediation
+    agent: a11y-auditor
+    task: a11y-remediate.md
+    depends_on: [a11y]
+    optional: true
+    condition: "issues.critical > 0 || issues.serious > 0"
+    inputs:
+      - audit_report
+      - component_files
+    outputs:
+      - fixed_files
+      - remediation_log
+    next: a11y
+
+  - id: document
+    name: Component Documentation
+    agent: ds-documenter
+    task: ds-document.md
+    depends_on: [a11y]
+    inputs:
+      - component_name
+      - component_files
+    outputs:
+      - documentation_page
+      - documentation_md
+
+  - id: test
+    name: Component Testing
+    agent: component-builder
+    task: component-test.md
+    depends_on: [document]
+    inputs:
+      - component_name
+      - component_files
+    outputs:
+      - test_suite
+      - test_report
+
+artifacts:
+  - audit_report
+  - extraction_plan
+  - token_outputs (CSS, SCSS, Tailwind)
+  - component_library
+  - a11y_reports
+  - documentation_pages
+  - test_suites
+
+quality_gates:
+  - step: build
+    checklist: component-quality-checklist
+  - step: a11y
+    checklist: a11y-wcag-checklist
+  - step: transform
+    checklist: token-quality-checklist
+  - step: test
+    checklist: ds-review-checklist
+
+estimated_duration: "4-8 hours (varies by component count)"

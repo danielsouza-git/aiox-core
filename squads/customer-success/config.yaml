@@ -88,6 +88,30 @@ agents:
     tier: 2
     focus: "Health check, engajamento proativo, deteccao de upsell e prevencao de churn"
 
+
+# -------------------------------------------------------------------------------
+# TASK REGISTRY
+# -------------------------------------------------------------------------------
+
+components:
+  tasks:
+    # onboarding-specialist
+    - welcome-client.md
+    - setup-account.md
+    - first-value.md
+    - handoff-to-cs.md
+    # suporte
+    - ticket-triage.md
+    - resolve-ticket.md
+    - escalate-ticket.md
+    - support-report.md
+    # cs-retencao
+    - health-check.md
+    - engagement.md
+    - upsell-detection.md
+    - churn-prevention.md
+
+
 # -------------------------------------------------------------------------------
 # HANDOFF MATRIX
 # -------------------------------------------------------------------------------
@@ -114,6 +138,7 @@ handoffs:
     receives_from: [onboarding-specialist, cs-head]
     escalates_to: [cs-head]
     gate: "health-check scoring atualizado e acoes definidas"
+
 
 # -------------------------------------------------------------------------------
 # CROSS-SQUAD FLOWS

@@ -68,6 +68,12 @@ squads/*
 !squads/auditoria/
 !squads/orchestration/
 !squads/research-intelligence/
+!squads/branding/
+!squads/copy/
+!squads/design-system/
+!squads/visual-production/
+!squads/qa-accessibility/
+!squads/brand-pipeline/
 keys/
 *.secret
 *.credentials

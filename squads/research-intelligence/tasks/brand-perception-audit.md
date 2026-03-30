@@ -176,5 +176,18 @@ For each channel, assess actual perception:
 - [ ] Action plan with quick wins and long-term items
 - [ ] Success metrics defined
 
+## Quality Gate
+
+| Criterio | Threshold | Obrigatorio |
+|----------|-----------|-------------|
+| Canais auditados com scores | 100% dos canais definidos | Sim |
+| Gaps quantificados (intended vs actual) | >70% dos atributos | Sim |
+| Root causes identificados para top gaps | >70% | Sim |
+| Action plan com quick wins e long-term | 100% | Sim |
+| Metricas de sucesso definidas | >70% | Sim |
+| Completude do output | 100% | Sim |
+
+**Pass threshold:** >70% em todos os criterios obrigatorios
+
 ---
 *Research Intelligence Squad Task*

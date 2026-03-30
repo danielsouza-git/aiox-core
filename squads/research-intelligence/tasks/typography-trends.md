@@ -209,5 +209,20 @@ EMERGING          GROWING           PEAK              CLASSIC
 - [ ] All sources cited
 - [ ] Industry-specific context applied
 
+## Quality Gate
+
+| Criterio | Threshold | Obrigatorio |
+|----------|-----------|-------------|
+| Typography trends documentados | >=5 | Sim |
+| Competidores typography auditados | >=5 | Sim |
+| Font pairing recommendations | >=3 | Sim |
+| Variable font trends avaliados | >70% | Sim |
+| Performance e accessibility notes | 100% | Sim |
+| Licensing documentado | >70% | Sim |
+| Fontes citadas | 100% | Sim |
+| Completude do output | 100% | Sim |
+
+**Pass threshold:** >70% em todos os criterios obrigatorios
+
 ---
 *Research Intelligence Squad Task*

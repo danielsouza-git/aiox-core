@@ -1,0 +1,103 @@
+# Copy Production Flow
+# Complete copy production from brief to delivery
+
+name: copy-production-flow
+version: 1.0.0
+description: End-to-end copy production workflow from brief analysis to final delivery
+
+trigger:
+  command: "*copy-production"
+  agent: copy-chief
+
+phases:
+  - id: brief
+    name: Brief Analysis
+    agent: copy-chief
+    task: copy-brief-analyze
+    outputs:
+      - brief_analysis
+      - target_audience
+      - copy_objectives
+    next: strategy
+
+  - id: strategy
+    name: Strategy Creation
+    agent: copy-chief
+    task: copy-strategy-create
+    inputs:
+      - brief_analysis
+    outputs:
+      - copy_strategy
+      - framework_selection
+      - tone_guidelines
+    next: write
+
+  - id: write
+    name: Copy Writing
+    agent: dynamic  # Assigned based on copy type
+    task: dynamic   # Selected based on deliverable
+    inputs:
+      - copy_strategy
+      - framework_selection
+    outputs:
+      - draft_copy
+    routing:
+      landing_page: conversion-writer
+      sales_page: conversion-writer
+      email: email-specialist
+      ads: ads-writer
+      social: social-writer
+      blog: seo-writer
+    next: edit
+
+  - id: edit
+    name: Copy Editing
+    agent: copy-editor
+    task: copy-edit
+    inputs:
+      - draft_copy
+      - tone_guidelines
+    outputs:
+      - edited_copy
+    next: review
+
+  - id: review
+    name: Final Review
+    agent: copy-chief
+    task: copy-review-final
+    inputs:
+      - edited_copy
+      - brief_analysis
+    outputs:
+      - final_copy
+      - review_notes
+    decisions:
+      approved: deliver
+      needs_revision: edit
+      major_issues: write
+
+  - id: deliver
+    name: Delivery
+    agent: copy-chief
+    outputs:
+      - final_deliverable
+      - copy_variations
+      - implementation_notes
+
+quality_gates:
+  - phase: write
+    checklist: conversion-copy-checklist
+  - phase: edit
+    checklist: copy-quality-checklist
+  - phase: review
+    checklist: copy-quality-checklist
+
+metrics:
+  - brief_to_delivery_time
+  - revision_count
+  - quality_score
+
+tags:
+  - production
+  - end-to-end
+  - copy

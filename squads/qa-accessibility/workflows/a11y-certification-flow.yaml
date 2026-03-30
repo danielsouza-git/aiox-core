@@ -1,0 +1,123 @@
+# A11y Certification Flow
+# Full WCAG certification from automated tests to manual verification
+
+name: a11y-certification-flow
+version: 1.0.0
+description: Complete accessibility certification workflow producing a formal WCAG compliance certificate
+
+trigger:
+  command: "*a11y-certify"
+  agent: a11y-tester
+
+phases:
+  - id: automated-scan
+    name: Automated WCAG Scan
+    agent: a11y-tester
+    task: wcag-test
+    outputs:
+      - automated_issues
+      - compliance_baseline
+      - wcag_criteria_status
+    next: screen-reader
+
+  - id: screen-reader
+    name: Screen Reader Testing
+    agent: a11y-tester
+    task: screen-reader-test
+    inputs:
+      - automated_issues
+    outputs:
+      - reading_order_map
+      - landmark_audit
+      - screen_reader_issues
+    next: keyboard
+
+  - id: keyboard
+    name: Keyboard Navigation Testing
+    agent: a11y-tester
+    task: keyboard-nav-test
+    inputs:
+      - automated_issues
+    outputs:
+      - focus_order_map
+      - keyboard_issues
+      - trap_report
+    next: contrast
+
+  - id: contrast
+    name: Color Contrast Testing
+    agent: a11y-tester
+    task: color-contrast-test
+    inputs:
+      - automated_issues
+    outputs:
+      - contrast_report
+      - failing_pairs
+    next: certification
+
+  - id: certification
+    name: Certification Decision
+    agent: a11y-tester
+    inputs:
+      - automated_issues
+      - screen_reader_issues
+      - keyboard_issues
+      - contrast_report
+    outputs:
+      - a11y_certificate
+      - remediation_plan
+    decisions:
+      certified: deliver
+      conditional: remediate
+      failed: remediate
+
+  - id: remediate
+    name: Remediation Plan
+    agent: a11y-tester
+    outputs:
+      - prioritized_fixes
+      - estimated_effort
+      - retest_plan
+
+  - id: deliver
+    name: Certificate Delivery
+    agent: a11y-tester
+    outputs:
+      - formal_certificate
+      - compliance_summary
+      - testing_evidence
+
+certification_levels:
+  full_aa:
+    criteria: "All WCAG 2.2 AA criteria pass"
+    automated: "Zero critical/serious axe-core issues"
+    manual: "All manual checks pass"
+    result: "WCAG 2.2 AA Certified"
+
+  conditional_aa:
+    criteria: "Most WCAG 2.2 AA criteria pass"
+    automated: "Zero critical, < 3 serious issues"
+    manual: "No critical manual failures"
+    result: "Conditional AA (with remediation plan)"
+
+  failed:
+    criteria: "Significant WCAG failures"
+    result: "Not Certified (remediation required)"
+
+quality_gates:
+  - phase: automated-scan
+    checklist: a11y-wcag-checklist
+  - phase: contrast
+    checklist: a11y-wcag-checklist
+
+metrics:
+  - total_criteria_tested
+  - criteria_passed
+  - criteria_failed
+  - certification_level
+  - remediation_items
+
+tags:
+  - accessibility
+  - certification
+  - wcag

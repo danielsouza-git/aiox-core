@@ -184,5 +184,19 @@ Per competitor:
 - [ ] Recommendations actionable and specific
 - [ ] All sources and URLs documented
 
+## Quality Gate
+
+| Criterio | Threshold | Obrigatorio |
+|----------|-----------|-------------|
+| Competidores auditados | >=5 | Sim |
+| Dimensoes cobertas por competidor | 100% (7 dimensoes) | Sim |
+| Scoring consistente na comparison matrix | >70% | Sim |
+| SEO e technical comparison preenchido | >70% dos campos | Sim |
+| Oportunidades de diferenciacao identificadas | >=3 | Sim |
+| URLs e fontes documentados | 100% | Sim |
+| Completude do output | 100% | Sim |
+
+**Pass threshold:** >70% em todos os criterios obrigatorios
+
 ---
 *Research Intelligence Squad Task*

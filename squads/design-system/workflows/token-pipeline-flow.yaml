@@ -1,0 +1,144 @@
+# Token Pipeline Flow
+# Token ingestion, transformation, and multi-platform export
+
+name: token-pipeline-flow
+version: 1.0.0
+description: "Token ingestion, validation, transformation, and multi-platform export"
+
+trigger:
+  command: "*token-pipeline"
+  agent: token-transformer
+
+steps:
+  - id: ingest
+    name: Token Ingestion
+    agent: token-transformer
+    description: "Load W3C DTCG tokens from source (file, Figma, Tokens Studio)"
+    inputs:
+      - tokens_source
+      - source_type
+    outputs:
+      - raw_tokens
+    next: validate
+
+  - id: validate
+    name: Token Validation
+    agent: token-transformer
+    description: "Validate token structure, types, references, and naming conventions"
+    inputs:
+      - raw_tokens
+    outputs:
+      - validation_report
+      - validated_tokens
+    decisions:
+      valid: transform
+      invalid: report_errors
+    next: transform
+
+  - id: report_errors
+    name: Error Report
+    agent: token-transformer
+    optional: true
+    condition: "validation_report.errors > 0"
+    inputs:
+      - validation_report
+    outputs:
+      - error_summary
+    description: "Generate human-readable error report for token authors"
+
+  - id: transform
+    name: Multi-Platform Transform
+    agent: token-transformer
+    task: token-transform.md
+    depends_on: [validate]
+    inputs:
+      - validated_tokens
+      - platforms
+    outputs:
+      - css_output
+      - scss_output
+      - tailwind_output
+      - json_flat_output
+      - json_nested_output
+    next: themes
+
+  - id: themes
+    name: Theme Generation
+    agent: token-transformer
+    task: theme-create.md
+    depends_on: [transform]
+    inputs:
+      - validated_tokens
+    outputs:
+      - dark_theme
+      - high_contrast_theme
+    loop: true
+    loop_over: [dark, high-contrast]
+    next: quality
+
+  - id: quality
+    name: Token Quality Check
+    agent: token-transformer
+    depends_on: [themes]
+    inputs:
+      - all_outputs
+    outputs:
+      - quality_report
+    checklist: token-quality-checklist
+    decisions:
+      pass: sync
+      fail: transform
+    next: sync
+
+  - id: sync
+    name: Figma Sync
+    agent: token-transformer
+    depends_on: [quality]
+    optional: true
+    condition: "platforms.includes('figma')"
+    inputs:
+      - validated_tokens
+    outputs:
+      - figma_sync_report
+    description: "Push tokens to Figma via Tokens Studio format"
+    next: report
+
+  - id: report
+    name: Pipeline Report
+    agent: token-transformer
+    depends_on: [sync]
+    inputs:
+      - all_outputs
+      - quality_report
+    outputs:
+      - pipeline_report
+    description: "Generate comprehensive pipeline execution report"
+
+artifacts:
+  - validated_tokens (W3C DTCG JSON)
+  - css_output (CSS Custom Properties)
+  - scss_output (SCSS Variables)
+  - tailwind_output (Tailwind Config)
+  - json_flat_output (Flat JSON)
+  - json_nested_output (Nested JSON)
+  - dark_theme (CSS + JSON)
+  - high_contrast_theme (CSS + JSON)
+  - figma_sync_report
+
+quality_gates:
+  - step: validate
+    checklist: token-quality-checklist
+  - step: quality
+    checklist: token-quality-checklist
+
+metrics:
+  - token_count
+  - platform_count
+  - theme_count
+  - validation_error_count
+  - contrast_compliance_rate
+
+tags:
+  - tokens
+  - pipeline
+  - multi-platform

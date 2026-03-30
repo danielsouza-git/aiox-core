@@ -146,5 +146,19 @@ Produce a comprehensive industry landscape report covering trends, disruptions, 
 - [ ] All data sourced and cited
 - [ ] Executive summary written
 
+## Quality Gate
+
+| Criterio | Threshold | Obrigatorio |
+|----------|-----------|-------------|
+| Macro trends identificados e classificados | >=5 | Sim |
+| Porter's Five Forces completado | 100% (5 forcas) | Sim |
+| Disruptions mapeados com impacto | >70% | Sim |
+| Forecast de 5 anos com projecoes | 100% | Sim |
+| Dados com fontes citadas | 100% | Sim |
+| Executive summary escrito | 100% | Sim |
+| Completude do output | 100% | Sim |
+
+**Pass threshold:** >70% em todos os criterios obrigatorios
+
 ---
 *Research Intelligence Squad Task*

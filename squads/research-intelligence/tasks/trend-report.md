@@ -202,5 +202,19 @@ EMERGING        GROWING         PEAK            DECLINING
 - [ ] All trends sourced and cited
 - [ ] Executive summary written
 
+## Quality Gate
+
+| Criterio | Threshold | Obrigatorio |
+|----------|-----------|-------------|
+| Trends identificados e documentados | >=12 | Sim |
+| Lifecycle stage atribuido por trend | 100% | Sim |
+| Exemplos reais por trend | >=2 por trend | Sim |
+| Categorias cobertas (layout, motion, icons, spacing, a11y) | >=5 categorias | Sim |
+| Adopt/Monitor/Avoid para cada trend | 100% | Sim |
+| Fontes citadas | 100% | Sim |
+| Completude do output | 100% | Sim |
+
+**Pass threshold:** >70% em todos os criterios obrigatorios
+
 ---
 *Research Intelligence Squad Task*

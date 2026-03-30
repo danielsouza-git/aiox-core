@@ -197,5 +197,19 @@ Timeline: 90-180 days
 - [ ] Trend comparison (if previous data available)
 - [ ] Methodology documented
 
+## Quality Gate
+
+| Criterio | Threshold | Obrigatorio |
+|----------|-----------|-------------|
+| Score geral calculado (0-100) | 100% | Sim |
+| 5 dimensoes pontuadas individualmente | 100% | Sim |
+| Dark mode avaliado dentro de Visual Consistency | 100% | Sim |
+| Pesos aplicados corretamente | 100% | Sim |
+| Top 3 areas fracas com root causes | 100% | Sim |
+| Improvement roadmap com fases e targets | >70% | Sim |
+| Completude do output | 100% | Sim |
+
+**Pass threshold:** >70% em todos os criterios obrigatorios
+
 ---
 *Research Intelligence Squad Task*

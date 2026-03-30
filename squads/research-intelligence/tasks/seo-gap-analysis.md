@@ -205,5 +205,19 @@ Per brand + each competitor:
 - [ ] Recommendations are actionable and specific
 - [ ] All competitor URLs and access dates documented
 
+## Quality Gate
+
+| Criterio | Threshold | Obrigatorio |
+|----------|-----------|-------------|
+| Meta tags comparados entre competidores | 100% dos competidores | Sim |
+| Schema markup inventariado por competidor | >70% | Sim |
+| Keyword gap matrix construido | >70% das keywords | Sim |
+| Gaps priorizados por impacto e esforco | >70% | Sim |
+| Quick wins identificados | >=3 | Sim |
+| URLs e datas de acesso documentados | 100% | Sim |
+| Completude do output | 100% | Sim |
+
+**Pass threshold:** >70% em todos os criterios obrigatorios
+
 ---
 *Research Intelligence Squad Task*

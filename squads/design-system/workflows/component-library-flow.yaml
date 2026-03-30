@@ -1,0 +1,174 @@
+# Component Library Flow
+# Build a complete component library from brand tokens
+
+name: component-library-flow
+version: 1.0.0
+description: "Build a complete component library from brand tokens: atoms, molecules, organisms"
+
+trigger:
+  command: "*component-library"
+  agent: ds-architect
+
+phases:
+  - id: plan
+    name: Library Planning
+    agent: ds-architect
+    task: atomic-audit.md
+    inputs:
+      - codebase_path
+      - framework
+    outputs:
+      - component_inventory
+      - audit_report
+    next: tokens
+
+  - id: tokens
+    name: Token Preparation
+    agent: token-transformer
+    task: token-transform.md
+    inputs:
+      - tokens_source
+    outputs:
+      - css_output
+      - tailwind_output
+    next: atoms
+
+  - id: atoms
+    name: Atom Components
+    agent: component-builder
+    task: component-build.md
+    depends_on: [tokens]
+    inputs:
+      - pattern_specs
+      - tokens_css
+    outputs:
+      - atom_components
+    description: "Build atomic elements: Button, Input, Label, Icon, Badge, Tag, Avatar, Checkbox, Radio, Toggle"
+    next: molecules
+
+  - id: molecules
+    name: Molecule Components
+    agent: component-builder
+    task: component-build.md
+    depends_on: [atoms]
+    inputs:
+      - atom_components
+      - tokens_css
+    outputs:
+      - molecule_components
+    description: "Build molecules: Search Bar, Form Field, Card Header, Nav Item, Breadcrumb, Pagination, Tab"
+    next: organisms
+
+  - id: organisms
+    name: Organism Components
+    agent: component-builder
+    task: component-build.md
+    depends_on: [molecules]
+    inputs:
+      - molecule_components
+      - tokens_css
+    outputs:
+      - organism_components
+    description: "Build organisms: Navigation Bar, Hero Section, Footer, Sidebar, Card, Modal, Toast, Data Table"
+    next: variants
+
+  - id: variants
+    name: Variant Generation
+    agent: component-builder
+    task: component-variants.md
+    depends_on: [atoms, molecules, organisms]
+    inputs:
+      - all_components
+    outputs:
+      - variant_css
+      - variant_showcases
+    next: audit
+
+  - id: audit
+    name: Accessibility Audit
+    agent: a11y-auditor
+    task: a11y-audit.md
+    depends_on: [variants]
+    inputs:
+      - all_components
+    outputs:
+      - a11y_report
+    decisions:
+      pass: test
+      fail: remediate
+    next: test
+
+  - id: remediate
+    name: Remediation
+    agent: a11y-auditor
+    task: a11y-remediate.md
+    optional: true
+    inputs:
+      - a11y_report
+      - component_files
+    outputs:
+      - fixed_files
+    next: audit
+
+  - id: test
+    name: Test Suite
+    agent: component-builder
+    task: component-test.md
+    depends_on: [audit]
+    inputs:
+      - all_components
+    outputs:
+      - test_suites
+      - test_reports
+    next: document
+
+  - id: document
+    name: Documentation
+    agent: ds-documenter
+    task: ds-document.md
+    depends_on: [test]
+    inputs:
+      - all_components
+    outputs:
+      - documentation_site
+    next: examples
+
+  - id: examples
+    name: Usage Examples
+    agent: ds-documenter
+    task: usage-examples.md
+    depends_on: [document]
+    inputs:
+      - all_components
+    outputs:
+      - examples_pages
+
+  - id: package
+    name: Library Package
+    agent: ds-architect
+    depends_on: [examples]
+    outputs:
+      - packaged_library
+      - release_notes
+
+quality_gates:
+  - phase: atoms
+    checklist: component-quality-checklist
+  - phase: molecules
+    checklist: component-quality-checklist
+  - phase: organisms
+    checklist: component-quality-checklist
+  - phase: audit
+    checklist: a11y-wcag-checklist
+
+metrics:
+  - total_components
+  - a11y_pass_rate
+  - test_coverage
+  - documentation_completeness
+  - token_coverage
+
+tags:
+  - library
+  - components
+  - end-to-end
