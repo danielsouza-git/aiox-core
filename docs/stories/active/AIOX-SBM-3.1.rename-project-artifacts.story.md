@@ -370,21 +370,35 @@ Verified 2nd UserPromptSubmit entry exists:
 - Timeout protection: Both hooks use 5000ms setTimeout with `timer.unref()`
 - No blocking operations: All non-critical failures (logging, notifications) are non-blocking
 
-### Issues Found
+### Issues Found (Previous Review 2026-03-26)
 
-| ID | Severity | Finding | Suggested Action |
+| ID | Severity | Finding | Status |
 | --- | --- | --- | --- |
-| REQ-001 | high | 34 stale "AIOX-HO" references in content of 5 renamed story files (titles, examples, JSON, file lists). AC #6 not met. | Run search-and-replace "AIOX-HO" -> "AIOX-SBM" inside the 5 story files: SBM-1, 2.1, 2.2, 2.3, 2.4 |
-| MNT-001 | low | `.aiox/lib/handoff/` modules are not tracked in git (gitignored). Requires `git add -f` for committing. Not a blocker since Dev Notes document this. | Ensure `git add -f .aiox/lib/handoff/` before commit |
-| DOC-001 | low | Task 14 ("Verify SYNAPSE loads renamed rule file") still unchecked. Manual verification deferred. | Verify on next prompt that SYNAPSE loads `session-branch-manager.md` |
+| REQ-001 | high | 34 stale "AIOX-HO" references in 5 renamed story files | **RESOLVED** -- all 5 files now have 0 AIOX-HO refs |
+| MNT-001 | low | .aiox/lib/handoff/ modules gitignored, requires git add -f | Documented in Dev Notes |
+| DOC-001 | low | Task 14 (SYNAPSE verification) unchecked | Deferred -- non-blocking |
+
+### Re-Review: 2026-03-30
+
+**Stale AIOX-HO Reference Verification:**
+
+| File | AIOX-HO Count | Status |
+| --- | --- | --- |
+| AIOX-SBM-1.unified-handoff-system.story.md | 0 | CLEAN |
+| AIOX-SBM-2.1.agent-activity-summaries.story.md | 0 | CLEAN |
+| AIOX-SBM-2.2.agent-memory-integration.story.md | 0 | CLEAN |
+| AIOX-SBM-2.3.session-observability-cli.story.md | 0 | CLEAN |
+| AIOX-SBM-2.4.productivity-metrics.story.md | 0 | CLEAN |
+
+**Test Re-Execution:** 12 suites, 263 tests, ALL PASS (48.3s)
 
 ### Gate Decision
 
-**Gate: NEEDS_WORK** --> `docs/qa/gates/aiox-sbm-3.1-rename-project-artifacts.yml`
+**Gate: PASS** --> `docs/qa/gates/aiox-sbm-3.1-rename-project-artifacts.yml`
 
-**Reason:** AC #6 is not fully met. The 5 renamed story files (AIOX-SBM-1 through 2.4) had their filenames renamed but their internal content still contains 34 "AIOX-HO" references (titles, code examples, JSON samples, file lists). This is a direct violation of the acceptance criterion: "All occurrences of AIOX-HO replaced with AIOX-SBM in story files." The fix is a straightforward search-and-replace within those 5 files. All other ACs (1-5, 7-10) are verified and passing.
+**Reason:** Previous NEEDS_WORK issue (REQ-001: 34 stale AIOX-HO references) has been fully resolved. All 10 ACs now pass. 263 tests pass across 12 suites. All modules unified in .aiox/lib/handoff/ with zero stale references.
 
-**Quality Score:** 70/100 (1 high-severity finding: -20, 2 low-severity: -10)
+**Quality Score:** 90/100 (2 low-severity remaining: -10)
 
 ---
 
