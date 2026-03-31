@@ -90,7 +90,7 @@ Definir a arquitetura do design system seguindo Atomic Design, auditar codebases
 
 - Codebase existente para auditoria
 - Brand profile e tokens do branding squad
-- Framework alvo (React, Vue, Angular, HTML, Svelte)
+- Framework alvo: React/Next.js 15 (TSX) com Tailwind CSS 4 e static export
 
 ## Output
 

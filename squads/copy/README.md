@@ -23,6 +23,48 @@ Professional copywriting squad for conversion-focused content across all channel
 | 🔍 | `seo-writer` | Samuel | SEO Content & Blog Posts |
 | ✏️ | `copy-editor` | Edgar | Editing, Proofreading, Localization |
 
+## Profile-Driven Architecture
+
+Todas as tasks do Copy Squad sao **profile-driven**: recebem o perfil do cliente como input e adaptam
+o output com base no archetype, industria, audiencia e escopo.
+
+### Content Selection Engine
+
+O motor central que determina O QUE produzir, PARA QUAIS canais e EM QUE tom:
+
+```
+Inputs:
+  brand-profile.yaml    -> archetype, industry, personality, target_audience
+  pipeline-state.yaml   -> scope (portfolio | small | medium | large | enterprise)
+  voice-guide.md        -> tone, vocabulary, forbidden words
+  deliverables.tier     -> what the client paid for
+
+Output:
+  content-manifest.md   -> EXACTLY what content to produce, for which channels, in what tone
+```
+
+**Config:** `config/content-selection-engine.md`
+**Template:** `data/content-manifest-template.md`
+
+### Manifests
+
+| Manifest | Responsavel | Descricao |
+|----------|------------|-----------|
+| `brand-profile.yaml` | Branding Squad | Archetype, industria, personalidade |
+| `voice-guide.md` | Branding Squad | Tom, vocabulario, palavras proibidas |
+| `design-manifest.md` | Design System Squad | Tokens, tipografia, cores |
+| `content-manifest.md` | **Copy Squad** | Conteudo, canais, quantidades, frameworks |
+
+### Fluxo Profile-Driven
+
+```
+1. brand-profile.yaml (input)
+2. Content Selection Engine aplica tabelas de selecao
+3. content-manifest.md (gerado)
+4. Tasks leem manifest para decidir canais, quantidades, tom, frameworks
+5. Nenhum valor hardcoded -- tudo flui do perfil do cliente
+```
+
 ## Quick Start
 
 ```bash
@@ -142,10 +184,11 @@ The Copy Squad integrates seamlessly with the Branding Squad:
 
 ```
 squads/copy/
-├── squad.yaml              # Manifest
-├── README.md               # This file
+├── config.yaml                 # Squad manifest
+├── README.md                   # This file
 ├── config/
 │   ├── coding-standards.md
+│   ├── content-selection-engine.md  # Profile-driven content selection
 │   ├── copy-frameworks.md
 │   └── tone-guidelines.md
 ├── agents/
@@ -157,7 +200,7 @@ squads/copy/
 │   ├── seo-writer.md
 │   └── copy-editor.md
 ├── tasks/
-│   └── (30 task files)
+│   └── (30 task files — all profile-driven)
 ├── workflows/
 │   ├── copy-production-flow.yaml
 │   ├── email-campaign-flow.yaml
@@ -169,6 +212,7 @@ squads/copy/
 │   ├── email-copy-checklist.md
 │   └── seo-copy-checklist.md
 └── data/
+    └── content-manifest-template.md  # 4th manifest template
 ```
 
 ## License

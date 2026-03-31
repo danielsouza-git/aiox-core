@@ -1,8 +1,8 @@
 # Session Handoff — Brand System Service
 
 **Date:** 2026-03-30
-**Status:** MERGED via PR #4 (21b85f1d) — branch deletada
-**Next:** BSS features em main. Squads tecnicos auditados e merged via PR #5.
+**Last session:** QA gate em 6 stories Ready + PO validation em 6 stories Draft
+**Next:** Implementar Wave A (6 stories agora Ready) + resolver 2 CONCERNS
 
 ---
 
@@ -14,55 +14,60 @@
 
 ---
 
-## Business Squads — IMPLEMENTADO
+## QA Gate desta Sessao (2026-03-30)
 
-**PRD:** `docs/prd-business-squads.md` (v1.1, validado por @architect)
+| Story | Verdict | Tests | Notas |
+|-------|---------|-------|-------|
+| BSS-1.2 (Cloudflare R2) | **PASS** | 175, 7 suites | Done |
+| BSS-1.3 (Asset Organization) | **PASS** | 175 (shared) | Done |
+| BSS-1.6 (Static Hosting) | **CONCERNS** | Validation scripts | 3 low: sub-tasks unchecked + Change Log |
+| BSS-A.7 (About Page) | **PASS** | 22, 1 suite | FAIL anterior revertido |
+| MH-TR-001 (Traducao MH) | **CONCERNS** | 10 pytest PASS | npm failures pre-existentes |
+| AIOX-SBM-3.1 (Rename) | **PASS** | 263, 12 suites | NEEDS_WORK anterior resolvido |
 
-| Squad | Dir | Agentes | Tasks | Arquivos | Status |
-|-------|-----|---------|-------|----------|--------|
-| OPS | squads/ops/ | 5 | 8 | 14 | DONE |
-| Vendas | squads/vendas/ | 4 | 10 | 15 | DONE |
-| Administracao | squads/administracao/ | 6 | 17 | 24 | DONE |
-| Produto | squads/produto/ | 4 | 12 | 17 | DONE |
-| Customer Success | squads/customer-success/ | 4 | 12 | 17 | DONE |
-| Marketing | squads/marketing/ | 6 | 16 | 23 | DONE |
-| Auditoria | squads/auditoria/ | 4 | 6 | 11 | DONE |
-| Orchestrator | squads/orchestration/ | 1 | 0 | 2 | DONE |
-| **TOTAL** | | **34** | **81** | **123** | **ALL DONE** |
-
-### Formato dos arquivos
-- **config.yaml:** Segue padrao claude-code-mastery (tiers, agents, handoffs, cross_cutting)
-- **Agents:** Business-agent template (YAML metadata + Proposito/Input/Output/O que faz/NAO faz/Ferramentas/QG)
-- **Tasks:** Task template (YAML metadata + Proposito/Input/Output/Workflow/O que faz/NAO faz/Ferramentas/QG)
-- Todos agentes <200 linhas, todos tasks <100 linhas
-- Conteudo em Portugues, YAML keys em Ingles
-
-### Decisoes-chave
-1. Delegacoes: Product Manager -> @pm, Research Analyst -> research-intelligence squad
-2. Renomeados: QA OPS -> Process Validator, Architect OPS -> Process Architect
-3. Auditoria: Squad SEPARADO, audita ESTRUTURA de TODOS os squads
-4. CS/Retencao: em Produto (qualidade) E em CS (retencao) com escopos distintos
-5. Chief Orchestrator: squads/orchestration/ (acima dos 6 squads, abaixo dos Builders)
+Gate files em: `docs/qa/gates/`
 
 ---
 
-## Trabalho Pendente de Sessoes Anteriores
+## PO Validation desta Sessao (2026-03-30)
 
-### Research-Intelligence Squad (NAO COMMITADO)
-- 9 arquivos modificados/criados (Tessa, Cyrus, Maya)
-- Blake dark mode fix em touchpoint-audit.md e consistency-score.md
+6 stories Draft promovidas a Ready (todas GO, score 8.3-8.7):
+
+| Story | Score | Should-Fix |
+|-------|-------|------------|
+| BSS-A.1 (Moodboard) | 8.4 | 0 |
+| BSS-A.2 (Movement/Strategy) | 8.6 | 0 |
+| BSS-A.3 (Logo Usage) | 8.5 | 2 |
+| BSS-A.4 (Surfaces & Borders) | 8.3 | 2 |
+| BSS-A.6 (Icon System) | 8.4 | 2 |
+| BSS-A.8 (Navigation) | 8.7 | 2 |
+
+**Ordem de implementacao recomendada:**
+- Wave 1: A.8 (Navigation) + A.4 (Surfaces)
+- Wave 2: A.3 (Logo) + A.6 (Icon)
+- Wave 3: A.1 (Moodboard) + A.2 (Movement)
+
+---
+
+## Stories InProgress (continuacao pendente)
+
+| Story | Status | Notas |
+|-------|--------|-------|
+| bss-a.5 (Semantic Tokens) | Done (verificado sessao anterior) | 22/22 tests |
+| bss-c.2 (SEO Documentation) | Done (verificado sessao anterior) | 36/36 tests |
+| bss-c.3 (Editorial Strategy) | Done (verificado sessao anterior) | 29/29 tests |
 
 ---
 
 ## Pendencias
 
-| # | Item | Prioridade | Status |
-|---|------|-----------|--------|
-| 1 | PRD Business Squads v1.1 | P1 | DONE |
-| 2 | Implementar 7 squads + orchestrator (123 arquivos) | P1 | DONE |
-| 3 | @devops: commit TUDO (squads + R-I + PRD + handoff) | P1 | Nao iniciado |
-| 4 | QA spot-check (amostragem de arquivos) | P2 | Nao iniciado |
-| 5 | Auditar 5 squads tecnicos vs BSS | P2 | Nao iniciado |
+| # | Item | Prioridade |
+|---|------|-----------|
+| 1 | Implementar Wave A (6 stories Ready) | P1 |
+| 2 | Resolver BSS-1.6 CONCERNS (sub-tasks + Change Log) | P3 |
+| 3 | Resolver MH-TR-001 CONCERNS (npm pre-existente) | P3 |
+| 4 | Story files sao untracked (nao em git) | P3 |
+| 5 | Research-Intelligence squad pendente | P2 |
 
 ---
 
@@ -71,18 +76,16 @@
 ```
 Leia docs/session-handoff-brand-system-service.md.
 
-CONTEXTO: 7 business squads + orchestrator IMPLEMENTADOS (123 arquivos).
-PRD v1.1 (docs/prd-business-squads.md). 34 agentes, 81 tasks.
-Tudo local, nada commitado ainda.
+CONTEXTO: 6 stories passaram QA gate (4 PASS, 2 CONCERNS non-blocking).
+6 stories Draft promovidas a Ready pelo @po (todas GO).
+Brand Pipeline Copy Squad + Agent Profiles atualizados para profile-driven + React/TSX.
 
-ACOES:
-1. @devops: commit TUDO numa branch feat/business-squads
-   - squads/{ops,vendas,administracao,produto,customer-success,marketing,auditoria,orchestration}/
-   - squads/research-intelligence/ (pendente de sessoes anteriores)
-   - docs/prd-business-squads.md
-   - docs/session-handoff-brand-system-service.md
-2. Opcional: QA spot-check em amostra de arquivos
-3. Opcional: auditar 5 squads tecnicos restantes vs BSS
+ACAO PRINCIPAL — Implementar Wave A do Epic BSS-A:
+1. Wave 1 (paralelo): @dev bss-a.8 (Navigation) + @dev bss-a.4 (Surfaces)
+2. Wave 2 (paralelo): @dev bss-a.3 (Logo Usage) + @dev bss-a.6 (Icon System)
+3. Wave 3 (paralelo): @dev bss-a.1 (Moodboard) + @dev bss-a.2 (Movement/Strategy)
+
+YOLO MODE. Stories em docs/stories/active/bss-a.*.story.md
 ```
 
-*Handoff atualizado 2026-03-29 — Implementacao completa 123 arquivos*
+*Handoff atualizado 2026-03-30 — QA gate + PO validation + Brand Pipeline updates*

@@ -196,6 +196,14 @@ const prefersReduced = useReducedMotion();
 - Avoid flashing content (WCAG 2.3.1)
 - Provide instant state changes when reduced motion is preferred
 
+## Next.js Static Export Workflow
+
+Os componentes Framer Motion gerados sao compatíveis com Next.js static export (`output: 'export'`):
+- Todos os componentes usam `'use client'` directive (animacoes requerem client-side)
+- Nenhuma dependencia de APIs server-side (no `getServerSideProps`, no API routes)
+- Assets estaticos (SVG, imagens) referenciados via `/public/` ou imports diretos
+- Build: `next build` gera HTML/CSS/JS estatico com animacoes Framer Motion funcionais
+
 ## Collaboration
 
 - **Receives from:** art-director (direction), photo-editor (still assets)

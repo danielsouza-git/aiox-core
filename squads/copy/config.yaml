@@ -115,6 +115,13 @@ config:
   coding-standards: config/coding-standards.md
   copy-frameworks: config/copy-frameworks.md
   tone-guidelines: config/tone-guidelines.md
+  content-selection-engine: config/content-selection-engine.md
+
+# ============================================
+# MANIFESTS & DATA
+# ============================================
+data:
+  content-manifest-template: data/content-manifest-template.md
 
 # ============================================
 # DEPENDENCIES

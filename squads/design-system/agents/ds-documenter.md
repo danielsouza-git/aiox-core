@@ -94,8 +94,8 @@ Gerar documentacao completa para cada componente do design system, incluindo tab
 
 ## Output
 
-- Pagina HTML de documentacao com exemplos ao vivo
-- Referencia markdown com props, exemplos e guidelines
+- Pagina Next.js de documentacao com componentes React embutidos e previews ao vivo
+- Referencia markdown com props, exemplos JSX/TSX e guidelines
 - Paginas de exemplos interativos com copy-paste ready code
 - Stories para Storybook 8
 
