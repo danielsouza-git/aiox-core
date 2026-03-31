@@ -1,6 +1,6 @@
 # Story BSS-A.7: About Page Auto-Generator
 
-**Status:** Ready for Review
+**Status:** Done
 **Epic:** EPIC-BSS-A — Complete Brand Book (MVP Enhancement)
 **Priority:** P0 (Wave 1)
 **Complexity:** Low (S)
