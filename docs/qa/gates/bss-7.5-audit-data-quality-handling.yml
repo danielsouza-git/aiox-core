@@ -1,0 +1,66 @@
+schema: 1
+story: '7.5'
+gate: PASS
+status_reason: 'All 9 acceptance criteria verified with line-level code evidence. 30/30 tests passing (data-quality.test.ts). Pure data processing (no AI calls). 5 issue types classified with correct severity mapping. Conflict detection covers tone, color, and messaging. Workshop recommender generates 3-5 focus areas sorted by priority. Critical alert at <=50% accessibility. Overall confidence with inference fallback. ClickUp graceful degradation. DI pattern consistent. No any types.'
+reviewer: 'Quinn'
+updated: '2026-03-24T18:00:00Z'
+
+checks:
+  ac_coverage:
+    status: pass
+    notes: >
+      All 9 ACs independently verified against source code:
+      AC-1 PASS: quality-analyzer.ts L95-162 analyze() produces DataQualityReport. L100 buildPerUrlStatus(report) builds per-URL accessibility. L101-103 computes urlsSubmitted, urlsAccessible, accessibilityRate. L124-135 builds complete report with all required fields: client_id, generated_at, urls_submitted, urls_accessible, accessibility_rate, critical_data_quality_alert, overall_confidence, issues, workshop_focus_areas, per_url_status. quality-types.ts L63-74 DataQualityReport interface.
+      AC-2 PASS: quality-types.ts L17-22 IssueType union: 'inaccessible_url' | 'stale_content' | 'inconsistent_branding' | 'low_content_density' | 'missing_category'. quality-analyzer.ts L192-203 detectInaccessibleUrls (from page.accessible=false). L209-230 detectStaleContent (fetchedAt older than STALE_CONTENT_THRESHOLD_MONTHS=12, quality-types.ts L108). L235-255 detectLowContentDensity (wordCount < LOW_CONTENT_WORD_THRESHOLD=200, quality-types.ts L111). L261-285 detectMissingCategories (RECOMMENDED_CATEGORIES=['website','instagram','linkedin_company'], quality-types.ts L144). Conflict detection for inconsistent_branding via ConflictDetector.
+      AC-3 PASS: quality-types.ts L32-38 DataQualityIssue interface: issue_type (IssueType), affected_url (string|null), description (string), severity (IssueSeverity), impact_on_audit (string). Every issue created in quality-analyzer.ts includes all 5 fields. Example: inaccessible_url at L196-202 has issue_type, affected_url=page.url, description, severity='high', impact_on_audit. Missing category uses affected_url=null (L276).
+      AC-4 PASS: conflict-detector.ts L86-111 ConflictDetector.detect() runs 3 checks: L99 detectToneConflicts, L103 detectColorConflicts, L107 extractMessagingContradictions. L121-176 detectToneConflicts: groups pages by category, compares estimateToneScore() across categories, flags if difference > TONE_CONFLICT_THRESHOLD=2 (quality-types.ts L117). L152 uses Math.abs(scoreA-scoreB). Both source URLs cited via source_a.url (L159) and source_b.url (L164). L184-232 detectColorConflicts: getDominantColorFamily() L44-64, warm vs cool flagged. L238-249 extractMessagingContradictions: surfaces audit contradictions as inconsistent_branding issues with sourceUrls[0].
+      AC-5 PASS: workshop-recommender.ts L50-92 recommend() generates 3-5 WorkshopFocusArea. L56-61 groups by type. L66-71 builds focus area per group. L74-75 sorts by priority (high>medium>low). L78 caps at MAX_WORKSHOP_FOCUS_AREAS=5 (quality-types.ts L123). L80-89 pads to MIN_WORKSHOP_FOCUS_AREAS=3 with defaults. L194-213 getDefaultFocusAreas() provides 3 default topics. Topic examples: 'Clarify brand identity' (L152), 'Verify digital presence' (L114), 'Provide {categories} examples' (L169).
+      AC-6 PASS: quality-analyzer.ts L118 criticalAlert = accessibilityRate <= CRITICAL_ALERT_THRESHOLD (quality-types.ts L114 = 0.5). This matches >=50% inaccessible. L143-156 posts ClickUp comment only when criticalAlert && clickUpClient && clickUpTaskId. L147 uses CRITICAL_ALERT_CLICKUP_MESSAGE (quality-types.ts L163 = 'Audit data quality is critically low. Recommend manual brand brief instead of audit-assisted mode.'). L150-155 catch block: graceful degradation, logs warning.
+      AC-7 PASS: quality-analyzer.ts L138-140 persists to R2 at buildDataQualityR2Key(clientId). L370-372 buildDataQualityR2Key returns `brand-assets/${clientId}/onboarding/data-quality-report.json`. Uses r2Client.uploadJson.
+      AC-8 PASS: quality-analyzer.ts is pure data processing. No AI service imports or calls. No URL fetching. L96 startTime tracked, L158-159 elapsed logged. All operations are in-memory analysis of the audit report. Performance well under 2 minutes for any realistic input.
+      AC-9 PASS: quality-analyzer.ts L313-327 calculateOverallConfidence(). L321 counts inferences where confidence==='High'. L322 calculates highPercentage. L324 >0.6 returns 'high'. L325 >=0.3 returns 'medium'. L326 returns 'low'. L316-318 fallback to calculateFromAnalysisConfidence when no inferences. L332-349 fallback uses toneOfVoice.confidence, messagingConsistency.confidence, visualConsistency.confidence, competitiveGap.confidence.
+
+  test_coverage:
+    status: pass
+    notes: '30/30 tests passing (23.407s). Coverage by AC: AC-1 report generation (3 tests: complete report fields, urls_submitted/urls_accessible/accessibility_rate correct, per_url_status for each page), AC-2 issue classification (5 tests: inaccessible_url from accessible:false pages, stale_content from old fetchedAt, low_content_density from short text, missing_category for absent categories, all 5 issue types classifiable), AC-3 issue structure (2 tests: each issue has all 5 required fields, affected_url is null for category-level issues), AC-4 conflict detection (4 tests: tone conflict when score difference >2, color conflict warm vs cool, messaging contradictions surfaced, both source URLs cited), AC-5 workshop focus areas (3 tests: generates 3-5 areas, sorted by priority, defaults when no issues), AC-6 critical alert (3 tests: triggered at <=50% accessible, not triggered above 50%, ClickUp comment posted only when critical), AC-7 R2 storage (2 tests: correct R2 key path, uploadJson called), AC-8 performance (1 test: completes under 2 seconds for test data), AC-9 overall confidence (4 tests: high when >60% High, medium when 30-60%, low when <30%, fallback from analysis confidence). Plus: Color classification utility (2 tests: warm/cool/neutral classification, getDominantColorFamily), Integration (1 test: full pipeline end-to-end).'
+
+  code_quality:
+    status: pass
+    notes: >
+      Zero any types across all quality module source files. All interfaces use readonly properties.
+      Error handling: ClickUp comment failure in catch block (L150-155) logs warning without throwing.
+      R2 persistence failure would throw (no catch around L139) which is correct -- R2 failure is critical.
+      Pure data processing: no external API calls, no URL fetching, no AI service dependency.
+      Utility functions well-isolated: countWords (L34-37), isOlderThanMonths (L43-51), inferCategoryFromUrl (L56-65).
+      Conflict detection uses heuristic tone estimation (L271-301) via text patterns -- appropriate given no AI calls constraint.
+      Workshop recommender handles edge cases: empty issues (defaults), fewer than 3 groups (padding), more than 5 groups (capping).
+      DI pattern: DataQualityAnalyzerDeps (quality-types.ts L151-156) injects r2Client, clickUpClient, clickUpTaskId, logger.
+
+  types:
+    status: pass
+    notes: >
+      quality-types.ts defines 15+ types: IssueType (5-member union), IssueSeverity (3-member union), DataQualityIssue (5 readonly fields), WorkshopFocusArea (3 readonly fields), OverallConfidence (3-member union), DataQualityReport (10 readonly fields), UrlAccessibilityStatus (3 fields), BrandingConflict (5 fields), ConflictSource (3 fields), DataQualityAnalyzerDeps (4 fields).
+      Constants typed with as const: STALE_CONTENT_THRESHOLD_MONTHS=12, LOW_CONTENT_WORD_THRESHOLD=200, CRITICAL_ALERT_THRESHOLD=0.5, TONE_CONFLICT_THRESHOLD=2, MIN_WORKSHOP_FOCUS_AREAS=3, MAX_WORKSHOP_FOCUS_AREAS=5, FOCUS_AREA_TEMPLATES, RECOMMENDED_CATEGORIES, CRITICAL_ALERT_CLICKUP_MESSAGE.
+      R2 key builder buildDataQualityR2Key returns string.
+      No any usage. conflict-detector.ts exports typed functions: classifyColorFamily, getDominantColorFamily, containsLogoTerms.
+
+  architecture:
+    status: pass
+    notes: >
+      Clean separation: quality-types.ts (contracts + constants), quality-analyzer.ts (orchestrator + issue detection), conflict-detector.ts (AC-4 branding conflict detection), workshop-recommender.ts (AC-5 focus area generation), index.ts (barrel).
+      DI pattern: DataQualityAnalyzerDeps reuses AuditR2Client, AuditClickUpClient, AuditLogger from audit-types.ts (no duplication).
+      Composition: DataQualityAnalyzer creates ConflictDetector and WorkshopRecommender in constructor (L73-79). Single entry point via analyze().
+      Module boundary clean: quality/ is separate from audit/ and drafts/. No circular imports.
+      Pure data processing pattern -- no AI service dependency. Operates only on audit-report.json input.
+
+  security:
+    status: pass
+    notes: >
+      No hardcoded credentials or secrets. R2 and ClickUp via injected clients.
+      No user input directly processed -- all data comes from structured audit report.
+      ClickUp operations non-blocking (catch block prevents disruption).
+      R2 key builder uses template string with clientId -- no path traversal risk from structured data.
+      Color classification uses numeric hex parsing with NaN guards (conflict-detector.ts L30).
+
+top_issues: []
+waiver: { active: false }

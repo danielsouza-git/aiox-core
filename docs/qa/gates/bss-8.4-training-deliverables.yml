@@ -1,0 +1,42 @@
+schema: 1
+story: '8.4'
+gate: PASS
+status_reason: 'All 9 ACs verified against source code with line-level evidence. 50/50 tests pass. Clean TypeScript with zero `any` types, readonly interfaces, exhaustive switch, structured error results, and XSS escaping on layout/loom/index. Two low-severity advisory items (unescaped body interpolation, unused eta dep) -- non-blocking.'
+reviewer: 'Quinn'
+updated: '2026-03-23T18:30:00Z'
+top_issues:
+  - id: 'SEC-001'
+    severity: low
+    finding: 'clientName and brandTokensPackage interpolated without escapeHtml() in guide template body content (brand-usage.ts:17, static-site-update.ts:17, social-media.ts:17, developer-onboarding.ts:19/25/39/70/94/105). wrapLayout escapes them in <title> and footer but body paragraphs and code blocks use raw interpolation.'
+    suggested_action: 'Wrap with escapeHtml() for defense-in-depth. Low urgency: values originate from server-side training-config.yaml, not user input.'
+  - id: 'MNT-001'
+    severity: low
+    finding: 'eta ^3.0.0 declared as dependency in package.json but never imported at runtime. TypeScript template functions replace the need for an external templating engine.'
+    suggested_action: 'Remove eta from dependencies to reduce bundle size and avoid misleading future developers.'
+waiver: { active: false }
+
+# -- AC Traceability (independent verification) --
+#
+# AC1 (Brand Usage Training):    PASS - brand-usage.ts:14-83 renders 5 sections (brand book L20-29, color/typography L31-47, logo L49-57, tone L59-66, quick-ref L69-79) + Loom L81
+# AC2 (Static Site Update Guide): PASS - static-site-update.ts:14-79 renders 4 sections (text content L20-31, images L34-48, R2 path L50-55, self-service vs developer L57-75) + Loom L77
+# AC3 (Social Media Training):    PASS - social-media.ts:14-96 renders 5 sections (content calendar L20-33, templates L35-53, hashtag niche/medium/broad L55-69, cadence L72-81, brand voice L83-92) + Loom L94
+# AC4 (Developer Onboarding):     PASS - developer-onboarding.ts:16-111 renders 5 sections (token install L22-33, CSS vars L35-63, Tailwind L66-85, token updates L87-97, troubleshooting L99-107) + Loom L109
+# AC5 (Loom Placeholders):        PASS - types.ts:103-152 DEFAULT_LOOM_PLACEHOLDERS with title, duration (3-5 min), 5-point outline per guide; shared.ts:151-173 loomSection() renders placeholder or clickable link
+# AC6 (Branded HTML):             PASS - shared.ts:7-146 wrapLayout() injects --color-primary CSS custom property; all 4 guides + index call wrapLayout()
+# AC7 (R2 Signed URL 30-day):     PASS - types.ts:155 TRAINING_SIGNED_URL_EXPIRY = 2592000 (30 days); training-generator.ts:177-186 getR2UploadPath() + getSignedUrlExpiry()
+# AC8 (Training Index):           PASS - training-index.ts:15-44 GUIDE_ENTRIES with role mapping; training-index.ts:50-91 renderTrainingIndex() groups by Business Owner / Content Team / Developer
+# AC9 (Config-driven):            PASS - types.ts:27-50 TrainingConfig interface; training-generator.ts:32-53 validateConfig() enforces clientId, clientName, primaryColor (6-digit hex), guides, loomPlaceholders, >=1 guide enabled
+
+# -- Test Evidence --
+# Tests: 50/50 passed (0 failures, 0 skipped)
+# Suite: training-generator.test.ts
+# Categories: validateConfig (6), Template helpers (11), Guide templates (12), Training Index (4), TrainingGenerator class (10), Constants (3), Package structure (3)
+
+# -- Code Quality --
+# TypeScript: Zero `any` types, all interfaces readonly, exhaustive switch with `never`
+# Error handling: Structured TrainingGenerationResult with success/error fields, validateConfig throws descriptive errors
+# XSS: escapeHtml() applied in wrapLayout (title, footer), loomSection (all fields), training-index (all dynamic values)
+# Exports: index.ts barrel exports all public APIs (types, constants, generator, templates, shared utils)
+
+# -- Quality Score --
+# Quality: 100 - (0 FAILs * 20) - (0 CONCERNS * 10) = 100

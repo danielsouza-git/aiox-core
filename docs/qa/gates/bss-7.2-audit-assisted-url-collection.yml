@@ -1,0 +1,62 @@
+schema: 1
+story: '7.2'
+gate: PASS
+status_reason: 'All 8 acceptance criteria verified with line-level code evidence. 82/82 tests passing (url-collector.test.ts). 10 URL categories with multi-entry support (landing_page, other), HTTP format validation via regex (rejects localhost, IP, single-char TLD), graceful incomplete input (min 1 URL, warning < 3), R2 persistence with correct document shape, non-blocking ClickUp update, high-value category markers (website, linkedin_company, linkedin_personal, instagram), dynamic add/remove with case-insensitive duplicate detection, post-submission preview with canStartAudit flag, per-URL metadata (url, category, submitted_at, validated). CON-17 and CON-18 compliance constants exported. DI pattern. No any types.'
+reviewer: 'Quinn'
+updated: '2026-03-24T18:00:00Z'
+
+checks:
+  ac_coverage:
+    status: pass
+    notes: >
+      All 8 ACs independently verified against source code:
+      AC-1 PASS: types.ts L17-28 URL_CATEGORIES defines 10 categories: website, landing_page, youtube, linkedin_company, linkedin_personal, instagram, facebook, tiktok, twitter, other. L48-51 MULTI_ENTRY_CATEGORIES = [landing_page, other]. L54 MAX_OTHER_URLS=3. L57 MAX_LANDING_PAGE_URLS=10. url-validator.ts L93-124 validateCategoryLimit() enforces per-category limits: landing_page max 10, other max 3, all others max 1. url-collector.ts L145-185 addUrl() validates category, format, duplicates, and limits before adding.
+      AC-2 PASS: url-validator.ts L33 URL_PATTERN regex enforces https?:// protocol and valid domain with 2+ char TLD. L41-57 validateUrl() checks empty input, protocol prefix, and regex match. url-collector.ts L156-159 calls validateUrl() on every addUrl() call, returns error to caller on failure.
+      AC-3 PASS: types.ts L59 MIN_URLS_REQUIRED=1. L63 LOW_URL_WARNING_THRESHOLD=3. L151-152 LOW_URL_WARNING_MESSAGE='Fewer URLs may reduce audit confidence...'. url-validator.ts L134-166 validateCollection() enforces min 1 URL (L141-143), emits warning when > 0 and < 3 URLs (L146-148). url-collector.ts L236-238 validate() delegates to validateCollection().
+      AC-4 PASS: url-collector.ts L244-316 submit() method. L267-274 persists to R2 via r2Client.uploadJson() with key from buildAuditUrlsR2Key() (L48-50: 'brand-assets/{clientId}/onboarding/audit-urls.json'). L276-303 ClickUp update is optional and non-blocking -- catch block on L297-302 logs warning but does not fail submission. L305 sets submitted=true only after R2 success.
+      AC-5 PASS: types.ts L37-42 HIGH_VALUE_CATEGORIES = [website, linkedin_company, linkedin_personal, instagram]. url-collector.ts L111-113 isHighValueCategory() checks membership. L119-129 getCategoryStatus() returns highValue boolean per category for UI rendering.
+      AC-6 PASS: url-collector.ts L145-185 addUrl() with L163-166 duplicate check via isDuplicateUrl(). url-validator.ts L77-80 isDuplicateUrl() uses case-insensitive comparison (trimmed + lowercased). types.ts L157 DUPLICATE_URL_MESSAGE='This URL has already been added.' url-collector.ts L193-206 removeUrl() by URL string (case-insensitive). L214-225 removeUrlByIndex() by zero-based index.
+      AC-7 PASS: url-collector.ts L330-352 getSubmissionPreview() returns: urls (all collected), grouped (by category via getUrlsByCategory()), totalCount, highValueCount (filtered by HIGH_VALUE_CATEGORIES), canStartAudit (L349: submitted && urls.length >= 1), validation result.
+      AC-8 PASS: types.ts L70-75 AuditUrl interface: url (string), category (URLCategory), submitted_at (ISO 8601 string), validated (boolean, false at collection). url-collector.ts L175-181 entry creation with all 4 fields. L361-385 buildCollectionDocument() constructs AuditUrlCollection with version, clientId, collectedAt, urls array, and metadata (totalUrls, categoryCounts, highValueCount, disclaimerAccepted).
+
+  test_coverage:
+    status: pass
+    notes: '82/82 tests passing. Coverage: validateUrl (10 tests: valid https/http, rejects empty, rejects ftp, rejects no protocol, rejects localhost, rejects IP address, rejects single-char TLD, accepts path/query, accepts subdomains, rejects malformed). isValidCategory (2 tests: known categories true, unknown false). isDuplicateUrl (5 tests: exact match, case-insensitive, trimmed, non-duplicate, empty collection). validateCategoryLimit (6 tests: single-entry max 1, landing_page max 10, other max 3, within limit OK, at limit rejected, empty OK). validateCollection (4 tests: valid collection, empty rejects, low count warns, invalid URL in collection errors). buildAuditUrlsR2Key (2 tests: correct format, different client IDs). URLCollector constructor (3 tests: valid clientId, empty rejects, whitespace-only rejects). addUrl (11 tests: valid add, invalid URL rejected, invalid category rejected, duplicate rejected, category limit enforced, after submission rejected, different categories OK, trims URL, returns valid true on success, format error messages, landing_page multi-entry). removeUrl (4 tests: remove by URL, case-insensitive, not found returns false, after submission returns false). removeUrlByIndex (2 tests: valid index, invalid index). isHighValueCategory (6 tests: website true, linkedin_company true, linkedin_personal true, instagram true, youtube false, other false). validate (4 tests: valid collection, empty errors, warnings emitted, all URLs re-validated). getCategoryStatus (1 test). getUrlsByCategory (1 test). submit (10 tests: successful submit writes R2, correct document shape, ClickUp updated, ClickUp failure non-blocking, double submit throws, validation failure throws, R2 failure throws, submitted flag set, result contains auditUrls, no ClickUp configured). getSubmissionPreview (3 tests: before submit, after submit with canStartAudit, highValueCount correct). Constants (6 tests: CON18_DISCLAIMER, LOW_URL_WARNING_MESSAGE, DUPLICATE_URL_MESSAGE, START_AUDIT_CTA_LABEL, MIN_URLS_REQUIRED, URL_CATEGORIES count).'
+
+  code_quality:
+    status: pass
+    notes: >
+      Zero any types across all BSS-7.2 source files. All interfaces use readonly properties.
+      Error handling: submit() wraps R2 upload in try/catch with descriptive error (url-collector.ts L270-274). ClickUp update wrapped separately (L281-302) with non-blocking catch. Validation errors propagated to callers via URLValidationResult and CollectionValidationResult types.
+      Naming follows conventions: PascalCase classes/interfaces, kebab-case files, SCREAMING_SNAKE constants.
+      URL normalization consistent: trimmed + lowercased for duplicate detection (url-validator.ts L78-79).
+      console.warn used for ClickUp failure logging (url-collector.ts L301) -- production would use Logger interface. Minor concern but acceptable for MVP.
+
+  types:
+    status: pass
+    notes: >
+      types.ts defines: URLCategory (10-member union), URL_CATEGORIES (as const array), HIGH_VALUE_CATEGORIES, MULTI_ENTRY_CATEGORIES, AuditUrl (4 readonly fields), AuditUrlCollection (version, clientId, collectedAt, urls, metadata), AuditCollectionMetadata (totalUrls, categoryCounts, highValueCount, disclaimerAccepted), URLValidationResult (valid + optional error), CollectionValidationResult (valid, errors, warnings), URLCollectionSubmitResult (7 fields), URLCollectorDeps (r2Client required, clickUpClient/clickUpTaskId optional).
+      Constants: MAX_OTHER_URLS=3, MAX_LANDING_PAGE_URLS=10, MIN_URLS_REQUIRED=1, LOW_URL_WARNING_THRESHOLD=3, CON18_DISCLAIMER, LOW_URL_WARNING_MESSAGE, DUPLICATE_URL_MESSAGE, START_AUDIT_CTA_LABEL.
+      No any usage detected.
+
+  architecture:
+    status: pass
+    notes: >
+      Clean separation within audit/ subdirectory: types.ts (contracts + constants), url-validator.ts (pure validation functions), url-collector.ts (stateful class with DI).
+      URLCollector uses constructor injection for URLCollectorDeps (r2Client required, clickUpClient optional).
+      Validation logic separated from collection state management.
+      R2 key builder (buildAuditUrlsR2Key) is a standalone exported function.
+      Reuses R2StorageClient and ClickUpClient interfaces from BSS-7.1 types.ts (import at types.ts L10) -- no duplication.
+      Module boundary clean via audit/index.ts barrel exports.
+
+  security:
+    status: pass
+    notes: >
+      No hardcoded credentials or secrets. R2 and ClickUp access via injected clients.
+      URL validation regex (url-validator.ts L33) rejects localhost, IP addresses, and single-char TLDs -- prevents internal network scanning.
+      CON-18 compliance: CON18_DISCLAIMER constant (types.ts L145-146) exported for UI to display.
+      No user-provided content is executed or evaluated -- all URLs treated as data strings.
+      Category validation (isValidCategory at url-validator.ts L65-67) prevents injection of unknown categories.
+
+top_issues: []
+waiver: { active: false }

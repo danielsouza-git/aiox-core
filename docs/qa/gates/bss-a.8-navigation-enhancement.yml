@@ -1,0 +1,8 @@
+schema: 1
+story: 'BSS-A.8'
+gate: PASS
+status_reason: 'All 10 ACs met. Previous CONCERNS (ARCH-001 wiring gap) resolved — static-generator.ts now imports and wires buildNavigationTree/generateBreadcrumbs. 34 tests passing. Story marked Done.'
+reviewer: 'Quinn'
+updated: '2026-03-30T23:45:00Z'
+top_issues: []
+waiver: { active: false }

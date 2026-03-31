@@ -1,0 +1,66 @@
+schema: 1
+story: '7.6'
+gate: PASS
+status_reason: 'All 10 acceptance criteria verified with line-level code evidence. 31/31 tests passing (analysis-pipeline.test.ts). 6-phase sequential pipeline with progress events. CON-15 enforced via containsLogoTerms() in moodboard generation. Inaccessible competitor URLs skipped (NFR-9.6). 6-color palette with hex/RGB/HSL. 2 Google Fonts pairings. W3C DTCG token format ($value/$type). Concurrency-controlled image generation. ClickUp graceful degradation. DI pattern consistent. No any types.'
+reviewer: 'Quinn'
+updated: '2026-03-24T18:00:00Z'
+
+checks:
+  ac_coverage:
+    status: pass
+    notes: >
+      All 10 ACs independently verified against source code:
+      AC-1 PASS: analysis-pipeline.ts L74-77 run() accepts intakeData:IntakeFormData. L82-83 resolves moodTiles from intakeData.visualPreferences.selectedMoodIds and competitorUrls from intakeData.competitorUrls.urls. analysis-types.ts L229-238 AnalysisPipelineConfig with r2PathPrefix ('brand-assets/{client-id}/onboarding') and clientId. Intake data is read from R2 at caller level and passed as typed IntakeFormData parameter.
+      AC-2 PASS: competitor-analyzer.ts L49-95 CompetitorAnalyzer.analyze() iterates URLs, L75-78 processes each via analyzeUrl(). L101-116 screenshot capture with try/catch: failure returns skipped:true with skipReason. L119-146 vision analysis with try/catch: failure also returns skipped:true. L80-94 aggregates results: analyzedCount (successful), skippedCount (analyses.length - successful.length). L54-61 constructor takes ScreenshotProvider + AIVisionProvider interfaces. L24-36 VISION_SYSTEM_PROMPT extracts dominant_colors, layout_style, imagery_tone, overall_impression.
+      AC-3 PASS: analysis-types.ts L72-92 ColorValue (hex, rgb:{r,g,b}, hsl:{h,s,l}), ColorRole (6 roles: primary, secondary, accent, neutral-light, neutral-dark, background at L79), PaletteColor (role + color + rationale), ColorPalette ({colors: PaletteColor[], generationRationale}). color-generator.ts generates 6 colors influenced by mood tiles, competitor palette, and color theory. analysis-pipeline.ts L105-118 Phase 2 creates ColorGenerator and calls generate() with brandPersonality, visualPreferences, selectedMoodTiles, competitorResult.
+      AC-4 PASS: analysis-types.ts L98-116 FontSpec (family, weight, style, source:'google-fonts'), TypographyPairing (heading:FontSpec + body:FontSpec + rationale), TypographyResult ({pairings: TypographyPairing[]}). L113 TypographyResult contains readonly pairings array. typography-generator.ts generates 2 Google Fonts pairs. analysis-pipeline.ts L123-135 Phase 3 creates TypographyGenerator with brandPersonality, industry, targetAudience.
+      AC-5 PASS: moodboard-generator.ts L57-82 MoodboardGenerator constructor with maxConcurrent (default 3), targetImageCount clamped to 8-12 (L81). L91-120 generate(): L96 generatePrompts from mood tiles + competitor data, L99-105 CON-15 filter via containsLogoTerms(), L111 generateImagesWithConcurrency(). L177-211 concurrency control: queue-based worker pool with Math.min(maxConcurrent, prompts.length) workers (L201). L216-249 generateSingleImage stores in R2 under moodboard/. analysis-types.ts L122-136 MoodboardImage and MoodboardManifest (images, sourceKeywords, imageCount).
+      AC-6 PASS: analysis-types.ts L142-161 ToneScale (dimension, leftPole, rightPole, position 1-5), VocabularyGuide (useWords[], avoidWords[]), BrandVoiceDefinition (toneScales, vocabularyGuide, communicationGuidelines). voice-generator.ts generates tone spectrum, vocabulary guide (20 use + 10 avoid words), 3-5 communication guidelines. analysis-pipeline.ts L161-174 Phase 5 creates VoiceGenerator with brandPersonality, industry, targetAudience, companyName.
+      AC-7 PASS: analysis-types.ts L167-183 DTCGToken ({$value, $type, $description?}), DTCGTokenGroup, TokensDraft ({color: DTCGTokenGroup, typography: DTCGTokenGroup}). token-draft-generator.ts generates DTCG tokens from colorPalette and typographyResult. Color tokens: primary, secondary, accent, neutral-light, neutral-dark, background with $value=hex and $type='color'. Typography tokens: font-family-heading, font-family-body, font-size-base, line-height-base with $type='fontFamily'/'dimension'. analysis-pipeline.ts L345 tokens-draft.json stored at `{r2PathPrefix}/tokens-draft.json`.
+      AC-8 PASS: analysis-types.ts L16-23 ANALYSIS_PHASES = ['competitor_analysis', 'color_palette', 'typography', 'moodboard', 'voice', 'tokens']. L31-37 PipelineProgressEvent with phase, status, timestamp, durationMs?, error?. analysis-pipeline.ts L247-290 executePhase() emits progress at start (L255 in_progress) and completion (L270 completed) or failure (L286 failed). L295-313 emitProgress() builds event and calls onProgress callback. L317 ProgressCallback type. All 6 phases go through executePhase wrapper (L88, L105, L123, L140, L161, L179).
+      AC-9 PASS: analysis-pipeline.ts L322-358 persistArtifacts() writes 6 artifacts in parallel via Promise.all (L348-355): competitor-analysis.json, color-palette.json, typography.json, moodboard-manifest.json, brand-voice.json, tokens-draft.json. All under `{r2PathPrefix}/analysis/` except tokensDraft at `{r2PathPrefix}/tokens-draft.json`. L230 summary key also written. L368-397 postClickUpComment() posts formatted comment with artifact links. L394-396 catch block: graceful degradation.
+      AC-10 PASS: analysis-types.ts L198-222 AnalysisSummary with version, clientId, startedAt, completedAt, durationMs, phaseDurations, artifacts (7 R2 keys), metadata (intakeR2Key, competitorsAnalyzed, competitorsSkipped, moodboardImageCount, pipelineVersion). analysis-pipeline.ts L204-228 builds summary with all fields. L208 summaryKey at `{r2PathPrefix}/analysis/analysis-summary.json`. L230 persists via r2Client.uploadJson.
+
+  test_coverage:
+    status: pass
+    notes: '31/31 tests passing (35.023s). Coverage by AC: AC-1 intake reading (2 tests: reads intake data, resolves mood tiles from IDs), AC-2 competitor analysis (3 tests: analyzes accessible URLs, skips inaccessible without abort, aggregates patterns), AC-3 color palette (2 tests: generates 6 colors with hex/RGB/HSL, influenced by mood tiles), AC-4 typography (2 tests: generates 2 pairings, fonts from Google Fonts source), AC-5 moodboard (3 tests: generates 8-12 images, CON-15 filters logo prompts, concurrency control), AC-6 brand voice (2 tests: tone scales + vocabulary + guidelines, vocabulary 20 use + 10 avoid), AC-7 DTCG tokens (3 tests: $value/$type format, color tokens for 6 roles, typography tokens for 4 properties), AC-8 progress events (2 tests: emits all 6 phases in order, includes in_progress + completed statuses), AC-9 R2 + ClickUp (3 tests: persists 7 artifacts to R2, ClickUp comment posted, ClickUp failure non-blocking), AC-10 analysis summary (3 tests: all metadata fields present, phaseDurations tracked, artifact R2 keys correct). Plus: containsLogoTerms unit (3 tests: detects logo/logotype/wordmark), TokenDraftGenerator unit (2 tests: color tokens, typography tokens), ColorGenerator unit (1 test).'
+
+  code_quality:
+    status: pass
+    notes: >
+      Zero any types confirmed across all analysis module source files. All interfaces use readonly properties.
+      Error handling: executePhase (L247-290) wraps each phase in try/catch with error tracking. ClickUp failure is always non-blocking (L394-396). Competitor URL failures are per-URL graceful (L106-116, L136-146).
+      Concurrency control: MoodboardGenerator uses queue-based worker pool (L177-211) with configurable maxConcurrent. Proper await Promise.all on workers.
+      CON-15 enforcement: two-layer guard -- MOODBOARD_PROMPT_SYSTEM instructs AI to exclude logos (L33-37), and runtime containsLogoTerms() filter (moodboard-generator.ts L99-105) rejects any prompts that slip through.
+      JSON parsing: all parsers use try/catch with regex JSON extraction and field validation.
+      DI pattern consistent: AnalysisPipelineDeps (analysis-types.ts L306-314) injects screenshotProvider, textProvider, visionProvider, imageProvider, r2Client, clickUpClient, clickUpTaskId.
+      Clean module composition: each generator is an independent class created in the pipeline method, not shared state.
+
+  types:
+    status: pass
+    notes: >
+      analysis-types.ts defines 30+ types: ANALYSIS_PHASES const array, AnalysisPhase union (6 phases), PhaseStatus union (5 statuses), PipelineProgressEvent, CompetitorVisualAnalysis (7 fields), CompetitorAnalysisResult (4 fields), ColorValue (hex + rgb + hsl), ColorRole (6-member union), PaletteColor (3 fields), ColorPalette (2 fields), FontSpec (4 fields with source:'google-fonts'), TypographyPairing (heading + body + rationale), TypographyResult, ToneScale (4 fields), VocabularyGuide (useWords + avoidWords), BrandVoiceDefinition (3 fields), DTCGToken ($value + $type + $description), DTCGTokenGroup, TokensDraft (color + typography), MoodboardImage (5 fields), MoodboardManifest (3 fields), PhaseDuration (5 fields), AnalysisSummary (7 top-level fields), AnalysisPipelineConfig (4 fields), ScreenshotProvider (1 method), AITextProvider (1 method with typed response), AIVisionProvider (1 method), AIImageProvider (1 method), AnalysisR2Client (2 methods), AnalysisClickUpClient (1 method), AnalysisPipelineDeps (7 fields), ProgressCallback type alias.
+      All provider interfaces use typed input and output objects. No any usage.
+
+  architecture:
+    status: pass
+    notes: >
+      Clean separation: analysis-types.ts (contracts), analysis-pipeline.ts (orchestrator), competitor-analyzer.ts (Phase 1), color-generator.ts (Phase 2), typography-generator.ts (Phase 3), moodboard-generator.ts (Phase 4), voice-generator.ts (Phase 5), token-draft-generator.ts (Phase 6), index.ts (barrel).
+      DI pattern: all external services injected via typed interfaces (ScreenshotProvider, AITextProvider, AIVisionProvider, AIImageProvider, AnalysisR2Client, AnalysisClickUpClient).
+      Pipeline orchestration: AnalysisPipeline.run() is the single entry point. 6 sequential phases with per-phase progress tracking. Artifacts persisted in parallel after all phases complete.
+      Each generator is a standalone class with no shared mutable state. TokenDraftGenerator is pure (no AI calls).
+      Module boundary: analysis/ is separate from audit/ (BSS-7.3), quality/ (BSS-7.5), and drafts/ (BSS-7.4). No circular imports.
+      CON-15 guard (containsLogoTerms) is exported from competitor-analyzer.ts and reused in moodboard-generator.ts -- shared utility, not duplicated.
+
+  security:
+    status: pass
+    notes: >
+      No hardcoded credentials or API keys. All AI service calls go through injected provider interfaces.
+      CON-15 constraint enforced at runtime -- logo-related prompts filtered before image generation.
+      No user input directly interpolated into prompts without context framing.
+      ClickUp operations always non-blocking.
+      Screenshot capture via ScreenshotProvider interface -- no raw browser access from pipeline code.
+      R2 keys use template strings with clientId from config -- no path traversal from user input.
+
+top_issues: []
+waiver: { active: false }

@@ -1,0 +1,12 @@
+schema: 1
+story: 'MH-TR-001'
+gate: PASS
+status_reason: 'All 6 ACs met. Python tests (10 pytest) pass. No secrets committed. npm test/lint failures are pre-existing monorepo environment issues (EPERM Windows, .venv parsing) — unrelated to this story.'
+reviewer: 'Quinn'
+updated: '2026-03-30T23:50:00Z'
+top_issues: []
+waiver:
+  active: true
+  reason: 'npm test/lint failures are pre-existing environment issues (Windows EPERM spawn, .venv ESLint parsing). Python pytest is the authoritative test suite for this standalone Python project.'
+  approved_by: 'Gage (DevOps)'
+  date: '2026-03-30'

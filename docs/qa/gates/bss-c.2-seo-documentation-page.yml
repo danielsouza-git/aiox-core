@@ -1,0 +1,128 @@
+schema: 1
+story: BSS-C.2
+title: SEO Documentation Page
+gate: PASS
+status_reason: >-
+  All 10 acceptance criteria fully implemented with correct data structures,
+  template rendering, navigation integration, and comprehensive test coverage.
+  36 tests passing. No issues found.
+reviewer: Quinn
+updated: '2026-03-27T00:00:00Z'
+
+acceptance_criteria:
+  - id: AC-1
+    description: "Meta Tags Guide with code examples for title, description, robots, canonical"
+    status: PASS
+    evidence: >-
+      seo-documentation-page-data.ts lines 153-208: buildMetaTagsGuide() produces all 4 tags
+      with maxLength (60 for title, 155 for description), bestPractice, and HTML-escaped fullSnippet.
+      Tests: 8 tests in metaTags describe block validate all fields.
+
+  - id: AC-2
+    description: "Open Graph Guide with 5 essential properties"
+    status: PASS
+    evidence: >-
+      seo-documentation-page-data.ts lines 213-266: buildOpenGraphGuide() produces exactly 5 properties
+      (og:title, og:description, og:type, og:image, og:url) with description, bestPractice, and fullSnippet.
+      Tests: 6 tests in openGraph describe block. og:image bestPractice contains 1200x630.
+
+  - id: AC-3
+    description: "Twitter/X Card Guide with 3 properties"
+    status: PASS
+    evidence: >-
+      seo-documentation-page-data.ts lines 271-311: buildTwitterCardGuide() produces exactly 3 properties
+      (twitter:card=summary_large_image, twitter:site with handle, twitter:image 1200x600).
+      Handles @ prefix normalization. Tests: 6 tests in twitterCard describe block.
+
+  - id: AC-4
+    description: "JSON-LD Schema Examples for Organization, Article, Product"
+    status: PASS
+    evidence: >-
+      seo-documentation-page-data.ts lines 316-407: buildJsonLdGuide() produces 3 schemas with
+      valid JSON snippets, description, and useCase. Organization includes brand name, URL, logo, sameAs.
+      Tests: 7 tests in jsonLd describe block, including JSON.parse validation.
+
+  - id: AC-5
+    description: "Brand Profile Integration with auto-population"
+    status: PASS
+    evidence: >-
+      seo-documentation-page-data.ts lines 467-504: extractSeoDocumentationPageData() accepts
+      SeoBrandProfile with brandName, domain, tagline, logoUrl, socialHandles. Falls back to
+      sensible defaults. Tests: 2 tests in brand profile integration block verify full population.
+
+  - id: AC-6
+    description: "Image Size Specifications with aspect ratio guides"
+    status: PASS
+    evidence: >-
+      seo-documentation-page-data.ts lines 412-456: buildImageSpecs() produces 4 specs
+      (OG 1200x630 1.91:1, Twitter 1200x600 2:1, Schema.org Logo, Favicon) with format,
+      maxFileSize, notes. Template renders SVG diagrams for visual reference.
+      Tests: 5 tests in imageSpecs describe block.
+
+  - id: AC-7
+    description: "HTML Page Output generates seo-documentation.html"
+    status: PASS
+    evidence: >-
+      static-generator.ts line 174: BRAND_BOOK_PAGES includes
+      { slug: 'seo-documentation', title: 'SEO Documentation', template: 'seo-documentation' }.
+      Line 561-564: generateBrandBook() iterates pages and writes {slug}.html.
+      Test line 318-325: verifies BRAND_BOOK_PAGES contains entry.
+
+  - id: AC-8
+    description: "Navigation Integration under Guidelines section"
+    status: PASS
+    evidence: >-
+      nav-tree.ts line 83: { slug: 'seo-documentation', title: 'SEO Documentation',
+      section: 'guidelines', path: './seo-documentation.html' } inside Guidelines section.
+      Navigation tests (35/35 passing) confirm no regression.
+
+  - id: AC-9
+    description: "Code Snippet Formatting with dark code blocks and copy-to-clipboard (CON-22)"
+    status: PASS
+    evidence: >-
+      seo-documentation.eta lines 42-49, 70-77, 98-105, 121-128: All code blocks use
+      seo-code-block class with dark background (#1e1e2e), Copy button, and aria-labels.
+      Lines 279-310: Vanilla JS copy-to-clipboard using navigator.clipboard with
+      document.execCommand('copy') fallback. No CDN, no framework - CON-22 compliant.
+      Inline <style> block per CON-22 offline requirement.
+
+  - id: AC-10
+    description: "Tests covering all sections (35 tests)"
+    status: PASS
+    evidence: >-
+      seo-documentation-page.test.ts: 36 tests total (35 in extractSeoDocumentationPageData +
+      1 in BRAND_BOOK_PAGES integration). All 36 passing. Coverage:
+      metaTags (8), openGraph (6), twitterCard (6), jsonLd (7), imageSpecs (5),
+      brand profile integration (2), static-generator integration (1), top-level structure (1).
+
+tests:
+  total: 36
+  passing: 36
+  failing: 0
+
+integration_checks:
+  - check: "static-generator.ts import"
+    status: PASS
+    detail: "Line 12: import { extractSeoDocumentationPageData } from './pages/seo-documentation-page-data'"
+  - check: "static-generator.ts BRAND_BOOK_PAGES entry"
+    status: PASS
+    detail: "Line 174: { slug: 'seo-documentation', title: 'SEO Documentation', template: 'seo-documentation' }"
+  - check: "static-generator.ts data extractor call"
+    status: PASS
+    detail: "Lines 518-522: extractSeoDocumentationPageData() called with brandName, domain, tagline from config"
+  - check: "static-generator.ts templateData wiring"
+    status: PASS
+    detail: "Line 550: seoDocumentation: seoDocumentationData in templateData object"
+  - check: "nav-tree.ts Guidelines section entry"
+    status: PASS
+    detail: "Line 83: seo-documentation registered under Guidelines with correct path"
+  - check: "index.ts re-exports"
+    status: PASS
+    detail: "Lines 197-212: 1 function + 12 types exported (BSS-C.2 section)"
+  - check: "Navigation regression"
+    status: PASS
+    detail: "35/35 navigation tests still passing after nav-tree.ts modification"
+
+findings: []
+top_issues: []
+waiver: { active: false }

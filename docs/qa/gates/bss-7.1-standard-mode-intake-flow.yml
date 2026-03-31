@@ -1,0 +1,65 @@
+schema: 1
+story: '7.1'
+gate: PASS
+status_reason: 'All 10 acceptance criteria verified with line-level code evidence. 52/52 tests passing (intake-handler.test.ts). 6-step intake form, 5-point personality scales, 14 mood tiles (exceeds AC-4 min 12), asset upload validation (SVG/PNG/AI, 10MB max), competitor URL validation (2-5, HTTP format), deliverable selection (12 types, min 1), save-and-resume via SessionStorage interface, progress indicator with estimated time, R2 persistence of intake.json, ClickUp task creation with graceful degradation (NFR-9.6). DI pattern throughout. No any types.'
+reviewer: 'Quinn'
+updated: '2026-03-24T18:00:00Z'
+
+checks:
+  ac_coverage:
+    status: pass
+    notes: >
+      All 10 ACs independently verified against source code:
+      AC-1 PASS: types.ts L155-162 INTAKE_STEPS defines 6 steps in sequence: company-basics, brand-personality, visual-preferences, asset-upload, competitor-urls, deliverable-selection. TOTAL_STEPS=6 (L177). intake-handler.ts L189-253 submitStep() handles all 6 steps via switch statement (L210-229). Barrel export from index.ts confirms full module.
+      AC-2 PASS: intake-handler.ts L394-420 ClickUp integration in submit(). L398-404 buildClickUpPayload() called and createTask() invoked. L417-420 catch block: graceful degradation per NFR-9.6 -- ClickUp failure does not block submission. types.ts L252-275 ClickUpClient, ClickUpTaskPayload, ClickUpTaskResult interfaces defined. buildClickUpPayload() at L528-564 maps all intake fields to ClickUp task description.
+      AC-3 PASS: types.ts L28 PersonalityScaleValue = 1|2|3|4|5 (union type). L39-45 BrandPersonality interface has 5 dimensions: formalCasual, traditionalInnovative, seriousPlayful, minimalExpressive, localGlobal. form-validators.ts L89-91 isValidScaleValue() enforces integer 1-5. L97-112 validateBrandPersonality() validates all 5 dimensions.
+      AC-4 PASS: mood-tiles.ts L13-98 defines 14 MoodTile objects (bold-modern, warm-approachable, clean-minimal, luxurious-premium, playful-creative, professional-corporate, natural-organic, tech-futuristic, vintage-retro, elegant-refined, edgy-disruptive, calm-serene, artisanal-handcrafted, geometric-structured). 14 > 12 minimum. form-validators.ts L29-30 MIN_MOOD_SELECTIONS=2, MAX_MOOD_SELECTIONS=3. L118-157 validateVisualPreferences() enforces range, checks invalid IDs, rejects duplicates.
+      AC-5 PASS: types.ts L80 ALLOWED_LOGO_EXTENSIONS=['.svg','.png','.ai']. L83-87 ALLOWED_LOGO_MIME_TYPES. L90 MAX_ASSET_FILE_SIZE_BYTES=10*1024*1024 (10MB). L100-106 AssetUpload interface has primaryLogo (required), secondaryLogo (optional), brandColors, fontNames. file-validator.ts L27-86 validateLogoFile() checks extension (L31-38), MIME type (L41-51), size (L54-62), and zero-size (L65-71).
+      AC-6 PASS: url-validator.ts L13 MIN_COMPETITOR_URLS=2, L16 MAX_COMPETITOR_URLS=5. L28-47 isValidUrl() requires http/https protocol, validates hostname has dot. L55-102 validateCompetitorUrls() enforces min/max count, validates each URL, detects duplicates via case-insensitive normalized comparison (L87-96).
+      AC-7 PASS: types.ts L128-141 BSS_DELIVERABLE_TYPES defines 12 deliverable types. L146-148 DeliverableSelection.selected. form-validators.ts L34-35 MIN_DELIVERABLES=1. L210-244 validateDeliverableSelection() enforces min 1, validates against known types, rejects duplicates.
+      AC-8 PASS: intake-handler.ts L119-170 Session Management section. startSession() L129-145 creates session with token and persists via sessionStorage.save(). resumeSession() L153-155 loads from sessionStorage. generateResumeUrl() L164-170 builds URL with client_id and session_token params. submitStep() L189-253 persists updated session after each step via sessionStorage.save() L251. types.ts L224-233 IntakeSession with clientId, sessionToken, currentStep, completedSteps, partialData, startedAt, lastUpdatedAt. SessionStorage interface at L297-301.
+      AC-9 PASS: intake-handler.ts L291-313 getProgress() computes currentStepNumber, totalSteps, estimatedRemainingMinutes. types.ts L180 AVG_MINUTES_PER_STEP=2.5. L238-246 IntakeProgress interface with currentStepNumber, totalSteps, currentStepId, completedSteps, estimatedRemainingMinutes. Calculation: remainingSteps * 2.5 minutes.
+      AC-10 PASS: intake-handler.ts L333-434 submit() method. L374-392 uploads intake.json to R2 under {prefix}/{clientId}/onboarding/intake.json. L376-383 IntakeRecord built with version, clientId, sessionToken, submittedAt, intakeData, metadata. L446-468 generateSummary() returns IntakeFormSummary (L476-496) with all fields for confirmation screen. types.ts L200-208 IntakeRecord interface. L282-290 R2StorageClient interface.
+
+  test_coverage:
+    status: pass
+    notes: '52/52 tests passing. Coverage: Session management (4 tests: startSession generates token, resumeSession loads from storage, resumeSession returns null for unknown, generateResumeUrl builds correct URL). Step submission (8 tests: submit company-basics, brand-personality, visual-preferences, asset-upload, competitor-urls, deliverable-selection, rejects invalid step data, session not found throws). Save-and-resume roundtrip (2 tests: save then resume preserves all steps, partial completion preserved). Complete submission (5 tests: successful submit writes R2 + creates ClickUp task, incomplete steps rejected, validates full form, ClickUp failure does not block submission, session deleted after submit). Progress indicator (3 tests: getProgress returns correct step/total, estimatedRemainingMinutes correct, all completed shows step 6). Confirmation summary (1 test: generateSummary returns all fields). URL validator (5 tests: valid http/https, rejects no protocol, rejects invalid domain, min 2 enforced, duplicates detected). File validator (6 tests: valid SVG/PNG/AI accepted, invalid extension rejected, oversized file rejected, zero-size rejected, MIME type checked, empty filename rejected). Form validators: company (3), personality (3), visual (4), deliverable (3). Mood tiles (3 tests: 14 tiles defined, getMoodTileById, getInvalidMoodIds).'
+
+  code_quality:
+    status: pass
+    notes: >
+      Zero any types confirmed across all BSS-7.1 source files. All interfaces use readonly properties throughout types.ts (every field marked readonly).
+      Error handling: IntakeError and IntakeValidationError extend BSSError from @bss/core (intake-handler.ts L60-76). R2 upload failures throw IntakeError (L388-392). ClickUp failures caught silently per NFR-9.6 (L417-420).
+      Validation is consistent: all validators return ValidationResult with field, message, and code.
+      Naming follows project conventions: PascalCase interfaces, kebab-case files, SCREAMING_SNAKE constants.
+      DI pattern used for all external dependencies: R2StorageClient (types.ts L282-290), ClickUpClient (types.ts L272-275), SessionStorage (types.ts L297-301).
+
+  types:
+    status: pass
+    notes: >
+      types.ts defines 25+ interfaces and types: CompanyBasics (5 fields), PersonalityScaleValue (1-5 union), PersonalityScale, BrandPersonality (5 scale values), MoodTile (4 fields), VisualPreference, AssetFileInfo (4 fields), AssetUpload, CompetitorUrl, CompetitorUrls, BSSDeliverableType (12-member union), DeliverableSelection, IntakeStepId (6-member union), IntakeFormData (6 step fields), IntakeRecord, IntakeMetadata, IntakeSession, IntakeProgress, ClickUpTaskPayload, ClickUpCustomField, ClickUpTaskResult, ClickUpClient, R2StorageClient, SessionStorage, IntakeSubmissionResult, ValidationResult, ValidationError.
+      Constants typed with as const: INTAKE_STEPS, BSS_DELIVERABLE_TYPES, ALLOWED_LOGO_EXTENSIONS, ALLOWED_LOGO_MIME_TYPES, PERSONALITY_DIMENSIONS, STEP_NUMBER_MAP.
+      IntakeFormSummary (intake-handler.ts L476-496) uses readonly modifiers on all properties.
+      No any usage detected.
+
+  architecture:
+    status: pass
+    notes: >
+      Clean package structure at packages/onboarding/: types.ts (contracts), intake-handler.ts (orchestrator), mood-tiles.ts (data), validators/ subdirectory with url-validator.ts, file-validator.ts, form-validators.ts, index.ts (barrel).
+      DI pattern consistent: constructor injection of IntakeHandlerConfig + IntakeHandlerDependencies (intake-handler.ts L114-117). External services accessed only through interfaces, never directly imported.
+      Separation of concerns: validation logic isolated in dedicated files, mood tile data separate from handler logic, session management in handler.
+      Barrel export via index.ts exports all public types, functions, and classes.
+      Auto-decisions documented and reasonable: packages/ over src/modules/ for monorepo consistency, SessionStorage interface over localStorage for Node.js compatibility, ClickUpClient interface for decoupling from unimplemented EPIC-BSS-6.
+
+  security:
+    status: pass
+    notes: >
+      No hardcoded credentials or secrets. R2 and ClickUp access via injected clients.
+      File upload validation: extension whitelist (ALLOWED_LOGO_EXTENSIONS), MIME type whitelist (ALLOWED_LOGO_MIME_TYPES), size limit 10MB (MAX_ASSET_FILE_SIZE_BYTES), zero-size check.
+      Hex color validation via regex in form-validators.ts L280-282.
+      URL validation prevents non-HTTP protocols (url-validator.ts L36-38). Hostname must contain dot (L43).
+      Session tokens generated with timestamp + random (intake-handler.ts L505-509) -- acceptable for non-security-critical session identification. Production may want crypto.randomUUID().
+      ClickUp payload built from validated data only (L528-564).
+
+top_issues: []
+waiver: { active: false }

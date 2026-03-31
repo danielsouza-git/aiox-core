@@ -1,0 +1,63 @@
+schema: 1
+story: '7.4'
+gate: PASS
+status_reason: 'All 9 acceptance criteria verified with line-level code evidence. 44/44 tests passing (draft-pipeline.test.ts). FR-10.4 compliance: _ai_draft, _requires_validation, _label on all drafts. CON-17 preamble present. NFR-9.7 low-confidence warning at <30% High inferences. 4 parallel AI calls via Promise.all. R2 paths correct. Manifest with validation_status. ClickUp non-blocking. DI pattern consistent. No any types.'
+reviewer: 'Quinn'
+updated: '2026-03-24T18:00:00Z'
+
+checks:
+  ac_coverage:
+    status: pass
+    notes: >
+      All 9 ACs independently verified against source code:
+      AC-1 PASS: brand-voice-drafter.ts L22-72 buildPrompt() extracts tone spectrum (formalCasualScore, emotionalRegister, vocabularyComplexity), vocabulary examples (headings + textContent from accessible pages), and communication do/don'ts from messagingConsistency. L78-133 parseBrandVoiceResponse() validates tone_spectrum (4+ entries), vocabulary_examples (6+ entries), communication_guidelines (8+ entries). L167-180 builds BrandVoiceDraft with tone_spectrum, vocabulary_examples, communication_guidelines. DraftBase fields set at L168-172: _ai_draft:true, _requires_validation:true, _label:'AI Draft - Requires Human Validation'.
+      AC-2 PASS: messaging-drafter.ts L22-71 buildPrompt() sources from messagingConsistency (consistencyScore, recurringValuePropositions, contradictions) and tone context. L95-101 parseMessagingResponse() enforces exactly 3 pillars via .slice(0,3). L144-157 builds MessagingFrameworkDraft with value_proposition, supporting_pillars (3), elevator_pitch. FR-10.4 fields at L145-148.
+      AC-3 PASS: moodboard-direction-drafter.ts L27-72 buildPrompt() derives from visual.colorPalette (top 10 colors), visual.typographyConsistency.fontsDetected, visual.imageryStyle. L94-105 parseMoodboardResponse() enforces 3 tags via .slice(0,3), 5 colors via .slice(0,5), 3 typography entries. L174-187 builds MoodboardDirectionDraft with visual_direction_tags, color_seeds, typography_direction. FR-10.4 fields at L175-178.
+      AC-4 PASS: improvement-drafter.ts L42-95 detectChannels() detects website homepage (first non-social URL), landing pages (remaining website URLs up to 3), and up to 2 social channels from SOCIAL_PATTERNS (L23-30: Instagram, Facebook, LinkedIn, X/Twitter, TikTok, YouTube). L74-75 enforces max 2 social channels. L149 generates 2-3 suggestions per channel. L179 parseImprovementsResponse() caps at 3 suggestions per channel via .slice(0,3).
+      AC-5 PASS: draft-types.ts L36-55 DraftBase interface: _ai_draft:true (L38), _requires_validation:true (L40), _label:'AI Draft - Requires Human Validation' (L42). Each drafter sets these fields: brand-voice-drafter.ts L168-170, messaging-drafter.ts L145-147, moodboard-direction-drafter.ts L175-177, improvement-drafter.ts L240-242 / L265-267. DRAFT_PREAMBLE at L62-63, LOW_CONFIDENCE_WARNING at L66-67. All drafts include validation_status:'pending'.
+      AC-6 PASS: draft-types.ts L228-229 buildDraftR2Key() returns `brand-assets/${clientId}/onboarding/ai-drafts/${filename}`. L233-239 DRAFT_FILENAMES: brandVoice='brand-voice-draft.json', messagingFramework='messaging-framework-draft.json', moodboardDirection='moodboard-direction-draft.json', improvementSuggestions='improvement-suggestions-draft.json', manifest='index.json'. draft-pipeline.ts L177-181 uploads each draft using buildDraftR2Key with correct filenames. L184-194 Promise.all for parallel R2 uploads.
+      AC-7 PASS: draft-pipeline.ts L201-244 buildManifest() creates DraftManifest with client_id, generated_at, source_audit_version, validation_status:'pending', and drafts array of DraftManifestEntry (filename, draft_type, generated_at, validation_status). L246-257 persistManifest() writes to R2 at buildDraftR2Key(clientId, 'index.json'). draft-types.ts L191-198 DraftManifest interface.
+      AC-8 PASS: draft-pipeline.ts L36-44 isLowConfidence() filters inferences where confidence==='High', calculates percentage, returns true if <30%. L65-70 applyLowConfidenceWarning() spreads draft and adds _low_confidence_warning. L119-139 in run(): if lowConfidence is true, applies warning to all 4 drafts. draft-types.ts L65-67 LOW_CONFIDENCE_WARNING constant. Tests confirm warning prepended when <30% High inferences.
+      AC-9 PASS: draft-pipeline.ts L111-116 Promise.all runs all 4 drafters in parallel (4 AI calls). L263-300 postClickUpComment() posts formatted ClickUp comment with links to all 4 draft files and manifest. L295-298 catch block: non-blocking, logs warning but does not throw. L106 startTime and L151 elapsed track performance. L266-268 graceful skip when ClickUp not configured.
+
+  test_coverage:
+    status: pass
+    notes: '44/44 tests passing (36.986s). Coverage by AC: isLowConfidence (3 tests: below threshold returns true, above returns false, empty inferences returns true), getHighConfidencePercentage (2 tests: rounds correctly, empty returns 0), buildDraftR2Key (2 tests: standard path, with slashes), DRAFT_FILENAMES (1 test: all 5 filenames present), detectChannels (5 tests: detects homepage, landing pages, max 2 social, social patterns, empty when no pages), DraftPipeline integration (31 tests: runs all 4 drafts, FR-10.4 _ai_draft flag, FR-10.4 _requires_validation flag, FR-10.4 _label, CON-17 _preamble on all drafts, validation_status pending on all drafts, manifest generated_at/source_audit_version/validation_status, manifest lists all 4 draft entries, R2 writes 5 files (4 drafts + manifest), R2 keys follow convention, low confidence warning applied when <30%, low confidence warning absent when >=30%, ClickUp comment posted on completion, ClickUp comment contains artifact links, ClickUp failure non-blocking, no ClickUp when not configured, brand voice contains tone_spectrum/vocabulary/guidelines, messaging contains value_proposition/3 pillars/elevator_pitch, moodboard contains visual_direction_tags/color_seeds/typography_direction, improvements contains channels with suggestions, metadata includes client_id/generated_at/source_audit_version).'
+
+  code_quality:
+    status: pass
+    notes: >
+      Zero any types confirmed across all draft module source files. All interfaces use readonly properties throughout draft-types.ts.
+      Error handling: R2 failures in persistDrafts throw with descriptive messages (L189-191). ClickUp failures are always non-blocking (L295-298 catch block logs warning, does not throw).
+      Parallel execution: Promise.all for 4 AI calls (L111-116) and 4 R2 uploads (L184-194) enables AC-9 performance target.
+      JSON parsing: all 4 parsers strip markdown fences, validate field types before access, clamp arrays to expected sizes (3 pillars, 3 tags, 5 colors, 3 suggestions per channel).
+      DI pattern consistent: DraftPipelineDeps (L205-211) injects aiService, r2Client, clickUpClient, clickUpTaskId, logger.
+      Tone score clamped to 1-5 range (brand-voice-drafter.ts L100). Vocabulary frequency validated against enum (L115-117). Pillar count capped at 3 (messaging-drafter.ts L101). Color roles validated against enum (moodboard-direction-drafter.ts L118-120).
+
+  types:
+    status: pass
+    notes: >
+      draft-types.ts defines 20+ types: DraftValidationStatus (3-member union), DraftBase (9 readonly fields including FR-10.4 flags), BrandVoiceDraft (extends DraftBase, adds 3 domain fields), MessagingFrameworkDraft (extends DraftBase, adds 3 domain fields), MoodboardDirectionDraft (extends DraftBase, adds 3 domain fields), ImprovementSuggestionsDraft (extends DraftBase, adds 1 domain field), ToneSpectrumEntry (4 fields), VocabularyExample (3 fields with frequency union), CommunicationGuideline (3 fields with type union), MessagingPillar (3 fields), VisualDirectionTag (3 fields), ColorSeed (3 fields with role union), TypographyDirection (3 fields with category union), ImprovementSuggestion (3 fields with priority union), ChannelImprovements (3 fields), DraftManifestEntry (4 fields), DraftManifest (5 fields), DraftPipelineDeps (5 fields), DraftPipelineResult (6 fields).
+      Constants typed with as const: DRAFT_FILENAMES, DRAFT_PREAMBLE, LOW_CONFIDENCE_WARNING.
+      R2 key builder buildDraftR2Key returns string. No any usage anywhere.
+
+  architecture:
+    status: pass
+    notes: >
+      Clean separation of concerns: draft-types.ts (contracts + constants), brand-voice-drafter.ts (AC-1), messaging-drafter.ts (AC-2), moodboard-direction-drafter.ts (AC-3), improvement-drafter.ts (AC-4), draft-pipeline.ts (orchestrator for AC-5 through AC-9), index.ts (barrel).
+      DI pattern: AuditAIService, AuditR2Client, AuditClickUpClient imported from audit-types.ts (reused, not duplicated). DraftPipelineDeps wraps them.
+      Pipeline orchestration: DraftPipeline.run() is the single entry point. 4 parallel drafters -> low confidence check -> R2 persistence -> manifest -> ClickUp.
+      Each drafter is a pure function (not class) taking report + aiService + clientId, returning a typed draft. Clean composability.
+      Barrel exports via index.ts. Module boundary clean: no circular imports.
+
+  security:
+    status: pass
+    notes: >
+      No hardcoded credentials or secrets. AI service, R2, and ClickUp all accessed via injected interfaces.
+      No user input directly interpolated into prompts without context framing (audit data is structured, not raw user text).
+      ClickUp operations always non-blocking to prevent pipeline disruption.
+      JSON parsing uses try/catch with fallback values to prevent crash on malformed AI responses.
+      Improvement-drafter detectChannels uses regex patterns, not eval or dynamic code execution.
+
+top_issues: []
+waiver: { active: false }

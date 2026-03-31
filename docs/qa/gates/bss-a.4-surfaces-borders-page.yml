@@ -1,0 +1,8 @@
+schema: 1
+story: 'BSS-A.4'
+gate: PASS
+status_reason: 'All 10 ACs verified with code evidence. Surfaces, borders, radius, and glass token extractors implemented with sensible defaults. Template renders 4 sections with visual swatches and code snippets. 23 tests passing. Responsive grid CSS confirmed.'
+reviewer: 'Quinn'
+updated: '2026-03-27T12:00:00Z'
+top_issues: []
+waiver: { active: false }

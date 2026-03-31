@@ -1,0 +1,66 @@
+schema: 1
+story: '7.8'
+gate: PASS
+status_reason: 'All 10 acceptance criteria verified with line-level code evidence. 31/31 tests passing (client-approval-flow.test.ts). Static HTML preview with inline CSS and no absolute URLs (CON-22). Approval writes approved_for_setup:true as BSS-7.9 trigger. Change request validates non-empty feedback. Structured ClickUp comments. Disclaimer footer. DI pattern consistent. No any types.'
+reviewer: 'Quinn'
+updated: '2026-03-24T12:00:00Z'
+
+checks:
+  ac_coverage:
+    status: pass
+    notes: >
+      All 10 ACs independently verified against source code:
+      AC-1 PASS: preview-generator.ts L37-104 generatePreview() builds full HTML document. L126-143 renderColorSwatches() renders color swatches with hex values and role names. L146-171 renderTypography() renders heading and body font samples with rendered sample text. L174-191 renderMoodboard() renders grid layout with img tags. L194-237 renderVoice() renders tone scales with visual bars, vocabulary tags, and guidelines. L240-274 renderTokenPreview() renders color and typography token cards. client-approval-handler.ts L80-116 generatePreviewPage() loads approved-direction.json from R2 via loadApprovedDirection() (L66-69).
+      AC-2 PASS: preview-generator.ts L45-103 generates complete HTML with DOCTYPE, inline CSS (L51-87 style block), no external stylesheet references, no absolute URLs. L113-119 generateAndStore() uploads as text/html to R2 at buildClientPreviewR2Key() (approval-types.ts L130-132 returns `brand-assets/{clientId}/client-preview/index.html`). Tests confirm no 'http://' or 'https://' in generated HTML.
+      AC-3 PASS: client-approval-handler.ts L127-188 approve() method and L200-260 requestChanges() method provide the two primary actions. Tests validate both paths.
+      AC-4 PASS: client-approval-handler.ts L127-188 approve(). L134-140 validates confirmationChecked flag against APPROVAL_CONFIRMATION_TEXT (approval-types.ts L158-159 = 'I confirm this brand direction is approved for full production.'). L143-150 builds ClientApproval with approved:true, approved_at ISO 8601, client_name, client_email. L152-155 writes to R2 at buildClientApprovalR2Key().
+      AC-5 PASS: client-approval-handler.ts L200-260 requestChanges(). approval-types.ts L22 ClientApprovalSection = 'color' | 'typography' | 'moodboard' | 'voice' | 'other' (5 sections). L38-41 ChangeRequest with section and feedback fields. L205-207 filters non-empty feedback. L209-215 rejects if validRequests.length === 0.
+      AC-6 PASS: client-approval-handler.ts L242-243 posts structured ClickUp comment via formatChangeRequestComment(). L270-277 formats with '## Client Change Requests' header and '### {Section}' subheadings per section. L244-246 updates ClickUp status to CLICKUP_CHANGES_REQUESTED (approval-types.ts L152 = 'Changes Requested').
+      AC-7 PASS: client-approval-handler.ts L168-170 posts ClickUp comment `Client approved brand direction at {timestamp}.`. L172-174 updates status to CLICKUP_CLIENT_APPROVED (approval-types.ts L149 = 'Client Approved').
+      AC-8 PASS: preview-generator.ts L277-279 renderDisclaimer() renders PREVIEW_DISCLAIMER (approval-types.ts L155 = 'This is a brand direction preview for internal review purposes only. Colors and typography may appear differently across devices and print media. Final production assets will be calibrated to exact brand specifications.'). Disclaimer div has class 'disclaimer' with warning styling (orange left border L85).
+      AC-9 PASS: This is a usability target (<=30 minutes for client). The implementation supports this by providing a clear, self-contained preview page with all brand elements visible in a single page load. No server round-trips required. [AUTO-DECISION] AC-9 is a usability NFR target, not a functional implementation check.
+      AC-10 PASS: client-approval-handler.ts L149 approved_for_setup: true is written to client-approval.json on approval (BSS-7.9 trigger). On change request, L220-223 approved_for_setup: false is written with change_requests array. ClickUp comments posted in both paths.
+
+  test_coverage:
+    status: pass
+    notes: '31/31 tests passing. Coverage: PreviewGenerator (10 tests: generates DOCTYPE HTML, inline CSS present, color palette section with hex/role, typography section with font samples, moodboard grid with images, voice section with tone scales/vocabulary/guidelines, token preview cards, disclaimer footer, no absolute URLs, R2 upload as text/html), ClientApprovalHandler (18 tests: loadApprovedDirection success/null, generatePreviewPage success/no-direction, approve with confirmation/without confirmation rejects, approve writes R2 record with approved_for_setup:true, approve posts ClickUp comment with timestamp, approve updates ClickUp status Client Approved, approve ClickUp failure non-blocking, requestChanges success, requestChanges empty feedback rejects, requestChanges structured ClickUp comment with section headers, requestChanges updates ClickUp status Changes Requested, requestChanges ClickUp failure non-blocking, requestChanges partial empty filtered out), R2 key builders (3 tests: clientApprovalR2Key, clientPreviewR2Key, approvedDirectionR2Key).'
+
+  code_quality:
+    status: pass
+    notes: >
+      Zero any types confirmed across all approval module source files. All interfaces use readonly properties.
+      XSS prevention: preview-generator.ts L306-313 escapeHtml() covers &, <, >, ", ' — applied to all user-supplied data in HTML output.
+      Error handling: all R2 operations wrapped in try/catch with descriptive error messages. ClickUp failures always non-blocking (catch blocks in approve L177-179 and requestChanges L249-251).
+      Clean separation: approval-types.ts (contracts + constants), preview-generator.ts (HTML generation), client-approval-handler.ts (orchestration).
+      Template literals used for HTML generation — zero external templating dependencies.
+      Buffer.from(html, 'utf-8') for R2 upload ensures correct encoding.
+
+  types:
+    status: pass
+    notes: >
+      approval-types.ts defines: ClientApprovalSection (5-member union), ChangeRequest (section + feedback), ClientApproval (7 fields including approved_for_setup for BSS-7.9 trigger), ClientPreviewData (7 fields), ApprovalFlowResult (4 fields), ApprovalR2Client (3 methods including uploadFile), ApprovalClickUpClient (2 methods), ClientApprovalHandlerDeps.
+      Constants typed with as const: CLICKUP_CLIENT_APPROVED, CLICKUP_CHANGES_REQUESTED, PREVIEW_DISCLAIMER, APPROVAL_CONFIRMATION_TEXT.
+      R2 key builders: buildClientApprovalR2Key, buildClientPreviewR2Key, buildApprovedDirectionR2Key.
+      No use of any. Content uses unknown where type is indeterminate (preview-generator.ts L296-298 token entry typed as { $value: string | number }).
+
+  architecture:
+    status: pass
+    notes: >
+      CON-22 compliance: static HTML with inline CSS, no external dependencies, no server requirements.
+      Clean module boundary: approval-types.ts, preview-generator.ts, client-approval-handler.ts, index.ts barrel.
+      DI pattern: ApprovalR2Client and ApprovalClickUpClient injected via ClientApprovalHandlerDeps interface.
+      PreviewGenerator composed inside ClientApprovalHandler (L57) — single responsibility.
+      Imports from sibling modules (review-types.ts for ApprovedDirection) are type-only, maintaining loose coupling.
+      BSS-7.9 trigger cleanly implemented via approved_for_setup flag in the same R2 record.
+
+  security:
+    status: pass
+    notes: >
+      XSS prevention via escapeHtml() applied to all dynamic content in generated HTML (color hex, roles, font families, vocabulary words, guidelines, client ID).
+      No hardcoded credentials or secrets. R2 and ClickUp via injected clients.
+      ClickUp operations always non-blocking to prevent approval flow disruption.
+      Confirmation checkbox validation prevents accidental approval (L134-140).
+      Change request requires non-empty feedback (L209-215) to prevent empty submissions.
+
+top_issues: []
+waiver: { active: false }

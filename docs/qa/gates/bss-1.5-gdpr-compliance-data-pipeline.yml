@@ -1,0 +1,26 @@
+story: BSS-1.5
+title: GDPR Compliance & Data Pipeline
+gate: PASS
+date: 2026-03-24
+tester: Quinn (QA)
+tests: 24/24
+suites:
+  - audit-log.test.ts: 8 tests
+  - delete-operations.test.ts: 8 tests
+  - gdpr-requests.test.ts: 8 tests
+
+ac_coverage:
+  AC-1: PASS — export.ts implements exportClientData() with R2 prefix scan, ZIP archive creation (archiver), JSON metadata inventory, signed download URL (1h expiry). DI pattern with r2Client parameter.
+  AC-2: PASS — soft-delete.ts implements softDeleteAsset() using CopyObjectCommand to _deleted/ prefix with timestamp suffix, then DeleteObjectCommand on original. Audit log entry written. Validates against deleting from _deleted/ or _backups/ prefixes. Tests verify copy+delete+audit chain.
+  AC-3: PASS — permanent-delete.ts implements permanentDeleteAsset() with 7-day retention check (rejects if timestamp suffix < 7 days), permanentDeleteClient() lists and deletes all objects under clientId/ prefix. Audit log entries immutable (retained after client deletion). Tests verify retention guard and full-client deletion.
+  AC-4: PASS — scripts/backup.ts implements daily backup job: ListObjectsV2 scan, CopyObjectCommand to _backups/{YYYY-MM-DD}/, incremental via backup-state.json, skips _deleted/_backups/_exports prefixes.
+  AC-5: PASS — gdpr-requests.ts implements createGdprRequest(), getGdprRequest(), updateGdprRequestStatus(). Types: export/delete/rectification, status pending/processing/complete/failed. Stored as JSON in output/gdpr-requests/{clientId}/{requestId}.json. 30-day deadline (GDPR Article 12). Tests verify unique IDs, status transitions, completedAt on complete.
+  AC-6: PASS — audit-log.ts implements appendAuditLog() with SHA-256 checksum chain (genesis = 64 zeros). verifyAuditLog() validates chain integrity. Append-only (appendFileSync). Events: SOFT_DELETE, PERMANENT_DELETE, DATA_EXPORT, GDPR_REQUEST_CREATED, GDPR_REQUEST_COMPLETED. Tests verify chain integrity and tamper detection.
+  AC-7: PASS — retention.ts implements enforceRetentionPolicy(): scans _deleted/ for assets > 7 days, _backups/ for sets > 30 days. Returns RetentionReport. scripts/retention.ts CLI wrapper. DI pattern.
+  AC-8: PASS — 24/24 tests with mocked S3Client (aws-sdk-client-mock), mocked fs for audit log, temp directories for file-based tests.
+
+issues:
+  - severity: low
+    id: FIX-1.5-1
+    description: "audit-log.test.ts had test isolation issue (shared output/test-logs/ dir). Fixed by using unique dir output/test-logs-audit/."
+    status: FIXED

@@ -1,0 +1,16 @@
+schema: 1
+story: '8.2'
+gate: PASS
+status_reason: 'All 10 ACs verified against implementation. 71 tests covering contrast, dimensions, checklist structure, and package integrity. 43 checklist items across 6 categories with 8 automated. Two low-severity documentation notes identified, neither blocking.'
+reviewer: 'Quinn'
+updated: '2026-03-23T20:00:00Z'
+top_issues:
+  - id: 'DOC-001'
+    severity: low
+    finding: 'Story file (lines 171, 197) claims "9 automated" items, but actual checklists and README contain 8 AUTO items (1+2+2+0+1+2=8). README correctly says 8.'
+    suggested_action: 'Update story File List and Dev Agent Record to say "8 automated" instead of "9 automated". This is a story metadata issue, not a code defect.'
+  - id: 'DOC-002'
+    severity: low
+    finding: 'check-dimensions.ts readImageDimensions JSDoc (line 151) says "Does NOT load the full image into memory — only reads the header bytes" but line 165 uses fs.readFileSync(resolvedPath) which reads the entire file.'
+    suggested_action: 'Either update JSDoc to reflect actual behavior or use fs.openSync + fs.readSync for first ~100 bytes. Acceptable as-is for a CLI tool invoked manually on individual files.'
+waiver: { active: false }

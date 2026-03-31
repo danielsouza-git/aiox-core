@@ -1,0 +1,8 @@
+schema: 1
+story: '6.3'
+gate: PASS
+status_reason: 'All 10 acceptance criteria met. 66 new tests passing (40 srt_utils + 26 subtitle_processor), full regression 442/442 green. Zero lint issues. No hardcoded API keys.'
+reviewer: 'Quinn'
+updated: '2026-03-25T12:00:00Z'
+top_issues: []
+waiver: { active: false }

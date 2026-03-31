@@ -1,0 +1,78 @@
+schema: 1
+story: '7.9'
+gate: PASS
+status_reason: 'All 10 acceptance criteria verified with line-level code evidence. 44/44 tests passing (automated-client-setup.test.ts). Trigger guard validates both approved AND approved_for_setup. 3 DTCG token files generated. R2 folder structure with placeholder objects. Logo copy via copyObject. Hosting graceful degradation (NFR-9.6). Client config, email, ClickUp all implemented. Setup summary with timing. Error state writes failed status. DI pattern consistent. No any types.'
+reviewer: 'Quinn'
+updated: '2026-03-24T12:00:00Z'
+
+checks:
+  ac_coverage:
+    status: pass
+    notes: >
+      All 10 ACs independently verified against source code:
+      AC-1 PASS: client-setup-pipeline.ts L85-101 Step 1 trigger_check. L86-88 reads client-approval.json via buildClientApprovalR2Key(). L94-97 validates BOTH approval.approved AND approval.approved_for_setup — throws if either is false with descriptive error message including both flags. L105-115 returns 'failed' summary if trigger fails.
+      AC-2 PASS: token-generator.ts L22-165. generatePrimitive() L31-61 maps approved palette colors to DTCG tokens with $value (hex) and $type ('color'), plus typography tokens (fontFamily, dimension, number). generateSemantic() L72-106 creates brand/text/surface semantic mappings. generateComponent() L117-150 creates button/text/card component tokens. client-setup-pipeline.ts L167-189 Step 3 creates TokenFileGenerator, generates all 3, uploads to R2 via buildTokenR2Key(clientId, 'primitive'|'semantic'|'component') (setup-types.ts L194-196 returns `brand-assets/{clientId}/tokens/{type}.json`).
+      AC-3 PASS: client-setup-pipeline.ts L196-203 Step 4 folder_structure. Creates `brand-assets/{clientId}/assets/.gitkeep` and `brand-assets/{clientId}/deliverables/.gitkeep` via r2Client.createPlaceholder(). Tokens directory created implicitly by Step 3 token uploads. Onboarding directory preserved (not modified).
+      AC-4 PASS: client-setup-pipeline.ts L210-225 Step 5 logo_copy. L211-212 lists all keys under onboarding/ prefix. L213-216 filters for filenames starting with 'logo-'. L218-222 copies each via r2Client.copyObject(sourceKey, destKey) where destKey = buildAssetDestR2Key(clientId, filename) (setup-types.ts L235-237 returns `brand-assets/{clientId}/assets/{filename}`). Original filenames preserved.
+      AC-5 PASS: hosting-configurator.ts L31-101. configure() L56-100 handles 3 cases: 'manual' returns ManualAction with instructions (L57-67); vercel/netlify with no client returns ManualAction (L69-79); vercel/netlify with client calls createProject (L82-86) and returns url. L87-99 catch block implements NFR-9.6 graceful degradation — API failure falls back to ManualAction. client-setup-pipeline.ts L234-253 Step 6 passes result to manualActions array if present. setup-types.ts L16 HostingProvider = 'vercel' | 'netlify' | 'manual'.
+      AC-6 PASS: client-setup-pipeline.ts L258-279 Step 7 client_config. L259-271 assembles ClientConfig with all required fields: client_id, client_name, onboarding_mode, approved_at, hosting_url (optional), token_paths (3 R2 keys), deliverables_selected (from intake.json). L273-276 writes to buildClientConfigR2Key(). setup-types.ts L79-91 ClientConfig interface defines all fields.
+      AC-7 PASS: email-sender.ts L39-116. sendSetupNotification() L62-78 builds HTML email with R2 folder path, token file paths, hosting URL (conditional L100-105), ClickUp link (conditional L107-112). L74-77 catch block returns {sent:false, error} — never throws. client-setup-pipeline.ts L286-333 Step 8 email_notification, L287-289 checks emailClient and teamEmail exist, L314-320 email failures marked as skipped (not failed).
+      AC-8 PASS: client-setup-pipeline.ts L338-375 Step 9 clickup_update. L343-345 posts CLICKUP_SETUP_COMPLETE_MESSAGE (setup-types.ts L257-258 = 'Automated client setup complete. Client ready for brand production.'). L348-350 updates status to CLICKUP_SETUP_COMPLETE (setup-types.ts L254 = 'Setup Complete'). ClickUp failures also non-blocking (L357-370 marked as skipped). Duration tracked via _executeStep timing.
+      AC-9 PASS: client-setup-pipeline.ts L422-441 Step 10 writes setup summary to R2 via buildSetupSummaryR2Key(). setup-types.ts L62-72 SetupSummary contains: client_id, status, setup_started_at, setup_completed_at, duration_ms, steps_completed, steps_skipped (with skipReason), steps_failed, manual_actions_required. L535-558 _buildSummary() calculates duration_ms from pipeline start to completion.
+      AC-10 PASS: client-setup-pipeline.ts L380-383 determines critical failure from token_generation, client_config, or trigger_check in stepsFailed. L383-387 sets status to 'failed' if critical. L408-417 posts ClickUp failure comment CLICKUP_SETUP_FAILED_PREFIX (setup-types.ts L261-262 = 'Automated setup failed -- manual setup required. See setup-summary.json for details.'). Summary with status:'failed' written to R2 at L432-439.
+
+  test_coverage:
+    status: pass
+    notes: '44/44 tests passing. Coverage: R2 key builders (8 tests: clientApprovalR2Key, approvedDirectionR2Key, tokenR2Key for primitive/semantic/component, clientConfigR2Key, setupSummaryR2Key, setupNotesR2Key, assetDestR2Key, intakeR2Key), TokenFileGenerator (7 tests: primitive colors with $value/$type, primitive typography tokens, semantic brand/text/surface mappings, component button/text/card tokens, _findColorByRole fallback to #000000, all generated tokens are DTCG compliant), HostingConfigurator (4 tests: manual returns ManualAction, vercel with client returns URL, netlify with client returns URL, API failure falls back to ManualAction), SetupEmailSender (2 tests: successful send, failure returns {sent:false}), ClientSetupPipeline (13 tests: AC1 trigger rejects unapproved, AC1 trigger rejects no approved_for_setup, AC2 token files generated and uploaded, AC3 folder structure placeholders created, AC4 logos copied with original filenames, AC5 hosting graceful degradation, AC6 client-config.json written with all fields, AC7 email failure non-blocking, AC8 ClickUp comment + status update, AC9 setup-summary.json with timing, AC10 failed status on critical error, AC10 ClickUp failure comment on pipeline failure, AC8 5-minute SLA feasibility).'
+
+  code_quality:
+    status: pass
+    notes: >
+      Zero any types confirmed across all setup module source files. All interfaces use readonly properties.
+      Pipeline error handling: _executeStep() L451-492 wraps every step with try/catch and timing. Critical vs non-critical failure distinction (L380-387). Email and ClickUp failures are always non-blocking (converted to skipped steps).
+      Token generator is pure (no side effects, no I/O) — deterministic conversion from palette to DTCG format.
+      _findColorByRole() L159-164 falls back to '#000000' for missing roles (safe default, not throwing).
+      HostingConfigurator implements NFR-9.6 graceful degradation at every level (manual, no client, API failure).
+      SetupEmailSender never throws (L74-77 catch returns result object).
+      Setup notes written as best-effort (L397-404 catch block) — does not fail pipeline.
+
+  types:
+    status: pass
+    notes: >
+      setup-types.ts defines: HostingProvider (3-member union), SetupStepName (8-member union), SetupStepStatus (4-member union), SetupStep (7 optional fields), ManualAction, SetupSummary (9 fields), ClientConfig (8 fields with nested token_paths), SetupNotes, TokenFilePaths, SetupR2Client (5 methods including copyObject, listKeys, createPlaceholder), SetupClickUpClient (2 methods), SetupEmailClient (1 method), HostingClient (1 method), SetupPipelineDeps (7 fields with optional email/clickUp/hosting clients).
+      Constants typed with as const: CLICKUP_SETUP_COMPLETE, CLICKUP_SETUP_COMPLETE_MESSAGE, CLICKUP_SETUP_FAILED_PREFIX.
+      10 R2 key builder functions all return string.
+      token-generator.ts: DTCGTokenGroup type imported from analysis-types for proper DTCG structure.
+      No use of any anywhere in the module.
+
+  architecture:
+    status: pass
+    notes: >
+      Clean orchestration pattern: ClientSetupPipeline is the single entry point calling specialized modules (TokenFileGenerator, HostingConfigurator, SetupEmailSender).
+      DI pattern: all external dependencies injected via SetupPipelineDeps interface (R2, ClickUp, email, hosting).
+      Step-level isolation: each step independently tracked with timing and error handling via _executeStep().
+      Non-critical failures (email, ClickUp) converted to skipped steps rather than pipeline failures.
+      Critical failure detection: only token_generation, client_config, trigger_check can cause overall 'failed' status.
+      R2 folder creation uses placeholder objects (.gitkeep pattern) appropriate for object storage.
+      Logo copy uses copyObject (not download+re-upload) as specified in architecture.
+      Token generation is a pure module with no external dependencies beyond types.
+
+  security:
+    status: pass
+    notes: >
+      No hardcoded credentials. RESEND_API_KEY, VERCEL_API_TOKEN, NETLIFY_ACCESS_TOKEN all via environment variables and injected clients.
+      No secrets logged in error messages — _executeStep() only captures error.message.
+      R2 path isolation: all writes scoped under `brand-assets/{clientId}/` via typed key builder functions.
+      Email sender never throws — prevents pipeline disruption from email infrastructure issues.
+      Trigger guard validates BOTH approved AND approved_for_setup — prevents accidental setup runs.
+
+top_issues:
+  - id: CONCERN-7.9-1
+    severity: minor
+    category: correctness
+    description: >
+      Step 2 (read inputs) reuses 'trigger_check' as the step name (client-setup-pipeline.ts L122) instead of having its own distinct name. This means the step name in summary tracking is slightly misleading. The step still works correctly but the name collision means two entries could share the same name in steps_failed.
+    location: 'brand-system-service/packages/onboarding/src/setup/client-setup-pipeline.ts:122'
+    remediation: 'Add a dedicated step name like "read_inputs" to SetupStepName union and use it for Step 2.'
+
+waiver: { active: false }

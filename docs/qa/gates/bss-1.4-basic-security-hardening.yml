@@ -1,0 +1,23 @@
+story: BSS-1.4
+title: Basic Security Hardening
+gate: PASS
+date: 2026-03-24
+tester: Quinn (QA)
+tests: 39/39
+suites:
+  - malware-scanner.test.ts: 10 tests
+  - mask-sensitive.test.ts: 10 tests
+  - rate-limiter.test.ts: 10 tests
+  - security-logger.test.ts: 9 tests
+
+ac_coverage:
+  AC-1: PASS — malware-scanner.ts implements scanBuffer() with ClamAV toggle (BSS_CLAMAV_ENABLED), timeout handling, ScanResult type. Tests mock ClamAV daemon responses (clean/infected/timeout).
+  AC-2: PASS — mask-sensitive.ts implements maskSensitiveFields() redacting accessKeyId, secretAccessKey, apiKey, token, password. Tests verify nested object masking and array handling.
+  AC-3: PASS — No refresh/extend endpoint exists. Signed URLs from BSS-1.2 (signed-urls.ts) use HMAC with expiry baked into signature. Validated by code review.
+  AC-4: PASS — rate-limiter.ts implements RateLimiter class with rolling 1-hour window, max 100 requests per clientId, persistent JSON file counter, 429 response structure with Retry-After header. Tests cover window rolling, boundary conditions, breach logging.
+  AC-5: PASS — Upload size validation exists in BSS-1.2 validateFile(). HTTP-layer Content-Length check documented as API handler responsibility (BSS-7.x scope).
+  AC-6: PASS — vercel.json and netlify.toml include Content-Security-Policy headers with default-src self, script-src self unsafe-inline, style-src self unsafe-inline, img-src self data https, font-src self data.
+  AC-7: PASS — security-logger.ts implements logSecurityEvent() with SecurityEvent type (event, severity INFO/WARN/CRITICAL, clientId, timestamp, details). Events: MALWARE_DETECTED, PATH_TRAVERSAL_ATTEMPT, RATE_LIMIT_BREACH, INVALID_CREDENTIALS. Exported from security/index.ts.
+  AC-8: PASS — pnpm audit script documented. Zero CRITICAL/HIGH vulnerabilities at time of implementation.
+
+issues: []

@@ -1,0 +1,21 @@
+story: BSS-1.7
+title: Infrastructure Monitoring Setup
+gate: PASS
+date: 2026-03-24
+tester: Quinn (QA)
+tests: 30/30
+suites:
+  - sentry.test.ts: 10 tests
+  - ai-logger.test.ts: 12 tests
+  - error-rate.test.ts: 8 tests
+
+ac_coverage:
+  AC-1: PASS — sentry.ts implements initSentry() with Sentry.init (dsn, environment, tracesSampleRate 0.1), captureError() wrapping Sentry.captureException(), BSS_SENTRY_ENABLED toggle. Tests mock @sentry/node, verify init params and captureException calls.
+  AC-2: PASS — ai-logger.ts implements logAiApiCall() writing to JSONL, AiApiCallEntry type with timestamp/clientId/provider/model/tokens/cost/latency/success fields. Cost constants: AI_COST_PER_TOKEN map. Log rotation at 10MB. summarizeAiCosts() aggregates by clientId+month. Tests verify JSONL format and cost aggregation.
+  AC-3: PASS — scripts/health-check.ts tests R2 connectivity (listObjects with 5s timeout), Sentry ping, outputs JSON report with status ok/error per service, exit code 0/1.
+  AC-4: PASS — error-rate.ts implements checkErrorRate(windowHours=24) scanning output/logs/ for ERROR entries, returns ErrorRateReport with errorCount, windowHours, rate (errors/hour), topErrors. Tests verify window filtering and aggregation.
+  AC-5: PASS — ai-logger.ts exports createAiLogger(clientId, provider) returning pre-configured logger with AI metadata. AI errors log at ERROR level with captureError() call to Sentry.
+  AC-6: PASS — docs/operations/monitoring.md exists with sections: Sentry dashboard access, AI cost tracking (JSONL), health check (pnpm health), alert escalation (manual ClickUp task for MVP).
+  AC-7: PASS — 30/30 tests covering logAiApiCall, summarizeAiCosts, checkErrorRate with mocked fs and Sentry SDK.
+
+issues: []

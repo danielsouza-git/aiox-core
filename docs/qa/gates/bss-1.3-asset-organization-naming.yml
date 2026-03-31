@@ -1,0 +1,8 @@
+schema: 1
+story: 'BSS-1.3'
+gate: PASS
+status_reason: 'All 8 ACs met. Folder structure, path validation with ASSET_FOLDERS membership, file validation, naming conventions, metadata, listing, and tests all implemented. 175 R2 tests pass including BSS-1.3 coverage.'
+reviewer: 'Quinn'
+updated: '2026-03-30T23:30:00Z'
+top_issues: []
+waiver: { active: false }

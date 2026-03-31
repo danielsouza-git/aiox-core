@@ -1,0 +1,8 @@
+schema: 1
+story: 'PAUTA-3.3'
+gate: PASS
+status_reason: 'All acceptance criteria verified against code. Parser no longer auto-detects SUPERCHATS, GUI radio buttons present in both locations, backend set_tarja_type validates correctly, tarja_processor handles SUPERCHATS with correct template/config. 38 tests pass, ruff lint clean.'
+reviewer: 'Quinn'
+updated: '2026-03-25T00:00:00Z'
+top_issues: []
+waiver: { active: false }

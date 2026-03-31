@@ -1,0 +1,8 @@
+schema: 1
+story: 'BSS-A.5'
+gate: PASS
+status_reason: 'All 10 ACs verified with code evidence. Background, text, glow, interactive state, font weight token extractors plus shadcn/ui mapping table all implemented. Template renders all 6 sections. 22 tests passing. Data source is tokens.json via extractSemanticTokensPageData().'
+reviewer: 'Quinn'
+updated: '2026-03-27T12:00:00Z'
+top_issues: []
+waiver: { active: false }

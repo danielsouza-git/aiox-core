@@ -1,0 +1,16 @@
+schema: 1
+story: '5.8'
+gate: PASS
+status_reason: 'All 12 acceptance criteria met. 16/16 tests passing. Clean architecture with proper error handling, ZIP verification, and cross-platform path normalization.'
+reviewer: 'Quinn'
+updated: '2026-03-23T19:12:00Z'
+top_issues:
+  - id: 'MNT-001'
+    severity: low
+    finding: 'verifyZip accepts nested index.html (e.g., subdir/index.html) in addition to root — more permissive than AC-7 wording'
+    suggested_action: 'Document behavior in Tech Notes. No code change needed.'
+  - id: 'MNT-002'
+    severity: low
+    finding: 'collectAllFiles uses synchronous readdirSync which blocks event loop for large directories'
+    suggested_action: 'Acceptable for static site exports. Consider async version if sites grow significantly.'
+waiver: { active: false }

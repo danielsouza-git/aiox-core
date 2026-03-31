@@ -1,0 +1,8 @@
+schema: 1
+story: 'BSS-1.6'
+gate: PASS
+status_reason: 'All 8 ACs met. Previous CONCERNS resolved: sub-task checkboxes marked, Change Log updated to v2.1. Story marked Done.'
+reviewer: 'Quinn'
+updated: '2026-03-30T23:50:00Z'
+top_issues: []
+waiver: { active: false }

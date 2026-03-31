@@ -1,0 +1,75 @@
+schema: 1
+story: '5.6'
+gate: PASS
+status_reason: 'All 11 acceptance criteria verified with line-level code evidence. 62/62 tests passing. Package fully isolated (zero external imports, peer deps only). RBAC covers all three roles. Lexical renderer includes XSS escaping. Zero any types.'
+reviewer: 'Quinn'
+updated: '2026-03-23T18:00:00Z'
+
+checks:
+  ac_coverage:
+    status: pass
+    notes: >
+      All 11 ACs independently verified against source code:
+      AC-1 PASS: packages/cms/package.json name @brand-system/cms (L2), tsconfig.json extends ../../tsconfig.json (L2), src/index.ts L1 opt-in warning comment, pnpm-workspace.yaml L2 packages/* glob covers cms. Grep confirms zero imports from other BSS packages.
+      AC-2 PASS: package.json L14-16 peerDependencies payload ^3.0.0 and next ^15.0.0. L18-24 peerDependenciesMeta marks both optional. No dependencies field exists — zero runtime deps.
+      AC-3 PASS: payload-adapter.ts L45 PayloadCMSAdapter implements ICMSAdapter. Methods: getPage (L56, queries by slug, throws on not-found L64), getAllPages (L73, limit 1000, sort -updatedAt), getGlobalConfig (L86, findGlobal slug site-config).
+      AC-4 PASS: collections/Pages.ts L102-165 defines 8 fields — slug (unique L107), title (required L115), template (select L119, 8 options L66-75), content (richText L126), seoTitle (maxLength 60 L136), seoDescription (maxLength 155 L145), status (select L151), publishedAt (date L158).
+      AC-5 PASS: collections/MediaAssets.ts L14-19 ALLOWED_MIME_TYPES 4 types (image/jpeg, image/png, image/webp, image/svg+xml). L55 staticDir from R2_BUCKET_NAME env with fallback.
+      AC-6 PASS: access/roles.ts L18-22 role hierarchy (admin=3, editor=2, viewer=1). adminAccess L47 checks admin minimum. editorWriteAccess L61-68 returns draft filter for editors. viewerAccess L73-81 returns published filter for viewers. Wired into Pages L91-96 and MediaAssets L58-63.
+      AC-7 PASS: Pages.ts L97-101 versions.drafts.autosave true. Status defaults to draft (L155).
+      AC-8 PASS: cms-to-static.ts L41 toStaticContext maps all fields. L63 toLandingPageContext extracts hero. L75 toStaticContextBatch for bulk. L82 convert dispatches by template. L95-143 Lexical renderer: paragraph, heading, text, list, listitem, link with HTML escaping L180-186.
+      AC-9 PASS: webhooks/on-publish.ts L60 createOnPublishHook. L65-67 checks publish transition. L74-75 calls CMSToStaticAdapter.convert. TODO comments for Vercel ISR (L91-95), Netlify (L98), GitHub Pages (L101). Returns doc after processing.
+      AC-10 PASS: README.md has decision table (L7-12), activation command (L18-19), 6 env vars (L27-33), architecture diagram (L37-44), webhook code example (L52-61), roles table (L71-75), API usage (L79-94), peer dep install (L100-102).
+      AC-11 PASS: cms-integration.test.ts 62 tests — PayloadCMSAdapter (4), CMSToStaticAdapter (16 incl all 8 template types via it.each), RBAC (22 covering all roles + unauthenticated), collections (12), webhook (5), isolation (2), Lexical rendering (1 list + 1 link + 1 escaping = 3 dedicated).
+
+  test_coverage:
+    status: pass
+    notes: '62/62 tests passing. Coverage areas: PayloadCMSAdapter (4 tests: getPage, getPage not-found, getAllPages, getGlobalConfig), CMSToStaticAdapter (16 tests: conversion, Lexical rendering, empty/string content, seoTitle fallback, hero extraction, convert dispatch, batch, all 8 templates, list/link/escape), RBAC (22 tests: hasMinimumRole 4, adminAccess 4, editorReadAccess 2, editorWriteAccess 4, viewerAccess 4, media 4), Collections (12 tests: Pages 8, MediaAssets 4), Webhook (5 tests: publish trigger, draft no-trigger, already-published no-trigger, create+published trigger, no callback), Isolation (2 tests: opt-in comment, peer deps).'
+
+  code_quality:
+    status: pass
+    notes: >
+      Zero any types confirmed via grep across all .ts source files. All interfaces use readonly properties consistently.
+      Error handling: PayloadCMSAdapter.getPage throws descriptive error on not-found (L63-65).
+      HTML escaping in Lexical renderer covers &, <, >, " for XSS prevention (L180-186).
+      Barrel exports in index.ts are comprehensive with type-only exports separated from value exports.
+      Content fallbacks: null/undefined returns empty string, string returns as-is, unknown structure falls through to JSON.stringify.
+      satisfies keyword used on template/status options arrays to ensure type safety without widening.
+
+  types:
+    status: pass
+    notes: >
+      types.ts defines: CMSTemplate (8-member union), PageStatus (draft|published), CMSPage (11 fields, readonly), CMSMediaAsset (10 fields, readonly), CMSGlobalConfig (8 fields, readonly), CMSRole (3-member union), CMSUser (3 fields), ICMSAdapter interface (3 methods), StaticPageContext (13 fields, readonly).
+      Content field typed as unknown (correct for Lexical JSON — no any).
+      LandingPageContext extends StaticPageContext with optional hero.
+      PagesCollectionConfig and MediaAssetsCollectionConfig use readonly arrays and typed access function references.
+      ALLOWED_MIME_TYPES uses as const with derived AllowedMimeType union type.
+
+  architecture:
+    status: pass
+    notes: >
+      Clean separation: types.ts (contracts), access/roles.ts (RBAC), collections/ (Payload configs), payload-adapter.ts (data access layer), cms-to-static.ts (CMS-to-static bridge), webhooks/ (integration stubs).
+      Barrel exports via index.ts with opt-in warning.
+      Peer dependency pattern correct — payload and next are NOT bundled, marked optional in peerDependenciesMeta.
+      Package fully isolated: grep confirms zero imports from or to other BSS packages.
+      PayloadLocalAPI interface abstracts Payload dependency for testability without requiring the actual package.
+      CMSToStaticAdapter uses constructor injection for globalConfig — clean dependency inversion.
+
+  security:
+    status: pass
+    notes: >
+      RBAC: 3-tier hierarchy (admin:3/editor:2/viewer:1) with Payload-compatible access functions.
+      Editor write returns query filter { status: { equals: 'draft' } } — cannot modify published pages.
+      Viewer read returns query filter { status: { equals: 'published' } } — cannot see drafts.
+      Admin is the only role with delete permission on both collections.
+      Media write access requires editor minimum.
+      HTML escaping on text nodes and link URLs prevents stored XSS via Lexical content.
+      No hardcoded secrets — PAYLOAD_SECRET, MONGODB_URI, R2 credentials all via env vars.
+
+  documentation:
+    status: pass
+    notes: >
+      README.md provides: decision table for CMS vs static, activation command, 6 required env vars with descriptions, ASCII architecture diagram, webhook wiring code example, roles and permissions table, full API usage examples, and peer dependency installation instructions.
+
+top_issues: []
+waiver: { active: false }

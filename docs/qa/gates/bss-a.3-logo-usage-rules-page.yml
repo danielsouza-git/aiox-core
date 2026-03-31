@@ -1,0 +1,8 @@
+schema: 1
+story: 'BSS-A.3'
+gate: PASS
+status_reason: 'All 9 tests pass. Clear space X-unit grid, 5 approved usage examples, 7 incorrect usage examples with CSS transforms, 5 color contexts with brand color adaptation, 4 file formats, minimum size specs. Template renders SVG diagram, do/dont galleries, color contexts, file format table.'
+reviewer: 'Quinn'
+updated: '2026-03-27T14:00:00Z'
+top_issues: []
+waiver: { active: false }
