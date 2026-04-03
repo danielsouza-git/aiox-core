@@ -17,7 +17,8 @@ export type DeliverableType =
   | 'ad-copy'
   | 'video-script'
   | 'hashtag-set'
-  | 'quality-evaluator';
+  | 'quality-evaluator'
+  | 'layout-token-generation';
 
 /** Schema definition for a single template variable. */
 export interface PromptVariableSchema {

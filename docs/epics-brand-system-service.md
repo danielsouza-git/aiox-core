@@ -478,8 +478,8 @@ EPIC-BSS-VAL (Validation Program)
 
 ### EPIC-BSS-D: Personality-Driven Layouts (AI-Generated)
 
-**Priority:** P1 (enhancement) | **Complexity:** L | **Estimate:** ~28 SP (11 stories across 4 waves)
-**Status:** Not started
+**Priority:** P1 (enhancement) | **Complexity:** L | **Estimate:** ~38 SP (14 stories across 5 waves)
+**Status:** In Progress (Wave 4+5 implemented, Wave 1-3 pending)
 **Description:** **[NEW v1.4]** Make each brand book, site, and social post visually unique by generating layouts from the brand profile and visual references rather than from predefined templates. The primary mode is AI-generated: an agent researches visual references, analyzes the brand profile, and produces unique layout code. A fallback mode provides 6 predefined layout families with parametric tokens (from the architecture document) when AI generation is unavailable.
 
 **Architecture:** `docs/architecture/personality-driven-layouts.md` (Aria - 15 sections, 5 ADRs)
@@ -510,20 +510,26 @@ Brand Profile (archetypes, personality, visual_direction)
 
 **Wave 2: AI-Generated Brand Books**
 
-4. **PDL-4: Brand Book Builder Layout Generation** (3 SP) -- Modify `brand-book-builder.md` agent instructions to generate unique layout code from the layout brief instead of applying fixed templates. Include structural diversity rules (no two brands should share the same layout skeleton)
+4. **PDL-4: Brand Book Builder Layout Generation** (5 SP) -- [UPDATED v1.5] Core AI layout generator (`ai-layout-generator.js`) that calls LLM via `aiService.generateText()` to produce unique W3C DTCG layout tokens per brand. Includes JSON extraction, token validation, retry with lower temperature, and budget enforcement. New `resolveLayoutTokensAsync()` function provides AI-first path with family-based fallback. **Status: Done** (24 tests passing)
 5. **PDL-5: PoC - Stray Innocence AI-Generated Brand Book** (3 SP) -- Re-generate the Stray Innocence brand book using the full AI-generated pipeline. Validate visual uniqueness, responsive behavior, and brand profile alignment. Compare against template-based version
 6. **PDL-6: PoC - Nova Vista Cafe AI-Generated Brand Book** (3 SP) -- Re-generate the Nova Vista Cafe brand book using the full AI-generated pipeline. Validate visual uniqueness, responsive behavior, and brand profile alignment. Compare against template-based version
 
 **Wave 3: Extension to Other Deliverables**
 
-7. **PDL-7: AI-Generated Landing Pages** (3 SP) -- Extend AI-generated layout capability to landing pages. Generate unique landing page layouts from the layout brief, respecting conversion architecture (Hero, Problem, Solution, CTA) while varying visual treatment per brand
+7. **PDL-7: AI-Generated Landing Pages** (4 SP) -- [UPDATED v1.5] Extend AI-generated layout capability to landing pages. Build pipeline updated to accept AI-generated tokens (`layoutTokens` field) as highest priority, with `normalizeTokensToLayoutData()` converting W3C DTCG tokens to LayoutData shape. **Status: Done** (744 static-generator tests passing)
 8. **PDL-8: Social Posts Visual Treatment** (2 SP) -- Apply visual treatment inspired by the layout brief to social media posts. Adapt spacing, composition, and visual hierarchy from the brand-level brief to post-level templates
 9. **PDL-9: Quality Gates for Generated Layouts** (2 SP) -- Automated validation of AI-generated layouts: Lighthouse performance >90, WCAG AA compliance, responsive validation at 375px/768px/1440px breakpoints, visual regression baseline
 
 **Wave 4: Fallback Engine (6 Layout Families)**
 
-10. **PDL-10: Layout Engine with 6 Families** (3 SP) -- Implement `@bss/layout-engine` with 6 predefined layout families from the architecture document as fallback. Each family provides parametric tokens for customization within the family constraints
-11. **PDL-11: Fallback Integration in Static Generator** (2 SP) -- Integrate the fallback layout engine into the static-generator pipeline. When AI generation is unavailable (API down, budget exceeded, manual override), automatically select the most appropriate layout family based on brand archetype
+10. **PDL-10: Layout Engine with 6 Families** (3 SP) -- Implement `@bss/layout-engine` with 6 predefined layout families from the architecture document as fallback. Each family provides parametric tokens for customization within the family constraints. **Status: Done**
+11. **PDL-11: Fallback Integration in Static Generator** (2 SP) -- Integrate the fallback layout engine into the static-generator pipeline. When AI generation is unavailable (API down, budget exceeded, manual override), automatically select the most appropriate layout family based on brand archetype. **Status: Done**
+
+**Wave 5: AI-Generation Infrastructure (NEW v1.5)**
+
+12. **PDL-12: Layout Token Prompt Template** (3 SP) -- [NEW v1.5] Create `layout-token-generation.v1.json` prompt template in PromptRegistry. Schema-constrained JSON output with 21 required token paths matching W3C DTCG format. Added `'layout-token-generation'` to `DeliverableType` in prompts package. **Status: Done**
+13. **PDL-13: AI Layout Cost Tracking** (2 SP) -- [NEW v1.5] Budget enforcement in `ai-layout-generator.js` — checks `costTracker.canSubmit()` before calling LLM. Returns null (triggering family fallback) when budget exceeded. Cost recording flows through existing `AIService` → `callLogger` → `costLedger` pipeline. **Status: Done** (4 tests)
+14. **PDL-14: AI Layout Uniqueness Validation** (2 SP) -- [NEW v1.5] Statistical divergence tests: 10 mock brand profiles generate tokens via AI, validate < 80% overlap between any pair. Checks unique family names, varied corner radii, animation durations, and whitespace multipliers. **Status: Done** (7 tests)
 
 **Verification Criteria:**
 - @analyst produces `visual-references.md` with 5-10 relevant reference sites per brand
@@ -531,6 +537,10 @@ Brand Profile (archetypes, personality, visual_direction)
 - Brand books generated via AI pipeline have visually distinct layouts between different brands
 - Quality gate: Lighthouse >90 performance, WCAG AA, responsive at 375px/768px/1440px
 - Fallback (6 layout families) functions correctly when AI generation is unavailable
+- [NEW v1.5] AI-generated tokens pass W3C DTCG validation (21 required paths)
+- [NEW v1.5] Uniqueness: < 80% token overlap between any two brands (PDL-14)
+- [NEW v1.5] Budget enforcement prevents AI calls when budget exceeded (PDL-13)
+- [NEW v1.5] 506 layout-engine tests pass, 744 static-generator tests pass, zero regression
 
 **Impact on Agents:**
 - **@analyst:** New task `visual-reference-research`
@@ -762,6 +772,48 @@ Brand Profile (archetypes, personality, visual_direction)
 ---
 
 ## Changelog
+
+### v1.5 (2026-04-03) -- AI-Generation Gap Fix (EPIC-BSS-D)
+
+Implemented AI-first layout generation as the PRIMARY path, with family-based as FALLBACK. Addresses the gap where the system was built as family-based (deterministic) instead of AI-generated (primary) as specified in PRD v1.4.
+
+**NEW STORIES:**
+
+1. **PDL-12 added (Done):** Layout Token Prompt Template — `layout-token-generation.v1.json` registered in PromptRegistry
+2. **PDL-13 added (Done):** AI Layout Cost Tracking — budget enforcement via `costTracker.canSubmit()` before LLM calls
+3. **PDL-14 added (Done):** AI Layout Uniqueness Validation — statistical divergence tests with 10 mock brands
+
+**UPDATED STORIES:**
+
+- **PDL-4 updated (3 SP → 5 SP, Done):** Core `ai-layout-generator.js` with LLM call, JSON extraction, token validation, retry logic
+- **PDL-7 updated (3 SP → 4 SP, Done):** Build pipeline accepts AI tokens via `layoutTokens` field with `normalizeTokensToLayoutData()`
+- **PDL-10 marked Done:** Layout Engine with 6 Families
+- **PDL-11 marked Done:** Fallback Integration in Static Generator
+
+**SCOPE IMPACT:**
+
+| Metric | v1.4 | v1.5 | Delta |
+|--------|------|------|-------|
+| Total Stories | 113 | 116 | +3 (PDL-12, 13, 14) |
+| EPIC-BSS-D SP | ~28 | ~38 | +10 (AI infrastructure) |
+| EPIC-BSS-D Stories | 11 | 14 | +3 |
+| EPIC-BSS-D Done | 0 | 7 | +7 (PDL-4, 7, 10, 11, 12, 13, 14) |
+| New Tests | 0 | 42 | +42 (24 + 11 + 7) |
+
+**FILES CREATED:**
+
+- `packages/layout-engine/src/ai-layout-generator.js` — Core AI generator
+- `packages/prompts/templates/layout-token-generation.v1.json` — Prompt template
+- `packages/layout-engine/__tests__/ai-layout-generator.test.js` — 24 tests
+- `packages/layout-engine/__tests__/resolve-layout-tokens-async.test.js` — 11 tests
+- `packages/layout-engine/__tests__/uniqueness-validation.test.js` — 7 tests
+
+**FILES MODIFIED:**
+
+- `packages/layout-engine/src/fallback-resolver.js` — New `resolveLayoutTokensAsync()`
+- `packages/layout-engine/src/index.js` — Exports new functions
+- `packages/prompts/src/types.ts` — Added `'layout-token-generation'` to DeliverableType
+- `packages/static-generator/src/build-pipeline.ts` — AI tokens support in `loadLayoutData()`
 
 ### v1.4 (2026-04-02) -- Personality-Driven Layouts Epic
 

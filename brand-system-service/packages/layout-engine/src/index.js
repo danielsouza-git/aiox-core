@@ -115,10 +115,13 @@ const {
 const { DEFAULT_LAYOUT, mergeWithDefaults, deepMerge } = require('./defaults');
 
 // PDL-11: Fallback integration
-const { resolveLayoutTokens } = require('./fallback-resolver');
+const { resolveLayoutTokens, resolveLayoutTokensAsync } = require('./fallback-resolver');
 const { writeLayoutTokens } = require('./token-writer');
 const { validateLayoutTokens } = require('./validators/layout-token-validator');
 const { generateCSSVariables } = require('./css-var-generator');
+
+// PDL-4/12: AI layout generation
+const { generateAILayoutTokens } = require('./ai-layout-generator');
 
 module.exports = {
   resolveLayout,
@@ -146,7 +149,10 @@ module.exports = {
   deepMerge,
   // PDL-11: Fallback integration
   resolveLayoutTokens,
+  resolveLayoutTokensAsync,
   writeLayoutTokens,
   validateLayoutTokens,
   generateCSSVariables,
+  // PDL-4/12: AI layout generation
+  generateAILayoutTokens,
 };

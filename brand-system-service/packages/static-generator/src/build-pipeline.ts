@@ -765,14 +765,16 @@ function escapeHtml(str: string): string {
 }
 
 /**
- * Load layout data from layout brief or options.
+ * Load layout data from layout brief, AI tokens, or options.
  *
  * Priority:
- * 1. options.templateData.layout (explicit layout data from caller)
- * 2. options.templateData.layoutBrief (raw brief YAML string)
- * 3. DEFAULT_LAYOUT (backward compatibility — current BSS output)
+ * 1. options.templateData.layoutTokens (AI-generated W3C DTCG tokens — PDL-4)
+ * 2. options.templateData.layout (explicit layout data from caller)
+ * 3. options.templateData.layoutBrief (raw brief YAML string)
+ * 4. DEFAULT_LAYOUT (backward compatibility — current BSS output)
  *
  * PDL-7: Enables layout-driven landing pages.
+ * PDL-4: AI-generated tokens take highest priority.
  */
 function loadLayoutData(
   options: GeneratorOptions,
@@ -780,7 +782,17 @@ function loadLayoutData(
 ): LayoutData | undefined {
   const templateData = options.templateData as Record<string, unknown> | undefined;
 
-  // 1. Check if explicit layout data was provided (e.g., from test or API)
+  // 1. Check for AI-generated layout tokens (W3C DTCG format — PDL-4)
+  if (templateData?.layoutTokens && typeof templateData.layoutTokens === 'object') {
+    const tokens = templateData.layoutTokens as Record<string, unknown>;
+    const layout = tokens.layout as Record<string, unknown> | undefined;
+    if (layout) {
+      logger.info('Using AI-generated layout tokens', { source: 'ai' });
+      return normalizeTokensToLayoutData(layout);
+    }
+  }
+
+  // 2. Check if explicit layout data was provided (e.g., from test or API)
   if (templateData?.layout && typeof templateData.layout === 'object') {
     const layout = templateData.layout as Record<string, unknown>;
     if (layout.family && typeof layout.family === 'string') {
@@ -789,16 +801,74 @@ function loadLayoutData(
     }
   }
 
-  // 2. Check for layout brief (YAML string from AI pipeline)
+  // 3. Check for layout brief (YAML string from AI pipeline)
   if (templateData?.layoutBrief && typeof templateData.layoutBrief === 'object') {
     const brief = templateData.layoutBrief as Record<string, unknown>;
     logger.info('Resolving layout from brief');
     return normalizeLayoutData(brief);
   }
 
-  // 3. No layout brief — return undefined (backward compat: templates use defaults via filters)
+  // 4. No layout brief — return undefined (backward compat: templates use defaults via filters)
   logger.info('No layout brief available, using template defaults');
   return undefined;
+}
+
+/**
+ * Extract the $value from a W3C DTCG token object.
+ * If the input is a plain value (not a token object), returns it directly.
+ */
+function extractTokenValue(token: unknown): unknown {
+  if (token && typeof token === 'object' && '$value' in (token as Record<string, unknown>)) {
+    return (token as Record<string, unknown>).$value;
+  }
+  return token;
+}
+
+/**
+ * Normalize W3C DTCG layout tokens into the LayoutData shape.
+ * Extracts $value from each token and maps to the flat LayoutData interface.
+ *
+ * PDL-4: Converts AI-generated tokens to the same shape the build pipeline expects.
+ */
+function normalizeTokensToLayoutData(layout: Record<string, unknown>): LayoutData {
+  const family = layout.family as Record<string, unknown> | undefined;
+  const corner = layout.corner as Record<string, unknown> | undefined;
+  const whitespace = layout.whitespace as Record<string, unknown> | undefined;
+  const nav = layout.nav as Record<string, unknown> | undefined;
+  const divider = layout.divider as Record<string, unknown> | undefined;
+  const animation = layout.animation as Record<string, unknown> | undefined;
+  const grid = layout.grid as Record<string, unknown> | undefined;
+  const section = layout.section as Record<string, unknown> | undefined;
+
+  return {
+    family: (extractTokenValue(family?.name) as string) || DEFAULT_LAYOUT.family,
+    nav: {
+      style: (extractTokenValue(nav?.style) as string) || DEFAULT_LAYOUT.nav.style,
+    },
+    whitespace: {
+      density: (extractTokenValue(whitespace?.density) as string) || DEFAULT_LAYOUT.whitespace.density,
+      multiplier: (extractTokenValue(whitespace?.multiplier) as number) ?? DEFAULT_LAYOUT.whitespace.multiplier,
+      sectionGap: (extractTokenValue(whitespace?.sectionGap) as string) || DEFAULT_LAYOUT.whitespace.sectionGap,
+      contentPadding: (extractTokenValue(whitespace?.contentPadding) as string) || DEFAULT_LAYOUT.whitespace.contentPadding,
+    },
+    corners: {
+      radiusBase: (extractTokenValue(corner?.radiusBase) as string) || DEFAULT_LAYOUT.corners.radiusBase,
+    },
+    dividers: {
+      style: (extractTokenValue(divider?.style) as string) || DEFAULT_LAYOUT.dividers.style,
+    },
+    animation: {
+      entrance: (extractTokenValue(animation?.entrance) as string) || DEFAULT_LAYOUT.animation.entrance,
+      duration: (extractTokenValue(animation?.duration) as string) || DEFAULT_LAYOUT.animation.duration,
+    },
+    grid: {
+      rhythm: (extractTokenValue(grid?.rhythm) as string) || DEFAULT_LAYOUT.grid.rhythm,
+      maxWidth: (extractTokenValue(grid?.maxWidth) as string) || DEFAULT_LAYOUT.grid.maxWidth,
+    },
+    sections: {
+      background: (extractTokenValue(section?.background) as string) || DEFAULT_LAYOUT.sections.background,
+    },
+  };
 }
 
 /**
