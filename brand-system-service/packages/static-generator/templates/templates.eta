@@ -1,50 +1,114 @@
 <section aria-labelledby="templates-title">
   <h1 id="templates-title">Templates</h1>
   <p class="section-intro">
+    <% if (it.templatesData) { %>
+    <%= it.templatesData.introText %>
+    <% } else { %>
     Ready-to-use layout templates and patterns for the <%= it.brand.clientName %> brand system.
     These templates combine the design tokens into practical, reusable compositions.
+    <% } %>
   </p>
 
+  <% if (it.templatesData && it.templatesData.templates) { %>
+
+  <nav class="templates-toc" aria-label="Templates section navigation">
+    <ul>
+      <% for (const tmpl of it.templatesData.templates) { %>
+      <li><a href="#<%= tmpl.id %>"><%= tmpl.name %></a></li>
+      <% } %>
+    </ul>
+  </nav>
+
+  <% for (const tmpl of it.templatesData.templates) { %>
+  <article class="template-showcase" id="<%= tmpl.id %>">
+    <h2><%= tmpl.name %></h2>
+    <p><%= tmpl.description %></p>
+
+    <% if (tmpl.features && tmpl.features.length > 0) { %>
+    <h3>Key Features</h3>
+    <ul class="template-features">
+      <% for (const feature of tmpl.features) { %>
+      <li><%= feature %></li>
+      <% } %>
+    </ul>
+    <% } %>
+
+    <h3>Preview</h3>
+    <div class="template-preview" aria-label="<%= tmpl.name %> preview">
+      <%~ tmpl.previewHtml %>
+    </div>
+
+    <h3>HTML Structure</h3>
+    <div class="template-code-block" role="region" aria-label="<%= tmpl.name %> HTML code">
+      <div class="template-code-block__header">
+        <span class="template-code-block__lang">HTML</span>
+        <button class="template-code-block__copy" type="button" aria-label="Copy HTML code to clipboard" data-snippet-id="<%= tmpl.id %>-html">Copy</button>
+      </div>
+      <pre class="template-code-block__pre"><code class="template-code-block__code" id="snippet-<%= tmpl.id %>-html"><%~ tmpl.codeSnippet.replace(/</g, '&lt;').replace(/>/g, '&gt;') %></code></pre>
+    </div>
+
+    <h3>CSS</h3>
+    <div class="template-code-block" role="region" aria-label="<%= tmpl.name %> CSS code">
+      <div class="template-code-block__header">
+        <span class="template-code-block__lang">CSS</span>
+        <button class="template-code-block__copy" type="button" aria-label="Copy CSS code to clipboard" data-snippet-id="<%= tmpl.id %>-css">Copy</button>
+      </div>
+      <pre class="template-code-block__pre"><code class="template-code-block__code" id="snippet-<%= tmpl.id %>-css"><%= tmpl.cssSnippet %></code></pre>
+    </div>
+  </article>
+  <% } %>
+
+  <!-- Copy-to-clipboard vanilla JS (CON-22 offline compatible) -->
+  <script>
+  (function() {
+    'use strict';
+    var buttons = document.querySelectorAll('.template-code-block__copy');
+    for (var i = 0; i < buttons.length; i++) {
+      buttons[i].addEventListener('click', function() {
+        var snippetId = this.getAttribute('data-snippet-id');
+        var codeEl = document.getElementById('snippet-' + snippetId);
+        if (!codeEl) return;
+        var text = codeEl.textContent || '';
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          var btn = this;
+          navigator.clipboard.writeText(text).then(function() {
+            var original = btn.textContent;
+            btn.textContent = 'Copied!';
+            setTimeout(function() { btn.textContent = original; }, 2000);
+          });
+        } else {
+          var textarea = document.createElement('textarea');
+          textarea.value = text;
+          textarea.style.position = 'fixed';
+          textarea.style.left = '-9999px';
+          document.body.appendChild(textarea);
+          textarea.select();
+          document.execCommand('copy');
+          document.body.removeChild(textarea);
+          var original = this.textContent;
+          this.textContent = 'Copied!';
+          var self = this;
+          setTimeout(function() { self.textContent = original; }, 2000);
+        }
+      });
+    }
+  })();
+  </script>
+
+  <% } else { %>
+  <!-- Fallback when no templatesData is provided -->
   <h2>Page Layouts</h2>
   <article>
-    <h3>Hero Section</h3>
-    <p>
-      Full-width hero with brand primary color background, display typography,
-      and centered call-to-action. Uses spacing scale 16 (128px) for vertical padding.
-    </p>
+    <h3>Page Shell</h3>
+    <p>A complete page scaffold with sticky navigation, section dividers, and branded footer.</p>
   </article>
-
   <article>
-    <h3>Content Section</h3>
-    <p>
-      Standard content area with max-width constraint, body typography,
-      and spacing scale 8 (64px) vertical rhythm between sections.
-    </p>
+    <h3>Dashboard Grid</h3>
+    <p>Bento-style asymmetric 4-column grid layout for dashboards and feature showcases.</p>
   </article>
-
   <article>
-    <h3>Card Grid</h3>
-    <p>
-      Responsive card grid using CSS Grid with auto-fill columns.
-      Cards use the component tokens defined in the Components section.
-    </p>
+    <h3>Content Grid</h3>
+    <p>Responsive auto-fit grid with minmax(340px, 1fr) for blog listings and catalogs.</p>
   </article>
-
-  <h2>Email Templates</h2>
-  <article>
-    <h3>Transactional Email</h3>
-    <p>
-      600px max-width, inline styles for email client compatibility.
-      Uses brand primary color for header bar and button backgrounds.
-    </p>
-  </article>
-
-  <h2>Social Media</h2>
-  <article>
-    <h3>Post Template</h3>
-    <p>
-      1080x1080px square format, brand primary background with white display typography.
-      Logo positioned in bottom-right corner.
-    </p>
-  </article>
+  <% } %>
 </section>

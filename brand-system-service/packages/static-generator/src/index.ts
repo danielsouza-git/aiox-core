@@ -225,6 +225,13 @@ export {
   type EditorialStrategySection,
 } from './pages/editorial-strategy-page-data';
 
+// Templates Page (BSS-C.1)
+export {
+  extractTemplatesPageData,
+  type LayoutTemplate,
+  type TemplatesPageData,
+} from './pages/templates-page-data';
+
 // Microcopy Guide (BSS-5.7)
 export {
   MicrocopyGuide,

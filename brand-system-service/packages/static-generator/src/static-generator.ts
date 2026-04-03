@@ -11,6 +11,7 @@ import { extractMoodboardPageData } from './pages/moodboard-page-data';
 import { extractMovementPageData } from './pages/movement-page-data';
 import { extractSeoDocumentationPageData } from './pages/seo-documentation-page-data';
 import { extractEditorialStrategyPageData } from './pages/editorial-strategy-page-data';
+import { extractTemplatesPageData } from './pages/templates-page-data';
 import { buildNavigationTree, generateBreadcrumbs } from './navigation';
 
 /**
@@ -521,6 +522,7 @@ export class StaticGenerator {
       tagline: config.brandConfig.tagline,
     });
     const editorialStrategyData = extractEditorialStrategyPageData();
+    const templatesData = extractTemplatesPageData();
 
     // Build navigation tree (hierarchical sidebar with icons + breadcrumbs)
     const navigationTree = buildNavigationTree();
@@ -549,6 +551,7 @@ export class StaticGenerator {
       movement: movementData,
       seoDocumentation: seoDocumentationData,
       editorialStrategy: editorialStrategyData,
+      templatesData,
     };
 
     // Generate CSS
@@ -2438,6 +2441,133 @@ a:hover { text-decoration: underline; }
   .brandscript-outcomes { grid-template-columns: 1fr; }
   .brand-contract { grid-template-columns: 1fr; }
   .movement-toc ul { gap: 8px; }
+}
+
+/* ===== Templates Page (BSS-C.1) ===== */
+.templates-toc {
+  position: sticky;
+  top: 0;
+  background: var(--color-bg-base, #fff);
+  border-bottom: 1px solid var(--color-border, #e5e7eb);
+  padding: 12px 0;
+  margin: -8px 0 24px;
+  z-index: 10;
+  overflow-x: auto;
+}
+.templates-toc ul {
+  display: flex;
+  gap: 16px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  white-space: nowrap;
+}
+.templates-toc a {
+  font-size: 13px;
+  color: var(--color-text-secondary, #6b7280);
+  text-decoration: none;
+  padding: 4px 0;
+  border-bottom: 2px solid transparent;
+  transition: color 0.15s, border-color 0.15s;
+}
+.templates-toc a:hover {
+  color: var(--brand-primary, #7631e5);
+  border-bottom-color: var(--brand-primary, #7631e5);
+}
+.template-showcase {
+  margin-bottom: 48px;
+  padding-bottom: 48px;
+  border-bottom: 1px solid var(--color-border, #e5e7eb);
+}
+.template-showcase:last-of-type {
+  border-bottom: none;
+}
+.template-features {
+  list-style: none;
+  padding: 0;
+  margin: 12px 0 24px;
+}
+.template-features li {
+  position: relative;
+  padding-left: 24px;
+  margin-bottom: 8px;
+  font-size: 14px;
+  color: var(--color-text-secondary, #6b7280);
+  line-height: 1.5;
+}
+.template-features li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 7px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--brand-primary, #7631e5);
+  opacity: 0.6;
+}
+.template-preview {
+  margin: 16px 0 32px;
+  padding: 24px;
+  background: var(--color-bg-subtle, #f8f9fa);
+  border: 1px solid var(--color-border, #e5e7eb);
+  border-radius: 8px;
+}
+.template-code-block {
+  margin: 16px 0 24px;
+  border: 1px solid var(--color-border, #e5e7eb);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.template-code-block__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  background: #1e1e2e;
+  border-bottom: 1px solid #2d2d44;
+}
+.template-code-block__lang {
+  font-family: var(--font-mono, monospace);
+  font-size: 12px;
+  color: #a0a0b0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.template-code-block__copy {
+  background: transparent;
+  border: 1px solid #3d3d54;
+  color: #a0a0b0;
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  font-family: var(--font-body, system-ui, sans-serif);
+  transition: background 0.15s, color 0.15s;
+}
+.template-code-block__copy:hover {
+  background: #2d2d44;
+  color: #e0e0f0;
+}
+.template-code-block__pre {
+  margin: 0;
+  padding: 16px;
+  background: #1e1e2e;
+  overflow-x: auto;
+}
+.template-code-block__code {
+  font-family: var(--font-mono, 'JetBrains Mono', monospace);
+  font-size: 13px;
+  line-height: 1.6;
+  color: #e0e0f0;
+  white-space: pre;
+}
+
+/* Templates Page — Responsive */
+@media (max-width: 768px) {
+  .templates-toc ul { gap: 8px; }
+  .template-preview { padding: 12px; }
+  .template-code-block__pre { padding: 12px; font-size: 11px; }
 }
 `;
   }

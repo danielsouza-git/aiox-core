@@ -70,3 +70,9 @@ export {
   type MovementPageData,
   type MovementBrandProfile,
 } from './movement-page-data';
+
+export {
+  extractTemplatesPageData,
+  type LayoutTemplate,
+  type TemplatesPageData,
+} from './templates-page-data';
