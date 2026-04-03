@@ -1,6 +1,14 @@
 'use strict';
 
-const { resolveLayout } = require('./index');
+// Lazy-loaded to avoid circular dependency (index.js imports from this file)
+let _resolveLayout;
+function getResolveLayout() {
+  if (!_resolveLayout) {
+    _resolveLayout = require('./index').resolveLayout;
+  }
+  return _resolveLayout;
+}
+
 const { generateAILayoutTokens } = require('./ai-layout-generator');
 
 /**
@@ -43,7 +51,7 @@ function resolveLayoutTokens({ layoutBrief, brandProfile, featureFlags }) {
       },
       buildType: 'brand-book',
     };
-    const result = resolveLayout(input);
+    const result = getResolveLayout()(input);
     return { tokens: result.tokens, source: 'fallback', family: result.family };
   }
 
@@ -71,7 +79,7 @@ function resolveFallbackTokens(brandProfile) {
     },
     buildType: 'brand-book',
   };
-  const result = resolveLayout(input);
+  const result = getResolveLayout()(input);
   return { tokens: result.tokens, source: 'fallback', family: result.family };
 }
 
