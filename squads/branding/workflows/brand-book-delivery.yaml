@@ -16,18 +16,77 @@ prerequisites:
       - voice_guide.md
       - manifesto.md
       - moodboard_urls[]
+      - brand_profile
 
 steps:
+  # ============================================
+  # PDL Steps (conditional on feature flag)
+  # These run BEFORE brand book generation to
+  # provide layout tokens and structural guidance.
+  # When PDL is disabled, they are skipped and
+  # the generate step uses default layout
+  # (BOLD-STRUCTURED, backward compatible).
+  # ============================================
+
+  - id: visual-research
+    name: Visual Reference Research (PDL)
+    agent: brand-strategist
+    feature_flag: bss.personalityDrivenLayouts.enabled
+    description: "Research 5-10 reference websites matching the brand's archetype and personality. Delegates to R-I squad's competitive-analyst (Cyrus) or AIOX @analyst for archetype-driven visual research."
+    inputs:
+      - brand_profile
+      - industry
+    outputs:
+      - visual-references.md
+    notes: |
+      This step bridges to the research-intelligence squad.
+      The brand-strategist (Stella) provides the brand profile
+      with archetypes and personality traits. The actual research
+      is delegated to the R-I squad's visual-reference-research
+      task via cross-squad handoff.
+
+  - id: layout-brief
+    name: Layout Brief Generation (PDL)
+    agent: brand-strategist
+    feature_flag: bss.personalityDrivenLayouts.enabled
+    depends_on: [visual-research]
+    description: "Resolve layout family via @bss/layout-engine, then synthesize visual references + brand profile into a layout-brief.md with structural recommendations for all 7 layout dimensions."
+    inputs:
+      - brand_profile
+      - visual-references.md
+    outputs:
+      - layout-brief.md
+      - layout.json
+    notes: |
+      Two sub-steps:
+      1. Layout resolution: Run @bss/layout-engine resolver
+         (archetypes + personality -> layout family + tokens).
+         Pure computation, <10ms.
+      2. Brief synthesis: Combine resolved family, visual
+         reference patterns, and brand personality into
+         actionable structural recommendations.
+      The layout-brief.md and layout.json (W3C DTCG tokens)
+      are passed to the generate step as additional inputs.
+
+  # ============================================
+  # Core Delivery Steps
+  # ============================================
+
   - id: generate
     name: Generate Brand Book
     agent: brand-book-builder
     task: brand-book-generate.md
+    depends_on: [layout-brief]
+    depends_on_mode: optional
     inputs:
       - tokens.json
       - voice_guide.md
       - manifesto.md
       - moodboard_urls[]
       - assets
+      # PDL inputs (optional, only present when PDL enabled)
+      - layout-brief.md
+      - layout.json
     outputs:
       - brand-book/
 
@@ -92,5 +151,9 @@ artifacts:
   - brand-book.pdf (50-100 pages)
   - brand-book.zip (local package)
   - deployed_url
+  # PDL artifacts (only present when feature flag enabled)
+  - visual-references.md (PDL)
+  - layout-brief.md (PDL)
+  - layout.json (PDL, W3C DTCG layout tokens)
 
 estimated_duration: "1-2 hours"

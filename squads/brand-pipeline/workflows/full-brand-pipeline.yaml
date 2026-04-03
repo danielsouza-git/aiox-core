@@ -113,11 +113,65 @@ phases:
       checklist: pipeline-gate-checklist.md
       minimum_score: 8
 
+  # Phase 2b: Visual Reference Research (PDL)
+  # Researches reference sites by brand archetype/personality to gather
+  # structural layout inspiration. Only runs when PDL is enabled.
+  - id: visual-reference-research
+    name: Visual Reference Research (PDL)
+    squad: research-intelligence
+    depends_on: [discovery]
+    feature_flag: bss.personalityDrivenLayouts.enabled
+    steps:
+      - id: visual-ref-search
+        agent: competitive-analyst
+        task: visual-reference-research.md
+        inputs: [brand_profile, industry]
+        outputs: [visual_references]
+        description: "Search 5-10 reference websites by archetype/personality. Output: visual-references.md with annotated URLs, layout pattern observations, and archetype alignment scores."
+      - id: layout-pattern-extract
+        agent: competitive-analyst
+        task: layout-pattern-extraction.md
+        depends_on: [visual-ref-search]
+        inputs: [visual_references]
+        outputs: [layout_patterns]
+        description: "Extract structured layout DNA from reference sites: nav style, grid system, whitespace ratios, corner radii, divider patterns, animation patterns. Output: layout-patterns.yaml"
+    gate:
+      type: pass_fail
+      description: "Visual references gathered (>=5 URLs), layout patterns extracted with all 7 dimensions populated (nav, grid, whitespace, corners, dividers, animations, section backgrounds)"
+
+  # Phase 2c: Layout Brief Generation (PDL)
+  # Analyzes visual references + brand profile to produce structural
+  # layout recommendations that guide the AI layout generator.
+  - id: layout-brief
+    name: Layout Brief Generation (PDL)
+    squad: branding
+    depends_on: [visual-reference-research]
+    feature_flag: bss.personalityDrivenLayouts.enabled
+    steps:
+      - id: layout-resolve
+        agent: brand-orchestrator
+        inputs: [brand_profile]
+        outputs: [layout_family, layout_tokens]
+        description: "Run @bss/layout-engine resolver: archetypes + personality traits -> layout family + base layout tokens (W3C DTCG format). Pure computation, <10ms."
+      - id: layout-brief-generate
+        agent: brand-orchestrator
+        depends_on: [layout-resolve]
+        inputs: [visual_references, layout_patterns, brand_profile, layout_family, layout_tokens]
+        outputs: [layout_brief]
+        description: "Synthesize visual references, extracted patterns, and resolved layout family into layout-brief.md with structural recommendations: spacing ratios, visual hierarchy, composition guidelines, nav style, divider style, animation approach."
+    gate:
+      type: pass_fail
+      description: "Layout brief generated with: resolved family name, structural recommendations for all 7 layout dimensions, token values finalized, layout.json emitted"
+
   # Phases 3-4-5 run in PARALLEL
+  # When PDL is enabled, these phases depend on layout-brief (which provides
+  # layout tokens and structural guidance). When PDL is disabled, they fall
+  # back to depending on discovery (backward compatible).
   - id: design-system
     name: Design System Build (React + Tailwind)
     squad: design-system
-    depends_on: [discovery]
+    depends_on: [layout-brief, discovery]
+    depends_on_mode: any_completed
     parallel_group: build
     steps:
       - id: token-transform
@@ -159,7 +213,8 @@ phases:
   - id: visual
     name: Visual Asset Production (Framer Motion)
     squad: visual-production
-    depends_on: [discovery]
+    depends_on: [layout-brief, discovery]
+    depends_on_mode: any_completed
     parallel_group: build
     steps:
       - id: visual-direction
@@ -202,7 +257,8 @@ phases:
   - id: content
     name: Content & Copy Production
     squad: copy
-    depends_on: [discovery]
+    depends_on: [layout-brief, discovery]
+    depends_on_mode: any_completed
     parallel_group: build
     steps:
       - id: copy-strategy
@@ -312,6 +368,8 @@ artifacts:
   scaffold: [app_path, package_json, next_config, tsconfig, scaffold_valid]
   research: [market_report, competitive_report, trend_data, audience_personas]
   discovery: [brand_profile, voice_guide, manifesto, moodboard_urls, palette, typography, tokens]
+  # PDL artifacts (only populated when bss.personalityDrivenLayouts.enabled)
+  pdl: [visual_references, layout_patterns, layout_family, layout_tokens, layout_brief]
   design_system: [tokens_css, tokens_ts, tailwind_config, component_library, variant_library, component_docs]
   visual: [visual_direction_doc, generated_images, retouched_images, motion_components, animation_presets, showcase_components, organized_assets]
   content: [copy_strategy, landing_copy, social_posts, seo_meta, email_sequences, pages_populated]

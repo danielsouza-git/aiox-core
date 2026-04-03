@@ -251,11 +251,13 @@ prd_refs:
     - EPIC-BSS-3  # AI Pipeline
     - EPIC-BSS-4  # Creative Production
     - EPIC-BSS-5  # Landing Pages & Sites
-    - EPIC-BSS-6  # Figma Component Library (NEW - figma-component-builder)
-    - EPIC-BSS-7  # Client Onboarding & Operations (operations-coordinator)
+    - EPIC-BSS-6  # ClickUp Operations & Approval Workflow
+    - EPIC-BSS-7  # Client Onboarding & Audit-Assisted Discovery (operations-coordinator)
     - EPIC-BSS-8  # QA Pipeline
-    - EPIC-BSS-9  # Analytics & Tracking (NEW - analytics-specialist)
-    - EPIC-BSS-10 # Validation Program (NEW - operations-coordinator)
+    - EPIC-BSS-9  # Figma Component Library & Design System Export (figma-component-builder)
+    - EPIC-BSS-10 # Observability, Analytics & Cost Tracking (analytics-specialist)
+    - EPIC-BSS-A  # Complete Brand Book - MVP Enhancement
+    - EPIC-BSS-VAL # Internal Validation Program (operations-coordinator)
 
 tags:
   - branding

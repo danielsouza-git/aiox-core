@@ -45,6 +45,7 @@ components:
     - cross-browser-test.md
     - responsive-test.md
     - screenshot-compare.md
+    - layout-differentiation-check.md  # PDL: cross-brand differentiation (Gap QA-2)
     # a11y-tester
     - wcag-test.md
     - screen-reader-test.md
@@ -56,6 +57,7 @@ components:
     - palette-compliance.md
     - typography-compliance.md
     - manifest-validate.md
+    - layout-personality-score.md  # PDL: personality expression scoring (Gap QA-1)
     # performance-auditor
     - lighthouse-audit.md
     - core-web-vitals.md

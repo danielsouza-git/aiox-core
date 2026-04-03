@@ -29,6 +29,9 @@ squad:
     - audience-research
     - trend-spotting
     - seo-gap
+    - visual-reference-research
+    - layout-pattern-extraction
+    - archetype-driven-research
 
   entry_agent: trend-spotter
   created_by: "dex-builder"
@@ -68,7 +71,7 @@ agents:
     file: agents/competitive-analyst.md
     name: Cyrus
     tier: 1
-    focus: "Auditoria competitiva, benchmark visual, mapa de posicionamento, SEO gap analysis"
+    focus: "Auditoria competitiva, benchmark visual, pesquisa de referencias visuais por archetype, extracao de padroes de layout, mapa de posicionamento, SEO gap analysis"
 
   brand-auditor:
     file: agents/brand-auditor.md
@@ -96,6 +99,8 @@ components:
     # competitive-analyst (Cyrus)
     - competitive-audit.md
     - visual-benchmark.md
+    - visual-reference-research.md
+    - layout-pattern-extraction.md
     - positioning-map.md
     - seo-gap-analysis.md
     # brand-auditor (Blake)
@@ -163,6 +168,12 @@ cross_squad_flows:
     target_agent: research-analyst
     payload: "Deep research report, competitive intelligence, trend analysis"
 
+  to_visual_production:
+    trigger: "Visual reference research and layout pattern extraction complete for PDL pipeline"
+    target_squad: visual-production
+    target_agent: art-director
+    payload: "visual-references.md, layout-patterns.md, layout-dna.yaml"
+
 # -------------------------------------------------------------------------------
 # CROSS-CUTTING CONCERNS
 # -------------------------------------------------------------------------------
@@ -199,6 +210,9 @@ cross_cutting:
       - competitive_analysis
       - trend_data
       - audience_personas
+      - visual_references
+      - layout_patterns
+      - layout_dna
 
     provides_to_copy:
       - audience_language

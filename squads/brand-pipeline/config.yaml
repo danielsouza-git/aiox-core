@@ -85,23 +85,39 @@ pipeline:
       squad: branding
       order: 2
       depends_on: [research]
+    # PDL phases (conditional on feature flag)
+    - id: visual-reference-research
+      name: Visual Reference Research (PDL)
+      squad: research-intelligence
+      order: 2.1
+      depends_on: [discovery]
+      feature_flag: bss.personalityDrivenLayouts.enabled
+    - id: layout-brief
+      name: Layout Brief Generation (PDL)
+      squad: branding
+      order: 2.2
+      depends_on: [visual-reference-research]
+      feature_flag: bss.personalityDrivenLayouts.enabled
     - id: design-system
       name: Design System Build
       squad: design-system
       order: 3
-      depends_on: [discovery]
+      depends_on: [layout-brief, discovery]
+      depends_on_mode: any_completed
       parallel_group: build
     - id: visual
       name: Visual Asset Production
       squad: visual-production
       order: 3
-      depends_on: [discovery]
+      depends_on: [layout-brief, discovery]
+      depends_on_mode: any_completed
       parallel_group: build
     - id: content
       name: Content & Copy Production
       squad: copy
       order: 3
-      depends_on: [discovery]
+      depends_on: [layout-brief, discovery]
+      depends_on_mode: any_completed
       parallel_group: build
     - id: qa
       name: Quality Assurance & Certification
