@@ -72,6 +72,19 @@ dependencies:
   integrations: []
 
 # ============================================
+# FEATURE FLAGS
+# ============================================
+bss:
+  personalityDrivenLayouts:
+    enabled: true
+    featureFlag: "bss.personalityDrivenLayouts.enabled"
+    description: "Personality-Driven Layouts (PDL) — AI-generated layout decisions based on brand archetypes and personality traits"
+    pdlPhases:
+      - visual-reference-research
+      - layout-brief
+    fallbackBehavior: "When disabled, pipeline skips PDL phases and build phases depend on discovery directly (backward compatible)"
+
+# ============================================
 # PIPELINE PHASES
 # ============================================
 pipeline:

@@ -1,0 +1,2 @@
+<% /* Divider Partial: solid-thin */ %>
+<hr class="layout-divider layout-divider--solid-thin" aria-hidden="true">

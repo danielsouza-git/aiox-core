@@ -3,12 +3,14 @@ const config = {
   preset: 'ts-jest',
   testEnvironment: 'node',
   roots: ['<rootDir>/packages'],
-  testMatch: ['**/__tests__/**/*.test.ts', '**/__tests__/**/*.test.tsx'],
+  testMatch: ['**/__tests__/**/*.test.ts', '**/__tests__/**/*.test.tsx', '**/__tests__/**/*.test.js'],
   moduleNameMapper: {
     '^@bss/core/(.*)$': '<rootDir>/packages/core/src/$1',
     '^@bss/core$': '<rootDir>/packages/core/src',
     '^@bss/tokens/(.*)$': '<rootDir>/packages/tokens/src/$1',
     '^@bss/tokens$': '<rootDir>/packages/tokens/src',
+    '^@bss/layout-engine/(.*)$': '<rootDir>/packages/layout-engine/src/$1',
+    '^@bss/layout-engine$': '<rootDir>/packages/layout-engine/src',
     '^@bss/creative/(.*)$': '<rootDir>/packages/creative/src/$1',
     '^@bss/creative$': '<rootDir>/packages/creative/src',
     '^@bss/static-generator/(.*)$': '<rootDir>/packages/static-generator/src/$1',
@@ -32,7 +34,7 @@ const config = {
     '^replicate$': '<rootDir>/packages/ai-service/src/__mocks__/replicate-sdk.ts',
   },
   transform: {
-    '^.+\\.tsx?$': [
+    '^.+\\.[jt]sx?$': [
       'ts-jest',
       {
         diagnostics: false,

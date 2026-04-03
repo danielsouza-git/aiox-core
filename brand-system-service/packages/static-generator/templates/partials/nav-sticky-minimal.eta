@@ -1,0 +1,15 @@
+<% /* Navigation Partial: sticky-minimal — ADVENTUROUS-OPEN family */ %>
+<header class="layout-nav layout-nav--sticky-minimal" role="navigation" aria-label="Brand book sections">
+  <span class="nav-brand__name" style="font-weight: 700; margin-right: 24px;"><%= it.brand.clientName %></span>
+  <nav>
+    <ul class="nav-links" role="list">
+      <% for (const page of it.pages) { %>
+      <li>
+        <a href="./<%= page.slug %>.html"<% if (it.currentPage.slug === page.slug) { %> class="active" aria-current="page"<% } %>>
+          <%= page.title %>
+        </a>
+      </li>
+      <% } %>
+    </ul>
+  </nav>
+</header>

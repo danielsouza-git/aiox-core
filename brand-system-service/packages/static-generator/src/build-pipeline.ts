@@ -21,6 +21,63 @@ import { SEOMetadataEngine } from './seo';
 import type { SEOInput } from './seo';
 
 /**
+ * Layout data structure passed to Nunjucks template context.
+ * Derived from layout brief or defaults.
+ */
+export interface LayoutData {
+  /** Resolved layout family name (e.g., 'ethereal', 'bold-structured') */
+  readonly family: string;
+  /** Navigation configuration */
+  readonly nav: { readonly style: string };
+  /** Whitespace configuration */
+  readonly whitespace: {
+    readonly density: string;
+    readonly multiplier: number;
+    readonly sectionGap: string;
+    readonly contentPadding: string;
+  };
+  /** Corner radius configuration */
+  readonly corners: {
+    readonly radiusBase: string;
+  };
+  /** Divider configuration */
+  readonly dividers: {
+    readonly style: string;
+  };
+  /** Animation configuration */
+  readonly animation: {
+    readonly entrance: string;
+    readonly duration: string;
+  };
+  /** Grid configuration */
+  readonly grid: {
+    readonly rhythm: string;
+    readonly maxWidth: string;
+  };
+  /** Section background configuration */
+  readonly sections: {
+    readonly background: string;
+  };
+}
+
+/** Default layout matching current BSS output (bold-structured / no brief). */
+const DEFAULT_LAYOUT: LayoutData = {
+  family: 'bold-structured',
+  nav: { style: 'sidebar-fixed' },
+  whitespace: {
+    density: 'compact',
+    multiplier: 0.8,
+    sectionGap: '48px',
+    contentPadding: '40px',
+  },
+  corners: { radiusBase: '8px' },
+  dividers: { style: 'solid-thin' },
+  animation: { entrance: 'none', duration: '0ms' },
+  grid: { rhythm: 'strict-grid', maxWidth: '1400px' },
+  sections: { background: 'flat-solid' },
+};
+
+/**
  * Result of a build pipeline execution.
  */
 export interface BuildResult {
@@ -78,14 +135,17 @@ export async function runBuildPipeline(
   fs.writeFileSync(path.join(outputDir, 'tokens.css'), tokenCSS, 'utf-8');
   logger.info('tokens.css generated');
 
+  // Step 1.5: Load layout brief and resolve layout data (PDL-7)
+  const layoutData = loadLayoutData(options, logger);
+
   // Step 2: Copy fonts (AC-5)
   const fontCount = copyFonts(options, logger);
 
   // Step 3: Copy images (AC-6)
   const imageCount = copyImages(options, templateDir, logger);
 
-  // Step 4: Render Nunjucks templates (AC-1)
-  const pageCount = renderTemplates(options, templateDir, logger);
+  // Step 4: Render Nunjucks templates (AC-1) — with layout data injected (PDL-7)
+  const pageCount = renderTemplates(options, templateDir, logger, layoutData);
 
   // Step 5: Bundle CSS (AC-3)
   await bundleCSS(options, templateDir, logger);
@@ -141,7 +201,8 @@ function resolveSharedDir(): string {
 function renderTemplates(
   options: GeneratorOptions,
   templateDir: string,
-  logger: Logger
+  logger: Logger,
+  layoutData?: LayoutData
 ): number {
   const sharedDir = resolveSharedDir();
 
@@ -181,6 +242,7 @@ function renderTemplates(
   const fixtureData = loadFixtureData(templateDir, logger);
 
   // Merge: base < fixture < explicit templateData
+  // PDL-7: Inject layout data into template context
   const templateData = {
     ...baseData,
     ...fixtureData,
@@ -190,6 +252,8 @@ function renderTemplates(
     type: options.type,
     year: new Date().getFullYear(),
     currentYear: new Date().getFullYear(),
+    // PDL-7: Layout data for Nunjucks templates (backward compat: only if present)
+    ...(layoutData ? { layout: layoutData } : {}),
   };
 
   // Generate ToC for blog post content (site builds only)
@@ -698,6 +762,88 @@ function escapeHtml(str: string): string {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
+}
+
+/**
+ * Load layout data from layout brief or options.
+ *
+ * Priority:
+ * 1. options.templateData.layout (explicit layout data from caller)
+ * 2. options.templateData.layoutBrief (raw brief YAML string)
+ * 3. DEFAULT_LAYOUT (backward compatibility — current BSS output)
+ *
+ * PDL-7: Enables layout-driven landing pages.
+ */
+function loadLayoutData(
+  options: GeneratorOptions,
+  logger: Logger
+): LayoutData | undefined {
+  const templateData = options.templateData as Record<string, unknown> | undefined;
+
+  // 1. Check if explicit layout data was provided (e.g., from test or API)
+  if (templateData?.layout && typeof templateData.layout === 'object') {
+    const layout = templateData.layout as Record<string, unknown>;
+    if (layout.family && typeof layout.family === 'string') {
+      logger.info('Using explicit layout data', { family: layout.family });
+      return normalizeLayoutData(layout);
+    }
+  }
+
+  // 2. Check for layout brief (YAML string from AI pipeline)
+  if (templateData?.layoutBrief && typeof templateData.layoutBrief === 'object') {
+    const brief = templateData.layoutBrief as Record<string, unknown>;
+    logger.info('Resolving layout from brief');
+    return normalizeLayoutData(brief);
+  }
+
+  // 3. No layout brief — return undefined (backward compat: templates use defaults via filters)
+  logger.info('No layout brief available, using template defaults');
+  return undefined;
+}
+
+/**
+ * Normalize a raw layout object into the LayoutData shape.
+ * Fills in missing fields with DEFAULT_LAYOUT values.
+ */
+function normalizeLayoutData(raw: Record<string, unknown>): LayoutData {
+  const nav = raw.nav as Record<string, unknown> | undefined;
+  const navigation = raw.navigation as Record<string, unknown> | undefined;
+  const whitespace = raw.whitespace as Record<string, unknown> | undefined;
+  const corners = raw.corners as Record<string, unknown> | undefined;
+  const dividers = raw.dividers as Record<string, unknown> | undefined;
+  const animation = raw.animation as Record<string, unknown> | undefined;
+  const grid = raw.grid as Record<string, unknown> | undefined;
+  const sections = raw.sections as Record<string, unknown> | undefined;
+
+  return {
+    family: (raw.family as string) || DEFAULT_LAYOUT.family,
+    nav: {
+      style: (nav?.style as string) || (navigation?.style as string) || DEFAULT_LAYOUT.nav.style,
+    },
+    whitespace: {
+      density: (whitespace?.density as string) || DEFAULT_LAYOUT.whitespace.density,
+      multiplier: (whitespace?.multiplier as number) ?? DEFAULT_LAYOUT.whitespace.multiplier,
+      sectionGap: (whitespace?.section_gap as string) || (whitespace?.sectionGap as string) || DEFAULT_LAYOUT.whitespace.sectionGap,
+      contentPadding: (whitespace?.content_padding as string) || (whitespace?.contentPadding as string) || DEFAULT_LAYOUT.whitespace.contentPadding,
+    },
+    corners: {
+      radiusBase: (corners?.radius_base as string) || (corners?.radiusBase as string) || DEFAULT_LAYOUT.corners.radiusBase,
+    },
+    dividers: {
+      style: (dividers?.style as string) || DEFAULT_LAYOUT.dividers.style,
+    },
+    animation: {
+      entrance: (animation?.entrance as string) || DEFAULT_LAYOUT.animation.entrance,
+      duration: (animation?.duration as string) || DEFAULT_LAYOUT.animation.duration,
+    },
+    grid: {
+      rhythm: (grid?.rhythm as string) || DEFAULT_LAYOUT.grid.rhythm,
+      maxWidth: (grid?.max_width as string) || (grid?.maxWidth as string) || DEFAULT_LAYOUT.grid.maxWidth,
+    },
+    sections: {
+      background: (sections?.background as string) || DEFAULT_LAYOUT.sections.background,
+    },
+  };
 }
 
 /**

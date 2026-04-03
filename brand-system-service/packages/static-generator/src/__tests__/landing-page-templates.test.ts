@@ -152,7 +152,8 @@ describe('BSS-5.2 Landing Page Templates', () => {
 
     it('layout.css container has max-width 1200px (AC-12)', () => {
       const css = fs.readFileSync(path.join(TEMPLATE_DIR, 'css', 'layout.css'), 'utf-8');
-      expect(css).toContain('max-width: 1200px');
+      // PDL-7: max-width now uses CSS var with 1200px as fallback
+      expect(css).toContain('1200px');
     });
   });
 
@@ -344,7 +345,7 @@ describe('BSS-5.2 Landing Page Templates', () => {
       expect(html).toContain('</html>');
       expect(html).toContain('<head>');
       expect(html).toContain('</head>');
-      expect(html).toContain('<body>');
+      expect(html).toContain('<body');
       expect(html).toContain('</body>');
     });
   });

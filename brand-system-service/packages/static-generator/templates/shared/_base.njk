@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="tokens.css">
   <link rel="stylesheet" href="styles.min.css">
 </head>
-<body>
+<body class="layout-family--{{ layout.family | default('bold-structured') }}">
   <a href="#main-content" class="skip-link">Skip to main content</a>
 
   {% include "_nav.njk" %}

@@ -1,11 +1,14 @@
 # Brand System Service - Epic Map & Story Breakdown
 
-**Version:** 1.2
-**Date:** 2026-03-09
+**Version:** 1.4
+**Date:** 2026-04-02
 **Author:** Pax (PO Agent)
 **Source PRD:** `docs/prd-brand-system-service.md` (v1.2, Reviewed)
 **Architect Review (PRD):** `docs/review-prd-brand-system-service.md` (APPROVED WITH CONDITIONS - all 5 conditions incorporated in PRD v1.1)
 **Architect Review (Epics):** `docs/review-epic-decomposition.md` (GO WITH ADJUSTMENTS - 10 recommendations incorporated)
+**Evolution Plan:** `docs/reviews/bss-brand-book-evolution-plan.md` (v1.0, by Aria - gap analysis)
+**PM Validation:** `docs/reviews/bss-evolution-plan-pm-validation.md` (CONDITIONAL GO - 5 conditions accepted)
+**Architecture (PDL):** `docs/architecture/personality-driven-layouts.md` (Aria - 15 sections, 5 ADRs)
 
 ---
 
@@ -22,8 +25,12 @@
 | EPIC-BSS-7 | Client Onboarding & Audit-Assisted Discovery | L+ | P0 | FR-1.1, FR-8.2 (revised), FR-10.1-10.5 (NEW), NFR-3.1, NFR-9.6-9.9 | EPIC-BSS-1, EPIC-BSS-6 |
 | EPIC-BSS-8 | Quality Assurance & Review Pipeline | M | P0 | FR-8.5 (revised), FR-8.7 (revised), NFR-7.1-7.4, NFR-8.1 | EPIC-BSS-3, EPIC-BSS-4 |
 | EPIC-BSS-VAL | Internal Validation Program | M | P0 | FR-11.1-11.6 (NEW), NFR-9.10-9.13 (NEW) | EPIC-BSS-1 through EPIC-BSS-8 |
+| EPIC-BSS-A | Complete Brand Book (MVP Enhancement) | M | P0 | FR-1.2-1.3, FR-1.6-1.9, NFR-9.1-9.2 | EPIC-BSS-2 |
 | EPIC-BSS-9 | Figma Component Library & Design System Export | L | P1 | FR-1.11, NFR-3.4, NFR-3.6, CON-13, CON-15 | EPIC-BSS-2 |
 | EPIC-BSS-10 | Observability, Analytics & Cost Tracking | M | P1 | FR-8.6 (revised), NFR-6.1-6.5, NFR-4.1-4.2 | EPIC-BSS-1 |
+| EPIC-BSS-C | Templates & SEO (Advanced Features) | L | P1 | FR-1.8, FR-3.7, NFR-9.1-9.2 | EPIC-BSS-2, EPIC-BSS-A |
+| EPIC-BSS-D | Personality-Driven Layouts (AI-Generated) | L | P1 | FR-1.7, FR-2.7, FR-3.5, NFR-2.1, NFR-9.1-9.5 | EPIC-BSS-2, EPIC-BSS-A |
+| EPIC-BSS-B | Design System Layer (Post-MVP) | XL | P2 | FR-1.2, FR-1.11, NFR-3.4 | EPIC-BSS-9, EPIC-BSS-A |
 | EPIC-BSS-11 | Email Marketing (Pillar 4) | M | P2 | FR-4.1-4.7, NFR-2.5 | EPIC-BSS-1, EPIC-BSS-3 |
 | EPIC-BSS-12 | Ads Criativos (Pillar 5) | M | P2 | FR-5.1-5.8 | EPIC-BSS-4, EPIC-BSS-3 |
 | EPIC-BSS-13 | Video & Motion Graphics (Pillar 6) | L | P2 | FR-6.1-6.8 | EPIC-BSS-2, EPIC-BSS-3 |
@@ -136,6 +143,23 @@ EPIC-BSS-VAL (Internal Validation Program) -- depends on all MVP epics (BSS-1 th
 
 **[NEW v1.2]** Mandatory validation phase with 3-5 reference projects before commercial launch. This epic exercises the full workflow and captures learnings for backlog refinement.
 
+### Wave 5b: Brand Book Enhancement (Weeks 10-14, overlapping with Wave 5)
+
+```
+EPIC-BSS-A (Complete Brand Book - MVP Enhancement) -- depends on EPIC-BSS-2
+EPIC-BSS-C (Templates & SEO) -- depends on EPIC-BSS-2 + EPIC-BSS-A
+```
+
+**[NEW v1.3]** EPIC-BSS-A fills the 63% gap between BSS brand book output and AIOX reference quality. EPIC-BSS-C adds SEO documentation and editorial strategy pages. Both originated from gap analysis (`docs/reviews/bss-brand-book-evolution-plan.md`), validated by PM ("CONDITIONAL GO"). **Status: EPIC-BSS-A COMPLETE (7/8 stories Done, 130 tests), EPIC-BSS-C 2/3 stories Done (65 tests).**
+
+### Wave 5c: Personality-Driven Layouts (Weeks 12-18, overlapping with Wave 5b)
+
+```
+EPIC-BSS-D (Personality-Driven Layouts) -- depends on EPIC-BSS-2 + EPIC-BSS-A
+```
+
+**[NEW v1.4]** EPIC-BSS-D introduces AI-generated layouts so that each brand book, site, and social post is visually unique -- driven by the brand profile and visual references rather than predefined templates. Wave 1 (PDL-1 to PDL-3) builds the visual research pipeline. Wave 2 (PDL-4 to PDL-6) proves the concept with AI-generated brand books. Wave 3 (PDL-7 to PDL-9) extends to other deliverables. Wave 4 (PDL-10 to PDL-11) adds a fallback engine with 6 layout families from the architecture document. Architecture: `docs/architecture/personality-driven-layouts.md`.
+
 ### Wave 6: Enhancement (Weeks 12-18, overlapping with Wave 5)
 
 ```
@@ -146,6 +170,7 @@ EPIC-BSS-10 (Observability & Analytics) -- depends on EPIC-BSS-1
 ### Wave 7: Expansion Pillars (Post-MVP, incremental)
 
 ```
+EPIC-BSS-B (Design System Layer) -- depends on EPIC-BSS-9 + EPIC-BSS-A
 EPIC-BSS-11 (Email Marketing) -- Q3
 EPIC-BSS-12 (Ads Criativos) -- Q3
 EPIC-BSS-13 (Video & Motion) -- Q4
@@ -158,7 +183,7 @@ EPIC-BSS-14 (Corporate Materials) -- Q1 Year 2
 EPIC-BSS-15 (Client Portal & Multi-Tenant) -- when approaching 40 clients
 ```
 
-### Dependency Graph (v1.2)
+### Dependency Graph (v1.4)
 
 ```
 EPIC-BSS-1 (Foundation - Simplified)
@@ -169,6 +194,14 @@ EPIC-BSS-1 (Foundation - Simplified)
   |
   +---> EPIC-BSS-2 (Tokens & Brand Book Triple Delivery)
   |       |
+  |       +---> EPIC-BSS-A (Complete Brand Book) [P0, DONE] <<<< NEW v1.3
+  |       |       |
+  |       |       +---> EPIC-BSS-C (Templates & SEO) [P1, 2/3 Done] <<<< NEW v1.3
+  |       |       |
+  |       |       +---> EPIC-BSS-D (Personality-Driven Layouts) [P1] <<<< NEW v1.4
+  |       |       |
+  |       |       +---> EPIC-BSS-B (Design System Layer) [P2] <--- EPIC-BSS-9 <<<< NEW v1.3
+  |       |
   |       +---> EPIC-BSS-4 (Creatives) <--- EPIC-BSS-3 (AI Pipeline)
   |       |
   |       +---> EPIC-BSS-5 (Landing Pages - Static First)
@@ -176,6 +209,8 @@ EPIC-BSS-1 (Foundation - Simplified)
   |       +---> EPIC-BSS-9 (Figma Components) [P1]
   |       |       |
   |       |       +---> EPIC-BSS-14 (Corporate Materials) [P2]
+  |       |       |
+  |       |       +---> EPIC-BSS-B (Design System Layer) [P2] <--- EPIC-BSS-A
   |       |
   |       +---> EPIC-BSS-13 (Video & Motion) [P2] <--- EPIC-BSS-3
   |
@@ -393,6 +428,142 @@ EPIC-BSS-VAL (Validation Program)
 
 ---
 
+### EPIC-BSS-A: Complete Brand Book (MVP Enhancement)
+
+**Priority:** P0 | **Complexity:** M | **Estimate:** 32-50h (adjusted by PM validation)
+**Status:** **COMPLETE** (8/8 stories Done, 152 tests passing)
+**Description:** **[NEW v1.3]** Fill missing brand identity pages and complete all foundation sub-pages in the brand book. Originated from gap analysis comparing BSS output (~7-9 pages) to AIOX reference (30+ pages). The analysis identified a 63% gap in brand identity and foundation categories. All pages use template-driven approach with curated imagery populated from brand discovery data.
+
+**Source:** `docs/reviews/bss-brand-book-evolution-plan.md` (Aria, Architect)
+**PM Validation:** `docs/reviews/bss-evolution-plan-pm-validation.md` (Morgan, CONDITIONAL GO)
+**Research:** `docs/research/aiox-brand-book-full-analysis.md`
+
+**FRs Covered:** FR-1.2 (tokens - surfaces, semantic), FR-1.3 (logo system - usage rules), FR-1.6 (icon set - documentation), FR-1.7 (brand book - new pages, navigation), FR-1.8 (brand voice - movement/strategy), FR-1.9 (manifesto - strategy extension)
+**NFRs Covered:** NFR-9.1 (local package functionality), NFR-9.2 (relative paths)
+**Dependencies:** EPIC-BSS-2
+
+**Stories:**
+
+1. **BSS-A.8: Navigation Enhancement** -- **[Done, 34 tests]** Hierarchical navigation scaffolding with 6 sections, 19 pages, breadcrumbs, JSON-LD, hamburger mobile menu. Built first to enable incremental page additions (PM reordering)
+2. **BSS-A.7: About Page Generator** -- **[Done, 22 tests]** Auto-generate About page from brand profile, tech stack (8 BSS tools), 5-phase evolution timeline, team placeholder. Data from brandConfig
+3. **BSS-A.4: Surfaces & Borders Page** -- **[Done, 21 tests]** Dedicated page for 8 surface tokens, 5 border tokens, 6 radius tokens, 2 glass effects with visual swatches. Extracted from existing FR-1.2 token schema
+4. **BSS-A.5: Semantic Tokens Page** -- **[Done, 22 tests]** Semantic backgrounds, text, glow/neon tokens, interactive states, font weights, shadcn/ui mapping table. From FR-1.2 token schema
+5. **BSS-A.6: Icon System Page** -- **[Done, 10 tests]** Grid sizes (16/24/32/48px), icon set preview, rules (2px stroke, round caps), accessibility (44x44px touch), color variants. From FR-1.6
+6. **BSS-A.3: Logo Usage Rules Page** -- **[Done, 9 tests]** Clear space (X-unit grid), do's and don'ts, incorrect usage examples, color contexts, file format guide. From FR-1.3
+7. **BSS-A.1: Moodboard Page Generator** -- **[Done, 13 tests]** 9 visual references in 4 categories (Web UI, HUD/Dashboard, Graphic/Pattern, Layout/Typography) plus Core Design Principles. Template-driven with curated imagery (PM simplified: no AI image gen dependency)
+8. **BSS-A.2: Movement/Strategy Page Generator** -- **[Done, 21 tests]** 8-10 sections: Manifesto, Purpose, Values, Archetype, Positioning, BrandScript, Naming, Vocabulary. Extended from existing FR-1.9 manifesto data (PM scoped: deferred Testimonials, Founders)
+
+---
+
+### EPIC-BSS-C: Templates & SEO (Advanced Features)
+
+**Priority:** P1 (promoted from P2 by PM) | **Complexity:** L | **Estimate:** 26-38h
+**Status:** **2/3 stories Done** (65 tests passing)
+**Description:** **[NEW v1.3]** Add page templates, SEO guidelines, and editorial strategy to the brand book. Can execute alongside Epic A. Originated from same gap analysis as EPIC-BSS-A.
+
+**Source:** `docs/reviews/bss-brand-book-evolution-plan.md`
+**PM Validation:** `docs/reviews/bss-evolution-plan-pm-validation.md`
+
+**FRs Covered:** FR-1.8 (brand voice - editorial strategy), FR-3.7 (SEO metadata - documentation page)
+**NFRs Covered:** NFR-9.1 (local package), NFR-9.2 (relative paths)
+**Dependencies:** EPIC-BSS-2, EPIC-BSS-A
+
+**Stories:**
+
+1. **BSS-C.1: Templates Page** -- 3 page layout templates: Page Shell (sticky nav, section dividers, footer), Dashboard Grid (bento-style asymmetric 4-column), Content Grid (auto-fit minmax 340px)
+2. **BSS-C.2: SEO Documentation Page** -- **[Done, 36 tests]** Meta tags guide, Open Graph properties, Twitter/X Card specifications, JSON-LD schema examples. Generated from FR-3.7 SEO framework and brand profile data
+3. **BSS-C.3: Editorial Strategy Page** -- **[Done, 29 tests]** Visual system (brand colors), brand traits, audience personas, editorial strategy. Extended from FR-1.8 Brand Voice Guide
+
+---
+
+### EPIC-BSS-D: Personality-Driven Layouts (AI-Generated)
+
+**Priority:** P1 (enhancement) | **Complexity:** L | **Estimate:** ~28 SP (11 stories across 4 waves)
+**Status:** Not started
+**Description:** **[NEW v1.4]** Make each brand book, site, and social post visually unique by generating layouts from the brand profile and visual references rather than from predefined templates. The primary mode is AI-generated: an agent researches visual references, analyzes the brand profile, and produces unique layout code. A fallback mode provides 6 predefined layout families with parametric tokens (from the architecture document) when AI generation is unavailable.
+
+**Architecture:** `docs/architecture/personality-driven-layouts.md` (Aria - 15 sections, 5 ADRs)
+
+**Approach (User-Approved):**
+1. **AI-Generated (primary):** Agent researches references, analyzes brand profile, generates unique layout code
+2. **Family-Based (fallback):** 6 predefined layout families with parametric tokens from architecture document
+
+**Pipeline:**
+```
+Brand Profile (archetypes, personality, visual_direction)
+  --> Visual Reference Research (@analyst) - search 5-10 reference sites per brand
+  --> Reference Analysis (@architect) - extract layout patterns into brief
+  --> Layout Generation (@dev + brand-book-builder) - generate unique HTML/CSS
+```
+
+**FRs Covered:** FR-1.7 (brand book - visual uniqueness), FR-2.7 (AI-assisted generation), FR-3.5 (landing page visual differentiation)
+**NFRs Covered:** NFR-2.1 (quality), NFR-9.1-9.5 (static delivery, portability)
+**Dependencies:** EPIC-BSS-2 (tokens), EPIC-BSS-A (brand book pages)
+
+**Stories:**
+
+**Wave 1: Visual Research Pipeline (foundation)**
+
+1. **PDL-1: Visual Reference Research Task** (3 SP) -- Create `visual-reference-research.md` task for @analyst. Research 5-10 reference sites per brand by archetype. Output: `visual-references.md` with annotated screenshots, layout patterns, and relevance scoring
+2. **PDL-2: Layout Brief Task** (2 SP) -- Create `layout-brief.md` task for @architect. Analyze visual references and brand profile to produce a layout brief with structural recommendations, spacing ratios, visual hierarchy, and composition guidelines. Output: `layout-brief.md`
+3. **PDL-3: Brand Book Delivery Workflow Integration** (2 SP) -- Modify `brand-book-delivery.yaml` workflow to include visual reference research and layout brief steps before the generate phase. Ensure pipeline orchestration respects the new stages
+
+**Wave 2: AI-Generated Brand Books**
+
+4. **PDL-4: Brand Book Builder Layout Generation** (3 SP) -- Modify `brand-book-builder.md` agent instructions to generate unique layout code from the layout brief instead of applying fixed templates. Include structural diversity rules (no two brands should share the same layout skeleton)
+5. **PDL-5: PoC - Stray Innocence AI-Generated Brand Book** (3 SP) -- Re-generate the Stray Innocence brand book using the full AI-generated pipeline. Validate visual uniqueness, responsive behavior, and brand profile alignment. Compare against template-based version
+6. **PDL-6: PoC - Nova Vista Cafe AI-Generated Brand Book** (3 SP) -- Re-generate the Nova Vista Cafe brand book using the full AI-generated pipeline. Validate visual uniqueness, responsive behavior, and brand profile alignment. Compare against template-based version
+
+**Wave 3: Extension to Other Deliverables**
+
+7. **PDL-7: AI-Generated Landing Pages** (3 SP) -- Extend AI-generated layout capability to landing pages. Generate unique landing page layouts from the layout brief, respecting conversion architecture (Hero, Problem, Solution, CTA) while varying visual treatment per brand
+8. **PDL-8: Social Posts Visual Treatment** (2 SP) -- Apply visual treatment inspired by the layout brief to social media posts. Adapt spacing, composition, and visual hierarchy from the brand-level brief to post-level templates
+9. **PDL-9: Quality Gates for Generated Layouts** (2 SP) -- Automated validation of AI-generated layouts: Lighthouse performance >90, WCAG AA compliance, responsive validation at 375px/768px/1440px breakpoints, visual regression baseline
+
+**Wave 4: Fallback Engine (6 Layout Families)**
+
+10. **PDL-10: Layout Engine with 6 Families** (3 SP) -- Implement `@bss/layout-engine` with 6 predefined layout families from the architecture document as fallback. Each family provides parametric tokens for customization within the family constraints
+11. **PDL-11: Fallback Integration in Static Generator** (2 SP) -- Integrate the fallback layout engine into the static-generator pipeline. When AI generation is unavailable (API down, budget exceeded, manual override), automatically select the most appropriate layout family based on brand archetype
+
+**Verification Criteria:**
+- @analyst produces `visual-references.md` with 5-10 relevant reference sites per brand
+- @architect produces `layout-brief.md` with clear structural recommendations
+- Brand books generated via AI pipeline have visually distinct layouts between different brands
+- Quality gate: Lighthouse >90 performance, WCAG AA, responsive at 375px/768px/1440px
+- Fallback (6 layout families) functions correctly when AI generation is unavailable
+
+**Impact on Agents:**
+- **@analyst:** New task `visual-reference-research`
+- **@architect:** New task `layout-brief`
+- **brand-book-builder (Paige):** Generate unique layout (not template-based)
+- **@dev:** For sites/LPs, generate from brief
+
+---
+
+### EPIC-BSS-B: Design System Layer (Post-MVP)
+
+**Priority:** P2 | **Complexity:** XL | **Estimate:** 178-238h
+**Status:** Not started (blocked by EPIC-BSS-9)
+**Description:** **[NEW v1.3]** Add components, patterns, motion, VFX, and advanced sections to the brand book. This is the largest evolution epic, adding 14 new pages with 60+ UI components, 31 patterns, 8 motion animations, 21 VFX effects, and 19 marketing section templates. Requires Figma Component Library (EPIC-BSS-9) as hard dependency.
+
+**Source:** `docs/reviews/bss-brand-book-evolution-plan.md`
+
+**FRs Covered:** FR-1.2 (tokens - motion, VFX), FR-1.11 (component library documentation)
+**NFRs Covered:** NFR-3.4 (Figma Auto Layout)
+**Dependencies:** EPIC-BSS-9 (Figma Component Library), EPIC-BSS-A (brand book pages foundation)
+
+**Stories:** (to be drafted by @sm when EPIC-BSS-9 begins)
+
+1. **BSS-B.1: Motion System Page** -- 8 animations (Framer Motion): Orchestration Pulse, Speed Lines, Particle Orbit, Logo Dissolve, Morphing Square, Glitch Reveal, Stagger Letters, Brand Reveal (16-20h)
+2. **BSS-B.2: Component Page Generator** -- Generic component page generator: reads schema from Figma library, generates HTML with variants, sizes, states, code examples. Produces 10 pages by parameterization (8-12h + 1-2h per page)
+3. **BSS-B.3: Charts Library Page** -- 13 chart types with interactive examples and data visualization tokens (24-32h)
+4. **BSS-B.4: Marketing Sections Page** -- 19 reusable marketing sections: Hero, Stats, Problem Gallery, Services, How It Works, Case Study, Testimonials, Pricing, FAQ, etc. (20-28h)
+5. **BSS-B.5: Effects Page** -- Ticker Strip, Badge Variants, Glow/Pulse, Hover Effects (8-12h)
+6. **BSS-B.6: Patterns Library Page** -- 31 patterns in 6 categories: Grid, HUD Frames, Hazard/Warning, Circuit Traces, Textures, Dividers (16-24h)
+7. **BSS-B.7: VFX System Page** -- 21 effects in 5 categories: Film Grain, Blend Modes, Blur, Glow, Overlay Composites (12-16h)
+
+---
+
 ### EPIC-BSS-9: Figma Component Library & Design System Export
 
 **Priority:** P1 | **Complexity:** L | **Estimate:** 3-4 weeks
@@ -529,22 +700,22 @@ EPIC-BSS-VAL (Validation Program)
 
 | Category | Count |
 |----------|-------|
-| Total Epics | 16 |
-| MVP Epics (P0) | 9 (including VAL) |
-| Enhancement Epics (P1) | 2 |
-| Expansion Epics (P2) | 4 |
+| Total Epics | 20 |
+| MVP Epics (P0) | 10 (including VAL + BSS-A) |
+| Enhancement Epics (P1) | 4 (BSS-9, BSS-10, BSS-C, BSS-D) |
+| Expansion Epics (P2) | 5 (BSS-11 to BSS-14 + BSS-B) |
 | Phase 2 Epics (P3) | 1 |
-| Total Stories (all epics) | 84 |
-| MVP Stories | 56 |
-| Post-MVP Stories | 28 |
+| Total Stories (all epics) | 113 |
+| MVP Stories | 64 (56 original + 8 BSS-A) |
+| Post-MVP Stories | 49 (28 original + 3 BSS-C + 7 BSS-B + 11 BSS-D) |
 
-### FR/NFR Coverage Matrix (v1.2)
+### FR/NFR Coverage Matrix (v1.4)
 
 | Requirement Range | Epic(s) |
 |-------------------|---------|
-| FR-1.1 to FR-1.13 | EPIC-BSS-2, EPIC-BSS-7, EPIC-BSS-9, EPIC-BSS-15 |
-| FR-2.1 to FR-2.10 | EPIC-BSS-3, EPIC-BSS-4 |
-| FR-3.1 to FR-3.10 | EPIC-BSS-5 |
+| FR-1.1 to FR-1.13 | EPIC-BSS-2, EPIC-BSS-7, EPIC-BSS-9, EPIC-BSS-15, **EPIC-BSS-A**, **EPIC-BSS-B**, **EPIC-BSS-D** (FR-1.7 visual uniqueness) |
+| FR-2.1 to FR-2.10 | EPIC-BSS-3, EPIC-BSS-4, **EPIC-BSS-D** (FR-2.7 AI-assisted generation) |
+| FR-3.1 to FR-3.10 | EPIC-BSS-5, **EPIC-BSS-C** (FR-3.7 SEO docs), **EPIC-BSS-D** (FR-3.5 LP visual differentiation) |
 | FR-4.1 to FR-4.7 | EPIC-BSS-11 |
 | FR-5.1 to FR-5.8 | EPIC-BSS-12 |
 | FR-6.1 to FR-6.8 | EPIC-BSS-13 |
@@ -554,15 +725,26 @@ EPIC-BSS-VAL (Validation Program)
 | FR-10.1 to FR-10.5 (NEW) | EPIC-BSS-7 |
 | FR-11.1 to FR-11.6 (NEW) | EPIC-BSS-VAL |
 | NFR-1.x (Performance) | EPIC-BSS-1, EPIC-BSS-3, EPIC-BSS-4 |
-| NFR-2.x (Quality) | EPIC-BSS-2, EPIC-BSS-5, EPIC-BSS-15 |
+| NFR-2.x (Quality) | EPIC-BSS-2, EPIC-BSS-5, EPIC-BSS-15, **EPIC-BSS-D** (NFR-2.1) |
 | NFR-3.x (Usability) | EPIC-BSS-2, EPIC-BSS-6, EPIC-BSS-7, EPIC-BSS-9 |
 | NFR-4.x (Cost) | EPIC-BSS-3, EPIC-BSS-10 |
 | NFR-5.x (Security) | EPIC-BSS-1, EPIC-BSS-15 |
 | NFR-6.x (Observability) | EPIC-BSS-1, EPIC-BSS-10 |
 | NFR-7.x (Documentation) | EPIC-BSS-8 |
 | NFR-8.x (Security Hardening) | EPIC-BSS-3, EPIC-BSS-15 |
-| NFR-9.x (NEW - Static & Validation) | EPIC-BSS-2, EPIC-BSS-5, EPIC-BSS-6, EPIC-BSS-7, EPIC-BSS-VAL |
+| NFR-9.x (NEW - Static & Validation) | EPIC-BSS-2, EPIC-BSS-5, EPIC-BSS-6, EPIC-BSS-7, EPIC-BSS-VAL, **EPIC-BSS-D** (NFR-9.1-9.5) |
 | CON-1 to CON-22 | Distributed across relevant epics |
+
+### Evolution Plan Traceability (v1.3)
+
+| Evolution Plan Item | Where Addressed |
+|---------------------|----------------|
+| Brand identity pages gap (63%) | EPIC-BSS-A (7 new pages: Moodboard, Movement, Logo Usage, Surfaces, Semantic Tokens, Icons, About) |
+| Design system layer gap (100%) | EPIC-BSS-B (14 new pages: components, patterns, motion, VFX, sections) |
+| Templates & SEO gap (75%) | EPIC-BSS-C (3 new pages: Templates, SEO, Editorial) |
+| Navigation enhancement | BSS-A.8 (hierarchical nav, breadcrumbs, JSON-LD) |
+| Moodboard simplification (no AI image gen) | BSS-A.1 (template-driven, curated imagery per PM validation) |
+| Movement/Strategy scope reduction (13→8-10 sections) | BSS-A.2 (deferred Testimonials, Founders per PM validation) |
 
 ### PRD v1.2 Change Traceability
 
@@ -580,6 +762,76 @@ EPIC-BSS-VAL (Validation Program)
 ---
 
 ## Changelog
+
+### v1.4 (2026-04-02) -- Personality-Driven Layouts Epic
+
+Added EPIC-BSS-D for AI-generated personality-driven layouts. Each brand deliverable (brand book, site, social post) will have a visually unique layout generated from the brand profile and visual references, rather than applied from predefined templates.
+
+**NEW EPIC:**
+
+1. **EPIC-BSS-D added (P1, Not Started):** Personality-Driven Layouts with 11 stories across 4 waves, ~28 SP estimate. Two modes: AI-generated (primary, via visual reference research + layout brief pipeline) and family-based fallback (6 layout families from architecture document). Architecture: `docs/architecture/personality-driven-layouts.md` (Aria, 15 sections, 5 ADRs). User-approved pipeline: Brand Profile --> @analyst visual reference research --> @architect layout brief --> @dev/@brand-book-builder unique layout generation.
+
+**OTHER CHANGES:**
+
+- Wave 5c added to Execution Sequence for EPIC-BSS-D
+- Dependency Graph updated to v1.4 with BSS-D under BSS-A
+- Summary Statistics updated: 19 --> 20 epics, 102 --> 113 stories
+- FR/NFR Coverage Matrix updated with BSS-D references (FR-1.7, FR-2.7, FR-3.5, NFR-2.1, NFR-9.1-9.5)
+- Header updated with Architecture (PDL) document reference
+- Next Steps updated with BSS-D story drafting
+
+**SCOPE IMPACT:**
+
+| Metric | v1.3 | v1.4 | Delta |
+|--------|------|------|-------|
+| Total Epics | 19 | 20 | +1 (BSS-D) |
+| Enhancement Epics (P1) | 3 | 4 | +1 (BSS-D) |
+| Total Stories | 102 | 113 | +11 |
+| Post-MVP Stories | 38 | 49 | +11 (BSS-D) |
+| Estimated SP (BSS-D) | 0 | ~28 | +28 |
+
+**AGENT IMPACT:**
+
+- @analyst: New task `visual-reference-research` (PDL-1)
+- @architect: New task `layout-brief` (PDL-2)
+- brand-book-builder (Paige): Modified to generate unique layout from brief (PDL-4)
+- @dev: Sites/LPs generated from brief (PDL-7)
+
+### v1.3 (2026-04-01) -- Brand Book Evolution Epics (No Invention Audit)
+
+Added 3 new epics (A, B, C) from the Brand Book Evolution Plan. These epics were already planned, PM-validated ("CONDITIONAL GO"), and partially implemented (Epic A complete, Epic C 2/3 done) but were missing from the epic map — identified during No Invention audit (Article IV).
+
+**NEW EPICS:**
+
+1. **EPIC-BSS-A added (P0, COMPLETE):** Complete Brand Book (MVP Enhancement) with 8 stories, 8 Done (152 tests). Fills 63% gap in brand identity and foundation pages. Originated from `docs/reviews/bss-brand-book-evolution-plan.md` (Aria) + PM validation (Morgan, CONDITIONAL GO). All stories trace to existing FRs (1.2, 1.3, 1.6, 1.7, 1.8, 1.9).
+
+2. **EPIC-BSS-C added (P1, 2/3 Done):** Templates & SEO (Advanced Features) with 3 stories, 2 Done (65 tests). Adds SEO documentation and editorial strategy pages. Traces to FR-3.7 and FR-1.8.
+
+3. **EPIC-BSS-B added (P2, Not Started):** Design System Layer (Post-MVP) with 7 stories planned, 178-238h estimate. Adds components, patterns, motion, VFX (14 new pages). Blocked by EPIC-BSS-9 (Figma Component Library). Story files to be drafted by @sm when dependency is met.
+
+**OTHER CHANGES:**
+
+- Wave 5b added to Execution Sequence for EPIC-BSS-A and EPIC-BSS-C
+- Dependency Graph updated to v1.3 with new epic relationships
+- Summary Statistics updated: 16 → 19 epics, 84 → 102 stories
+- FR/NFR Coverage Matrix updated with new epic references
+- Evolution Plan Traceability section added
+- Header updated with Evolution Plan and PM Validation references
+
+**SCOPE IMPACT:**
+
+| Metric | v1.2 | v1.3 | Delta |
+|--------|------|------|-------|
+| Total Epics | 16 | 19 | +3 (A, B, C) |
+| MVP Epics (P0) | 9 | 10 | +1 (BSS-A) |
+| Total Stories | 84 | 102 | +18 |
+| MVP Stories | 56 | 64 | +8 (BSS-A) |
+| Tests Added (A+C) | 0 | 217 | +217 (152 + 65) |
+
+**AUDIT FINDINGS ADDRESSED:**
+- Epic map now reflects all implemented work
+- All new epics have FR traceability documented
+- Decision trail (research → architect → PM) linked in header
 
 ### v1.2 (2026-03-09) -- PRD v1.2 MVP Simplification Alignment
 
@@ -642,9 +894,12 @@ Initial decomposition of PRD v1.1 into 14 epics (68 stories) across 6 execution 
 ---
 
 **Next Steps:**
-- Delegate to @sm for detailed story drafting (starting with EPIC-BSS-1 stories)
+- Complete BSS-C.1 (Templates page) -- last remaining story in EPIC-BSS-C
+- Delegate to @sm for PDL-1 through PDL-11 story file drafting (EPIC-BSS-D, 11 stories)
+- Delegate to @sm for BSS-VAL story drafting (7 remaining: BSS-VAL.2 through BSS-VAL.8)
+- Delegate to @sm for BSS-2.x story file creation (retroactive -- 9 stories referenced in epic map but no story files exist)
+- Begin EPIC-BSS-9 (Figma Components) to unblock EPIC-BSS-B
 - Delegate to @architect for static-first architecture and build pipeline design
-- Delegate to @ux-design-expert for Brand Book template wireframes (triple delivery)
 - Configure ClickUp workspace structure (EPIC-BSS-6)
 - Plan reference projects for validation program (EPIC-BSS-VAL)
 

@@ -571,7 +571,7 @@ describe('BSS-5.3 Institutional Site Templates', () => {
       expect(html).toContain('</html>');
       expect(html).toContain('<head>');
       expect(html).toContain('</head>');
-      expect(html).toContain('<body>');
+      expect(html).toContain('<body');
       expect(html).toContain('</body>');
     });
 

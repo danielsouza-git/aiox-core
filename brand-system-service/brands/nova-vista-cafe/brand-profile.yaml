@@ -1,0 +1,11 @@
+brand:
+  name: "Nova Vista Cafe"
+  industry: "food-beverage"
+  personality:
+    archetypes: ["Explorer", "Creator"]
+    traits:
+      formal_casual: 2
+      traditional_modern: 4
+      serious_playful: 3
+      conservative_bold: 4
+      minimal_expressive: 4

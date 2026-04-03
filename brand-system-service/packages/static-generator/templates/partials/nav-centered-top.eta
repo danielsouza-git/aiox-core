@@ -1,0 +1,18 @@
+<% /* Navigation Partial: centered-top — ETHEREAL family */ %>
+<header class="layout-nav layout-nav--centered-top" role="navigation" aria-label="Brand book sections">
+  <div class="nav-brand">
+    <img src="./assets/logo.svg" alt="<%= it.brand.clientName %> logo" class="nav-brand__logo" width="32" height="32">
+    <span class="nav-brand__name"><%= it.brand.clientName %></span>
+  </div>
+  <nav>
+    <ul class="nav-links" role="list">
+      <% for (const page of it.pages) { %>
+      <li>
+        <a href="./<%= page.slug %>.html"<% if (it.currentPage.slug === page.slug) { %> class="active" aria-current="page"<% } %>>
+          <%= page.title %>
+        </a>
+      </li>
+      <% } %>
+    </ul>
+  </nav>
+</header>

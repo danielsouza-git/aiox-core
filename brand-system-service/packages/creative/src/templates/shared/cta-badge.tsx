@@ -1,14 +1,16 @@
 /**
  * CtaBadge — Shared sub-component for social media templates.
  *
- * Renders a rounded call-to-action badge with brand-colored background.
+ * Renders a call-to-action badge with brand-colored background.
  * Uses flexbox only (no CSS Grid — ADR-005 / Satori constraint).
  * Inline styles only — no CSS classes, no Tailwind, no CSS modules.
+ *
+ * PDL-8: Badge shape now driven by layout cardShape token with fallback to pill.
  */
 
 import React from 'react';
 import type { TokenSet } from '../../types';
-import { tokenStr } from '../../types';
+import { tokenStr, resolveCardRadius } from '../../types';
 
 export interface CtaBadgeProps {
   readonly tokens: TokenSet;
@@ -22,7 +24,7 @@ export interface CtaBadgeProps {
 }
 
 /**
- * CtaBadge component — rounded CTA text badge.
+ * CtaBadge component — CTA text badge shaped by layout tokens.
  */
 export function CtaBadge({
   tokens,
@@ -42,6 +44,9 @@ export function CtaBadge({
     ? tokenStr(bodyGroup as import('../../types').TokenGroup, 'fontFamily', 'sans-serif')
     : 'sans-serif';
 
+  // PDL-8: Card shape drives badge border-radius; fallback to pill (999px)
+  const borderRadius = resolveCardRadius(tokens.layout, '999px');
+
   return (
     <div
       style={{
@@ -49,7 +54,7 @@ export function CtaBadge({
         alignItems: 'center',
         justifyContent: 'center',
         backgroundColor: bgColor,
-        borderRadius: '999px',
+        borderRadius,
         padding: `${Math.round(fontSize * 0.625)}px ${Math.round(fontSize * 1.5)}px`,
       }}
     >

@@ -13,8 +13,10 @@ inputs:
   required:
     - brand_profile: "Brand profile YAML with archetypes and personality traits"
     - archetypes: "1-3 brand archetypes from the Jungian framework (e.g., Explorer, Creator, Innocent)"
+    - personality_traits: "5 personality scales (formal_casual, traditional_modern, serious_playful, conservative_bold, minimal_expressive) each 1-5"
     - industry: "Industry vertical for contextualizing visual references"
   optional:
+    - visual_preferences: "Explicit visual preferences from brand profile (colors, typography style, imagery style)"
     - mood_keywords: "Additional mood/aesthetic keywords (e.g., ethereal, bold, handcrafted)"
     - geographic_focus: "Geographic region for cultural relevance (default: global)"
     - exclude_urls: "URLs to exclude from results (e.g., already-analyzed competitors)"

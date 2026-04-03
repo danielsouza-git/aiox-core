@@ -1,0 +1,13 @@
+{# Navigation Partial: floating-pill — PLAYFUL-DYNAMIC family (PDL-7) #}
+<nav class="layout-nav layout-nav--floating-pill" role="navigation" aria-label="Main navigation">
+  <div class="container">
+    <ul class="nav-links" role="list">
+      <li><a href="index.html">{{ clientId }}</a></li>
+      {% if nav and nav.links %}
+        {% for link in nav.links %}
+          <li><a href="{{ link.href }}">{{ link.label }}</a></li>
+        {% endfor %}
+      {% endif %}
+    </ul>
+  </div>
+</nav>

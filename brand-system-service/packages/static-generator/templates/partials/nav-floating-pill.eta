@@ -1,0 +1,12 @@
+<% /* Navigation Partial: floating-pill — PLAYFUL-DYNAMIC family */ %>
+<nav class="layout-nav layout-nav--floating-pill" role="navigation" aria-label="Brand book sections">
+  <ul class="nav-links" role="list">
+    <% for (const page of it.pages) { %>
+    <li>
+      <a href="./<%= page.slug %>.html"<% if (it.currentPage.slug === page.slug) { %> class="active" aria-current="page"<% } %>>
+        <%= page.title %>
+      </a>
+    </li>
+    <% } %>
+  </ul>
+</nav>

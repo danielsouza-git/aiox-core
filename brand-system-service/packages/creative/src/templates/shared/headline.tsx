@@ -4,6 +4,8 @@
  * Renders a styled headline text block driven by brand tokens.
  * Uses flexbox only (no CSS Grid — ADR-005 / Satori constraint).
  * Inline styles only — no CSS classes, no Tailwind, no CSS modules.
+ *
+ * PDL-8: Spacing multiplied by layout whitespaceMultiplier when present.
  */
 
 import React from 'react';
@@ -47,6 +49,10 @@ export function Headline({
 
   const resolvedColor = color ?? tokenStr(tokens.color, 'primary', '#111111');
 
+  // PDL-8: Scale line-height and letter-spacing by whitespace multiplier
+  const wsMultiplier = tokens.layout?.whitespaceMultiplier ?? 1;
+  const lineHeight = 1.2 * wsMultiplier;
+
   return (
     <div
       style={{
@@ -61,7 +67,7 @@ export function Headline({
           fontWeight: 700,
           color: resolvedColor,
           textAlign: align,
-          lineHeight: 1.2,
+          lineHeight,
           letterSpacing: '-0.02em',
         }}
       >

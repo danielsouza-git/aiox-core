@@ -1,0 +1,137 @@
+{
+  "layout": {
+    "family": {
+      "name": {
+        "$value": "adventurous-open",
+        "$type": "string",
+        "$description": "Resolved layout family name"
+      }
+    },
+    "corner": {
+      "radiusBase": {
+        "$value": "3px",
+        "$type": "dimension",
+        "$description": "Base corner radius for general elements"
+      },
+      "radiusSmall": {
+        "$value": "4px",
+        "$type": "dimension",
+        "$description": "Small corner radius for compact elements"
+      },
+      "radiusLarge": {
+        "$value": "12px",
+        "$type": "dimension",
+        "$description": "Large corner radius for hero/card elements"
+      }
+    },
+    "whitespace": {
+      "density": {
+        "$value": "generous",
+        "$type": "string",
+        "$description": "Overall whitespace density category"
+      },
+      "multiplier": {
+        "$value": 1.17,
+        "$type": "number",
+        "$description": "Whitespace scaling multiplier"
+      },
+      "sectionGap": {
+        "$value": "80px",
+        "$type": "dimension",
+        "$description": "Vertical gap between major sections"
+      },
+      "contentPadding": {
+        "$value": "64px",
+        "$type": "dimension",
+        "$description": "Content area padding"
+      }
+    },
+    "nav": {
+      "style": {
+        "$value": "sticky-minimal",
+        "$type": "string",
+        "$description": "Navigation layout style"
+      },
+      "width": {
+        "$value": "100%",
+        "$type": "string",
+        "$description": "Navigation width"
+      },
+      "height": {
+        "$value": "48px",
+        "$type": "dimension",
+        "$description": "Navigation height"
+      }
+    },
+    "divider": {
+      "style": {
+        "$value": "thin-geometric",
+        "$type": "string",
+        "$description": "Section divider visual style"
+      },
+      "height": {
+        "$value": "1px",
+        "$type": "dimension",
+        "$description": "Divider stroke height"
+      }
+    },
+    "animation": {
+      "entrance": {
+        "$value": "scroll-reveal",
+        "$type": "string",
+        "$description": "Element entrance animation type"
+      },
+      "duration": {
+        "$value": "280ms",
+        "$type": "duration",
+        "$description": "Animation duration"
+      },
+      "easing": {
+        "$value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "$type": "cubicBezier",
+        "$description": "Animation easing curve"
+      }
+    },
+    "grid": {
+      "rhythm": {
+        "$value": "editorial-wide",
+        "$type": "string",
+        "$description": "Grid layout rhythm pattern"
+      },
+      "maxWidth": {
+        "$value": "1200px",
+        "$type": "dimension",
+        "$description": "Maximum content width"
+      },
+      "columns": {
+        "$value": 2,
+        "$type": "number",
+        "$description": "Number of grid columns"
+      }
+    },
+    "section": {
+      "background": {
+        "$value": "full-bleed-image",
+        "$type": "string",
+        "$description": "Section background treatment"
+      },
+      "heroHeight": {
+        "$value": "80vh",
+        "$type": "dimension",
+        "$description": "Hero section viewport height"
+      }
+    },
+    "component": {
+      "cardShape": {
+        "$value": "subtle",
+        "$type": "string",
+        "$description": "Card element shape style"
+      },
+      "shadowIntensity": {
+        "$value": "light",
+        "$type": "string",
+        "$description": "Component shadow depth"
+      }
+    }
+  }
+}

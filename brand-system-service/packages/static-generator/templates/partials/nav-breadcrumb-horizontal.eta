@@ -1,0 +1,15 @@
+<% /* Navigation Partial: breadcrumb-horizontal — WARM-ARTISAN family */ %>
+<header class="layout-nav layout-nav--breadcrumb-horizontal" role="navigation" aria-label="Brand book sections">
+  <nav>
+    <ul class="nav-links" role="list">
+      <li><a href="./index.html"><%= it.brand.clientName %></a></li>
+      <% for (const page of it.pages) { %>
+      <li>
+        <a href="./<%= page.slug %>.html"<% if (it.currentPage.slug === page.slug) { %> class="active" aria-current="page"<% } %>>
+          <%= page.title %>
+        </a>
+      </li>
+      <% } %>
+    </ul>
+  </nav>
+</header>

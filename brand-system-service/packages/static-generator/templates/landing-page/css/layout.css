@@ -1,8 +1,19 @@
 /* Layout — Grid, Container, Spacing Utilities */
 
+/* PDL-7: Layout custom properties from layout tokens (with backward-compat fallbacks) */
+:root {
+  --layout-corner-radius: var(--layout-corner-radiusBase, 8px);
+  --layout-whitespace-mult: var(--layout-whitespace-multiplier, 1);
+  --layout-section-gap: var(--layout-whitespace-sectionGap, 48px);
+  --layout-content-padding: var(--layout-whitespace-contentPadding, 40px);
+  --layout-grid-max-width: var(--layout-grid-maxWidth, 1200px);
+  --layout-animation-duration: var(--layout-animation-duration, 0ms);
+  --layout-animation-easing: var(--layout-animation-easing, ease);
+}
+
 .container {
   width: 100%;
-  max-width: 1200px;
+  max-width: var(--layout-grid-max-width, 1200px);
   margin: 0 auto;
   padding: 0 1rem;
 }
@@ -175,4 +186,298 @@
   font-size: 0.875rem;
   color: var(--color-neutral-500, #6b7280);
   border-top: 1px solid var(--color-neutral-200, #e5e7eb);
+}
+
+/* ===================================================================
+   PDL-7: Layout Family Navigation Styles
+   =================================================================== */
+
+/* Base nav styles */
+.layout-nav {
+  width: 100%;
+}
+
+.layout-nav .nav-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.layout-nav .nav-links a {
+  text-decoration: none;
+  color: var(--color-neutral-700, #374151);
+  font-weight: 500;
+  font-size: 0.875rem;
+}
+
+.layout-nav .nav-links a:hover {
+  color: var(--color-primary-500, #2563eb);
+}
+
+/* centered-top — ETHEREAL */
+.layout-nav--centered-top {
+  text-align: center;
+  padding: 1.5rem 0;
+  background: transparent;
+}
+
+.layout-nav--centered-top .nav-brand {
+  margin-bottom: 0.75rem;
+}
+
+.layout-nav--centered-top .nav-brand__name {
+  font-weight: 700;
+  font-size: 1.125rem;
+}
+
+.layout-nav--centered-top .nav-links {
+  justify-content: center;
+}
+
+/* sidebar-fixed — BOLD-STRUCTURED */
+.layout-nav--sidebar-fixed {
+  padding: 1rem;
+  border-bottom: 2px solid var(--color-neutral-200, #e5e7eb);
+  background: var(--color-neutral-50, #f8f9fa);
+}
+
+.layout-nav--sidebar-fixed .nav-brand__name {
+  font-weight: 800;
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: block;
+  margin-bottom: 0.75rem;
+}
+
+/* breadcrumb-horizontal — WARM-ARTISAN */
+.layout-nav--breadcrumb-horizontal {
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--color-neutral-200, #e5e7eb);
+}
+
+.layout-nav--breadcrumb-horizontal .nav-links li + li::before {
+  content: "/";
+  margin-right: 0.75rem;
+  color: var(--color-neutral-400, #9ca3af);
+}
+
+/* sticky-minimal — ADVENTUROUS-OPEN */
+.layout-nav--sticky-minimal {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  padding: 0.75rem 0;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.layout-nav--sticky-minimal .container {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.layout-nav--sticky-minimal .nav-brand__name {
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* floating-pill — PLAYFUL-DYNAMIC */
+.layout-nav--floating-pill {
+  position: fixed;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+  background: var(--color-neutral-900, #1a1a2e);
+  color: #fff;
+  border-radius: var(--layout-corner-radius, 9999px);
+  padding: 0.5rem 1.5rem;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
+  max-width: 90vw;
+}
+
+.layout-nav--floating-pill .nav-links a {
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.8125rem;
+}
+
+.layout-nav--floating-pill .nav-links a:hover {
+  color: #fff;
+}
+
+/* inline-minimal — REBEL-EDGE */
+.layout-nav--inline-minimal {
+  padding: 1rem 0;
+  border-bottom: 3px solid var(--color-neutral-900, #1a1a2e);
+}
+
+.layout-nav--inline-minimal .nav-links a {
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+  font-size: 0.75rem;
+}
+
+/* ===================================================================
+   PDL-7: Layout Family Body Modifiers
+   =================================================================== */
+
+/* Whitespace and corners vary by family class on <body> */
+.layout-family--ethereal .solution__card,
+.layout-family--ethereal .testimonial-card,
+.layout-family--ethereal .pricing-card {
+  border-radius: 24px;
+}
+
+.layout-family--ethereal .btn {
+  border-radius: 9999px;
+}
+
+.layout-family--ethereal .metrics-strip {
+  border-radius: 24px;
+}
+
+.layout-family--bold-structured .solution__card,
+.layout-family--bold-structured .testimonial-card,
+.layout-family--bold-structured .pricing-card {
+  border-radius: 2px;
+}
+
+.layout-family--bold-structured .btn {
+  border-radius: 2px;
+}
+
+.layout-family--warm-artisan .solution__card,
+.layout-family--warm-artisan .testimonial-card,
+.layout-family--warm-artisan .pricing-card {
+  border-radius: 12px;
+}
+
+.layout-family--adventurous-open .solution__card,
+.layout-family--adventurous-open .testimonial-card,
+.layout-family--adventurous-open .pricing-card {
+  border-radius: 6px;
+}
+
+.layout-family--playful-dynamic .solution__card,
+.layout-family--playful-dynamic .testimonial-card,
+.layout-family--playful-dynamic .pricing-card {
+  border-radius: 16px;
+}
+
+.layout-family--playful-dynamic .btn {
+  border-radius: 16px;
+}
+
+.layout-family--rebel-edge .solution__card,
+.layout-family--rebel-edge .testimonial-card,
+.layout-family--rebel-edge .pricing-card {
+  border-radius: 0;
+}
+
+.layout-family--rebel-edge .btn {
+  border-radius: 0;
+}
+
+/* ===================================================================
+   PDL-7: Animation entrance classes
+   =================================================================== */
+
+@keyframes layout-fade-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes layout-slide-in {
+  from { opacity: 0; transform: translateX(-20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes layout-bounce-in {
+  0% { opacity: 0; transform: scale(0.9); }
+  60% { transform: scale(1.02); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes layout-cut-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.layout-family--ethereal .section,
+.layout-family--ethereal .hero {
+  animation: layout-fade-up var(--layout-animation-duration, 300ms) var(--layout-animation-easing, ease) both;
+}
+
+.layout-family--warm-artisan .section,
+.layout-family--warm-artisan .hero {
+  animation: layout-slide-in var(--layout-animation-duration, 250ms) var(--layout-animation-easing, ease) both;
+}
+
+.layout-family--playful-dynamic .section,
+.layout-family--playful-dynamic .hero {
+  animation: layout-bounce-in var(--layout-animation-duration, 350ms) var(--layout-animation-easing, ease) both;
+}
+
+.layout-family--rebel-edge .section,
+.layout-family--rebel-edge .hero {
+  animation: layout-cut-in var(--layout-animation-duration, 150ms) linear both;
+}
+
+/* Respect reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .layout-family--ethereal .section,
+  .layout-family--ethereal .hero,
+  .layout-family--warm-artisan .section,
+  .layout-family--warm-artisan .hero,
+  .layout-family--playful-dynamic .section,
+  .layout-family--playful-dynamic .hero,
+  .layout-family--rebel-edge .section,
+  .layout-family--rebel-edge .hero {
+    animation: none;
+  }
+}
+
+/* ===================================================================
+   PDL-7: Responsive Layout Adjustments
+   =================================================================== */
+
+/* Mobile (375px) */
+@media (max-width: 767px) {
+  .layout-nav--floating-pill {
+    bottom: 0.75rem;
+    padding: 0.375rem 1rem;
+  }
+
+  .layout-nav--floating-pill .nav-links {
+    gap: 0.5rem;
+  }
+
+  .layout-nav--sticky-minimal .container {
+    flex-wrap: wrap;
+  }
+}
+
+/* Tablet (768px) */
+@media (min-width: 768px) {
+  .layout-nav--centered-top .nav-links {
+    gap: 1.5rem;
+  }
+}
+
+/* Desktop (1440px) */
+@media (min-width: 1440px) {
+  .layout-nav--centered-top .nav-links {
+    gap: 2rem;
+  }
+
+  .layout-nav--sticky-minimal .container {
+    gap: 2rem;
+  }
 }

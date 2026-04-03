@@ -1,0 +1,2 @@
+<% /* Divider Partial: thin-geometric */ %>
+<div class="layout-divider layout-divider--thin-geometric" role="separator" aria-hidden="true"></div>

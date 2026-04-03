@@ -1,0 +1,15 @@
+{# Navigation Partial: sticky-minimal — ADVENTUROUS-OPEN family (PDL-7) #}
+<header class="layout-nav layout-nav--sticky-minimal" role="navigation" aria-label="Main navigation">
+  <div class="container">
+    <span class="nav-brand__name">{{ clientId }}</span>
+    <nav>
+      <ul class="nav-links" role="list">
+        {% if nav and nav.links %}
+          {% for link in nav.links %}
+            <li><a href="{{ link.href }}">{{ link.label }}</a></li>
+          {% endfor %}
+        {% endif %}
+      </ul>
+    </nav>
+  </div>
+</header>

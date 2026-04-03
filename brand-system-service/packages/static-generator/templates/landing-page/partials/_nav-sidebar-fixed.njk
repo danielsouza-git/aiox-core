@@ -1,0 +1,16 @@
+{# Navigation Partial: sidebar-fixed — BOLD-STRUCTURED family (PDL-7, default) #}
+<aside class="layout-nav layout-nav--sidebar-fixed" role="navigation" aria-label="Main navigation">
+  <div class="nav-brand">
+    <span class="nav-brand__name">{{ clientId }}</span>
+  </div>
+  <nav>
+    <ul class="nav-links" role="list">
+      {% if nav and nav.links %}
+        {% for link in nav.links %}
+          <li><a href="{{ link.href }}">{{ link.label }}</a></li>
+        {% endfor %}
+      {% endif %}
+      <li><a href="#main-content">Overview</a></li>
+    </ul>
+  </nav>
+</aside>

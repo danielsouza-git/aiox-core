@@ -57,15 +57,38 @@ export interface TokenGroup {
 }
 
 /**
+ * Flattened layout tokens for creative pipeline token substitution.
+ * Consumed as inline style values by Satori templates (Phase 1 — token substitution only).
+ *
+ * Source: layout-engine LayoutBrief, flattened for direct style injection.
+ * Reference: docs/architecture/personality-driven-layouts.md Section 10.
+ */
+export interface LayoutTokenFlat {
+  readonly family: string;
+  readonly cornerRadiusBase: string;
+  readonly cornerRadiusSmall: string;
+  readonly whitespaceMultiplier: number;
+  readonly contentPadding: string;
+  readonly cardShape: string;       // sharp|subtle|rounded|pill
+  readonly shadowIntensity: string; // none|light|medium|deep
+  readonly dividerStyle: string;
+}
+
+/**
  * TokenSet maps W3C DTCG token keys (colors, typography, spacing)
  * so templates can reference `tokens.color.primary` and receive
  * the correct value injected at render time.
+ *
+ * The optional `layout` field carries flattened layout tokens for
+ * visual treatment (PDL-8). When undefined, templates fall back to
+ * their current hardcoded values (backward compatible).
  */
 export interface TokenSet {
   readonly color?: TokenGroup;
   readonly typography?: TokenGroup;
   readonly spacing?: TokenGroup;
-  readonly [category: string]: TokenGroup | undefined;
+  readonly layout?: LayoutTokenFlat;
+  readonly [category: string]: TokenGroup | LayoutTokenFlat | undefined;
 }
 
 // ---------------------------------------------------------------------------
@@ -188,6 +211,44 @@ export function tokenNum(
   const token = group[key];
   if (token && '$value' in token) return Number(token.$value);
   return fallback;
+}
+
+// ---------------------------------------------------------------------------
+// Layout token helpers (PDL-8)
+// ---------------------------------------------------------------------------
+
+/** Map cardShape token to a concrete border-radius value. */
+const CARD_SHAPE_RADIUS: Record<string, string> = {
+  sharp: '0px',
+  subtle: '8px',
+  rounded: '16px',
+  pill: '999px',
+};
+
+/** Map shadowIntensity token to a concrete box-shadow value. */
+const SHADOW_INTENSITY: Record<string, string> = {
+  none: 'none',
+  light: '0 2px 8px rgba(0,0,0,0.08)',
+  medium: '0 4px 16px rgba(0,0,0,0.12)',
+  deep: '0 8px 32px rgba(0,0,0,0.18)',
+};
+
+/**
+ * Resolve cardShape token to a CSS border-radius value.
+ * Falls back to the provided default when layout tokens are absent.
+ */
+export function resolveCardRadius(layout: LayoutTokenFlat | undefined, fallback: string): string {
+  if (!layout) return fallback;
+  return CARD_SHAPE_RADIUS[layout.cardShape] ?? fallback;
+}
+
+/**
+ * Resolve shadowIntensity token to a CSS box-shadow value.
+ * Falls back to the provided default when layout tokens are absent.
+ */
+export function resolveShadow(layout: LayoutTokenFlat | undefined, fallback: string): string {
+  if (!layout) return fallback;
+  return SHADOW_INTENSITY[layout.shadowIntensity] ?? fallback;
 }
 
 // ---------------------------------------------------------------------------

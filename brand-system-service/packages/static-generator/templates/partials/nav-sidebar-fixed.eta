@@ -1,0 +1,62 @@
+<% /* Navigation Partial: sidebar-fixed — BOLD-STRUCTURED family (current default) */ %>
+<aside class="layout-nav layout-nav--sidebar-fixed sidebar" role="navigation" aria-label="Brand book sections">
+  <div class="sidebar__brand">
+    <img src="./assets/logo.svg" alt="<%= it.brand.clientName %> logo" class="sidebar__logo" width="40" height="40">
+    <div class="sidebar__brand-name"><%= it.brand.clientName %></div>
+    <% if (it.brand.tagline) { %>
+    <div class="sidebar__brand-tagline"><%= it.brand.tagline %></div>
+    <% } %>
+  </div>
+
+  <div class="search-container" style="position: relative;">
+    <label for="brand-search" class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);">Search brand book</label>
+    <input type="search" id="brand-search" class="search-input" placeholder="Search..." aria-label="Search brand book">
+    <div id="search-results" class="search-results" role="listbox" aria-label="Search results"></div>
+  </div>
+
+  <nav>
+    <% if (it.navigationTree && it.navigationTree.length > 0) { %>
+    <ul class="nav-tree" role="list">
+      <% for (const section of it.navigationTree) { %>
+      <% const sectionActive = section.children.some(c => c.slug === it.currentPage.slug); %>
+      <li class="nav-section<%= sectionActive ? ' nav-section--active' : '' %>">
+        <% if (section.children.length === 1 && section.id === 'home') { %>
+        <a href="<%= section.children[0].path %>" class="nav-section__header nav-section__header--link<%= it.currentPage.slug === section.children[0].slug ? ' nav-item--active' : '' %>"<% if (it.currentPage.slug === section.children[0].slug) { %> aria-current="page"<% } %>>
+          <span class="nav-section__icon"><%~ section.icon %></span>
+          <span class="nav-section__title"><%= section.children[0].title %></span>
+        </a>
+        <% } else { %>
+        <details class="nav-section__details"<%= sectionActive ? ' open' : '' %>>
+          <summary class="nav-section__header">
+            <span class="nav-section__icon"><%~ section.icon %></span>
+            <span class="nav-section__title"><%= section.title %></span>
+            <span class="nav-section__chevron" aria-hidden="true"></span>
+          </summary>
+          <ul class="nav-section__items" role="list">
+            <% for (const child of section.children) { %>
+            <li>
+              <a href="<%= child.path %>" class="nav-item<%= it.currentPage.slug === child.slug ? ' nav-item--active' : '' %><%= child.placeholder ? ' nav-item--placeholder' : '' %>"<% if (it.currentPage.slug === child.slug) { %> aria-current="page"<% } %><% if (child.placeholder) { %> aria-disabled="true"<% } %>>
+                <%= child.title %>
+                <% if (child.placeholder) { %><span class="nav-item__badge">Soon</span><% } %>
+              </a>
+            </li>
+            <% } %>
+          </ul>
+        </details>
+        <% } %>
+      </li>
+      <% } %>
+    </ul>
+    <% } else { %>
+    <ul role="list">
+      <% for (const page of it.pages) { %>
+      <li>
+        <a href="./<%= page.slug %>.html"<% if (it.currentPage.slug === page.slug) { %> class="active" aria-current="page"<% } %>>
+          <%= page.title %>
+        </a>
+      </li>
+      <% } %>
+    </ul>
+    <% } %>
+  </nav>
+</aside>

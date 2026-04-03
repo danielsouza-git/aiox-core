@@ -1,68 +1,124 @@
 # Session Handoff — Brand System Service
 
-**Date:** 2026-03-30
-**Last session:** Wave A completa — 6 stories implementadas, 111 testes passando, stories marcadas Done
-**Next:** QA re-run em A.8 + A.4 (concerns/fail anteriores resolvidos) + commit stories + resolver pendencias P3
+**Date:** 2026-04-03
+**Last session:** Implementacao YOLO de 8 stories PDL (1-6, 10-11) — 464 testes, 0 regressoes
+**Next:** Implementar PDL-7, PDL-8, PDL-9 (Wave 3 — desbloqueadas) + QA gate + commit
 
 ---
 
 ## Estado Atual do BSS
 
-### Code — MERGED to main via PR #4
-- **Testes:** 1875+ passando (base) + 111 Wave A testes
-- **Epics:** A (Wave 1+2+3 COMPLETE) + C (Wave 3) — ALL MERGED
+### Code — main (uncommitted)
+- **Testes layout-engine:** 464 passando (17 suites, 0 falhas)
+- **Epics:** A (COMPLETE) + C (COMPLETE) + D (8/11 stories Ready for Review)
+- **Package novo:** `@bss/layout-engine` com resolveLayout() API publica
+
+### EPIC-BSS-D: Personality-Driven Layouts — Progresso
+
+| Story | Titulo | SP | Status | Testes |
+|-------|--------|-----|--------|--------|
+| PDL-1 | Visual Reference Research Task | 3 | Ready for Review | 50 |
+| PDL-2 | Layout Brief Task | 2 | Ready for Review | 59 |
+| PDL-3 | Brand Book Delivery Workflow Integration | 2 | Ready for Review | 30 |
+| PDL-4 | Brand Book Builder Layout Generation | 3 | Ready for Review | 110 |
+| PDL-5 | PoC - Stray Innocence (ETHEREAL) | 3 | Ready for Review | 30 |
+| PDL-6 | PoC - Nova Vista Cafe (ADVENTUROUS-OPEN) | 3 | Ready for Review | 46 |
+| PDL-7 | AI-Generated Landing Pages | 3 | **Draft (GO)** | - |
+| PDL-8 | Social Posts Visual Treatment | 2 | **Draft (GO)** | - |
+| PDL-9 | Quality Gates for Generated Layouts | 2 | **Draft (GO)** | - |
+| PDL-10 | Layout Engine with 6 Families | 3 | Ready for Review | 133 |
+| PDL-11 | Fallback Integration in Static Generator | 2 | Ready for Review | 48 |
+| **Total** | | **28 SP** | **8/11 done** | **506** |
+
+### PoC Diferenciacao Confirmada
+
+| Dimensao | Stray Innocence (ETHEREAL) | Nova Vista Cafe (ADVENTUROUS-OPEN) |
+|----------|---------------------------|-------------------------------------|
+| Navigation | centered-top | sticky-minimal |
+| Corners | 12px | 3px |
+| Whitespace | spacious (1.5x) | generous (1.17x) |
+| Dividers | organic-wave | thin-geometric |
+| Animation | fade-up (300ms) | scroll-reveal (280ms) |
+| Grid | centered-single | editorial-wide |
+| Section BG | soft-fill | full-bleed-image |
+
+**7/7 dimensoes diferenciadas** — pipeline valida diferenciacao de marca.
 
 ---
 
-## Wave A — Epic BSS-A (COMPLETO)
+## Arquivos Criados Nesta Sessao (~80 files)
 
-| Story | Tests | QA Gate | Status |
-|-------|-------|---------|--------|
-| BSS-A.8 (Navigation) | 34 | CONCERNS (wiring gap resolvido) | **Done** |
-| BSS-A.4 (Surfaces & Borders) | 21 | FAIL (pre-implementacao, agora ok) | **Done** |
-| BSS-A.3 (Logo Usage) | 9 | **PASS** | **Done** |
-| BSS-A.6 (Icon System) | 10 | **PASS** | **Done** |
-| BSS-A.1 (Moodboard) | 13 | **PASS** | **Done** |
-| BSS-A.2 (Movement/Strategy) | 21 | **PASS** | **Done** |
+### Package: @bss/layout-engine
+```
+brand-system-service/packages/layout-engine/
+  package.json, jest.config.js
+  src/
+    index.js, types.js, family-resolver.js, personality-modulator.js,
+    token-emitter.js, defaults.js, layout-brief-parser.js,
+    layout-css-generator.js, fallback-resolver.js, token-writer.js,
+    css-var-generator.js
+    families/ (ethereal, bold-structured, warm-artisan, adventurous-open, playful-dynamic, rebel-edge, index)
+    validators/ (reference-input, reference-output, brief-output, layout-token)
+  __tests__/
+    family-resolver, personality-modulator, token-emitter, integration,
+    layout-brief-parser, layout-css-generator, defaults,
+    fallback-resolver, token-writer, css-var-generator
+    validators/ (reference-validators, brief-validator, layout-token-validator)
+    workflows/ (brand-book-delivery-pdl)
+    poc/ (stray-innocence, nova-vista-cafe, differentiation)
+```
 
-**Total:** 111 testes, 6 suites, ALL PASSING
+### Eta Partials (static-generator)
+```
+brand-system-service/packages/static-generator/templates/partials/
+  nav-centered-top.eta, nav-sidebar-fixed.eta, nav-breadcrumb-horizontal.eta,
+  nav-sticky-minimal.eta, nav-floating-pill.eta, nav-inline-minimal.eta
+  divider-solid-thin.eta, divider-solid-thick.eta, divider-organic-wave.eta,
+  divider-textured-line.eta, divider-thin-geometric.eta, divider-zigzag-wave.eta,
+  divider-slash-raw.eta, divider-none.eta
+```
 
-### Implementacao Verificada
-- `static-generator.ts`: imports + wiring para todas 6 pages
-- `nav-tree.ts`: 6 sections, 19 pages, breadcrumbs, JSON-LD
-- `layout.eta`: hierarchical nav, hamburger mobile, breadcrumbs
-- Page data: surfaces, semantic-tokens, icons, logo-usage, moodboard, movement
-- Templates .eta: surfaces, icons, logo-usage, moodboard, movement
-- CSS: todas as sections com responsive (768px breakpoint)
+### Brand Data
+```
+brand-system-service/brands/stray-innocence/ (brand-profile, layout-brief, visual-references, tokens/layout/layout.json)
+brand-system-service/brands/nova-vista-cafe/ (brand-profile, layout-brief, visual-references, tokens/layout/layout.json)
+```
+
+### Workflows + Tasks
+```
+squads/research-intelligence/tasks/visual-reference-research.md (MODIFIED)
+squads/brand-pipeline/tasks/layout-brief.md (CREATE)
+squads/branding/workflows/brand-book-delivery.yaml (MODIFIED — 3 fixes)
+squads/brand-pipeline/config.yaml (MODIFIED)
+```
+
+### Reports
+```
+docs/reviews/pdl-poc-stray-innocence.md
+docs/reviews/pdl-poc-nova-vista-cafe.md
+docs/reviews/pdl-differentiation-comparison.md
+```
 
 ---
 
-## Stories Done (verificadas esta sessao + anteriores)
+## Proximo Passo
 
-| Story | Status | Tests |
-|-------|--------|-------|
-| BSS-A.1 (Moodboard) | Done | 13 |
-| BSS-A.2 (Movement/Strategy) | Done | 21 |
-| BSS-A.3 (Logo Usage) | Done | 9 |
-| BSS-A.4 (Surfaces & Borders) | Done | 21 |
-| BSS-A.5 (Semantic Tokens) | Done | 22 |
-| BSS-A.6 (Icon System) | Done | 10 |
-| BSS-A.8 (Navigation) | Done | 34 |
-| BSS-C.2 (SEO Documentation) | Done | 36 |
-| BSS-C.3 (Editorial Strategy) | Done | 29 |
+3 stories restantes (Wave 3), todas desbloqueadas:
+- **PDL-7:** AI-Generated Landing Pages (3 SP, @dev)
+- **PDL-8:** Social Posts Visual Treatment (2 SP, @dev)
+- **PDL-9:** Quality Gates for Generated Layouts (2 SP, @qa)
+
+Depois: QA gate nas 8 stories prontas + commit + PR.
 
 ---
 
-## Pendencias
+## Documentos-Chave
 
-| # | Item | Prioridade |
-|---|------|-----------|
-| 1 | ~~Implementar Wave A (6 stories Ready)~~ DONE | ~~P1~~ |
-| 2 | QA re-run BSS-A.8 + BSS-A.4 (concerns/fail agora resolvidos) | P2 |
-| 3 | Resolver BSS-1.6 CONCERNS (sub-tasks + Change Log) | P3 |
-| 4 | Resolver MH-TR-001 CONCERNS (npm pre-existente) | P3 |
-| 5 | Story files sao untracked (nao em git) | P3 |
-| 6 | Research-Intelligence squad pendente | P2 |
+| Documento | Descricao |
+|-----------|-----------|
+| `docs/architecture/personality-driven-layouts.md` | Arquitetura PDL (15 sections, 5 ADRs) |
+| `docs/stories/active/pdl-*.story.md` | 11 story files |
+| `docs/reviews/pdl-differentiation-comparison.md` | Comparacao PoC side-by-side |
 
 ---
 
@@ -71,14 +127,15 @@
 ```
 Leia docs/session-handoff-brand-system-service.md.
 
-CONTEXTO: Wave A COMPLETA. 6 stories Done, 111 testes passando.
-9 total BSS stories Done (A.1-A.8 + C.2 + C.3).
+CONTEXTO: EPIC-BSS-D — 8/11 stories implementadas (Ready for Review), 506 testes.
+Layout engine: brand-system-service/packages/layout-engine/
+Arquitetura: docs/architecture/personality-driven-layouts.md
+PoCs validados: Stray Innocence (ETHEREAL) + Nova Vista Cafe (ADVENTUROUS-OPEN)
 
-OPCOES:
-1. QA re-run para BSS-A.8 e BSS-A.4 (concerns/fail anteriores resolvidos)
-2. Commit todas as stories atualizadas
-3. Resolver pendencias P3 (BSS-1.6, MH-TR-001)
-4. Iniciar proximo epic/feature
+PROXIMO: Implementar PDL-7 + PDL-8 + PDL-9 em YOLO mode (todos desbloqueados).
+Depois: QA gate + commit todas as 11 stories + PR para EPIC-BSS-D.
+
+NADA FOI COMMITADO — todos os arquivos estao uncommitted no working tree.
 ```
 
-*Handoff atualizado 2026-03-30 — Wave A complete, 111 tests passing*
+*Handoff atualizado 2026-04-03 — 8/11 stories implementadas, 506 testes*

@@ -1,0 +1,2 @@
+<% /* Divider Partial: textured-line */ %>
+<div class="layout-divider layout-divider--textured-line" role="separator" aria-hidden="true"></div>

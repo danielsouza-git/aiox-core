@@ -1,0 +1,14 @@
+<% /* Navigation Partial: inline-minimal — REBEL-EDGE family */ %>
+<header class="layout-nav layout-nav--inline-minimal" role="navigation" aria-label="Brand book sections">
+  <nav>
+    <ul class="nav-links" role="list">
+      <% for (const page of it.pages) { %>
+      <li>
+        <a href="./<%= page.slug %>.html"<% if (it.currentPage.slug === page.slug) { %> class="active" aria-current="page"<% } %>>
+          <%= page.title %>
+        </a>
+      </li>
+      <% } %>
+    </ul>
+  </nav>
+</header>

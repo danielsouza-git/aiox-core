@@ -1,0 +1,11 @@
+brand:
+  name: "Stray Innocence"
+  industry: "fashion"
+  personality:
+    archetypes: ["Innocent", "Dreamer", "Creator"]
+    traits:
+      formal_casual: 2
+      traditional_modern: 3
+      serious_playful: 3
+      conservative_bold: 2
+      minimal_expressive: 3

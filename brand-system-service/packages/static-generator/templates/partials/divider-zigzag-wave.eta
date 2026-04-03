@@ -1,0 +1,2 @@
+<% /* Divider Partial: zigzag-wave */ %>
+<div class="layout-divider layout-divider--zigzag-wave" role="separator" aria-hidden="true"></div>

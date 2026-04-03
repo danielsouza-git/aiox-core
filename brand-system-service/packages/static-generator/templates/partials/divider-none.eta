@@ -1,0 +1,2 @@
+<% /* Divider Partial: none — no visual divider */ %>
+<div class="layout-divider layout-divider--none" role="separator" aria-hidden="true"></div>

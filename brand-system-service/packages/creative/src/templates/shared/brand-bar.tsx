@@ -4,6 +4,8 @@
  * Renders a brand logo alongside a color strip at the bottom of templates.
  * Uses flexbox only (no CSS Grid — ADR-005 / Satori constraint).
  * Inline styles only — no CSS classes, no Tailwind, no CSS modules.
+ *
+ * PDL-8: Corner radius and padding now driven by layout tokens with fallback.
  */
 
 import React from 'react';
@@ -25,6 +27,10 @@ export function BrandBar({ tokens, logoUrl, height = 60 }: BrandBarProps): React
   const primaryColor = tokenStr(tokens.color, 'primary', '#333333');
   const secondaryColor = tokenStr(tokens.color, 'secondary', '#666666');
 
+  // PDL-8: Layout token substitution with fallback
+  const cornerRadius = tokens.layout?.cornerRadiusSmall ?? '0px';
+  const barPadding = tokens.layout?.contentPadding ?? '8px 16px';
+
   return (
     <div
       style={{
@@ -34,6 +40,7 @@ export function BrandBar({ tokens, logoUrl, height = 60 }: BrandBarProps): React
         width: '100%',
         height: `${height}px`,
         backgroundColor: '#ffffff',
+        borderRadius: cornerRadius,
       }}
     >
       {/* Brand color strip */}
@@ -51,7 +58,7 @@ export function BrandBar({ tokens, logoUrl, height = 60 }: BrandBarProps): React
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          padding: '8px 16px',
+          padding: barPadding,
         }}
       >
         <img

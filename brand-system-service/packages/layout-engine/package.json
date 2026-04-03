@@ -1,0 +1,12 @@
+{
+  "name": "@bss/layout-engine",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Layout Personality Engine - archetype-to-family resolution, personality modulation, W3C DTCG token emission",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "jest --config ../../jest.config.js --testPathPattern=packages/layout-engine"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}

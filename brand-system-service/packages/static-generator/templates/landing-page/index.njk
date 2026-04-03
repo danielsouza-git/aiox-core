@@ -3,8 +3,24 @@
 <head>
   {% include "partials/head.njk" %}
 </head>
-<body>
+<body class="layout-family--{{ layout.family | default('bold-structured') }}">
   <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  {# PDL-7: Dynamic nav partial based on layout brief #}
+  {% set navStyle = layout.nav.style | default('sidebar-fixed') if layout else 'sidebar-fixed' %}
+  {% if navStyle == 'centered-top' %}
+    {% include "partials/_nav-centered-top.njk" %}
+  {% elif navStyle == 'breadcrumb-horizontal' %}
+    {% include "partials/_nav-breadcrumb-horizontal.njk" %}
+  {% elif navStyle == 'sticky-minimal' %}
+    {% include "partials/_nav-sticky-minimal.njk" %}
+  {% elif navStyle == 'floating-pill' %}
+    {% include "partials/_nav-floating-pill.njk" %}
+  {% elif navStyle == 'inline-minimal' %}
+    {% include "partials/_nav-inline-minimal.njk" %}
+  {% else %}
+    {% include "partials/_nav-sidebar-fixed.njk" %}
+  {% endif %}
 
   {% include "partials/01-hero.njk" %}
 

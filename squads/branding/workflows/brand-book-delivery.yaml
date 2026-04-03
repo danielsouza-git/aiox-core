@@ -28,9 +28,9 @@ steps:
   # (BOLD-STRUCTURED, backward compatible).
   # ============================================
 
-  - id: visual-research
+  - id: visual-reference-research
     name: Visual Reference Research (PDL)
-    agent: brand-strategist
+    agent: competitive-analyst
     feature_flag: bss.personalityDrivenLayouts.enabled
     description: "Research 5-10 reference websites matching the brand's archetype and personality. Delegates to R-I squad's competitive-analyst (Cyrus) or AIOX @analyst for archetype-driven visual research."
     inputs:
@@ -47,9 +47,9 @@ steps:
 
   - id: layout-brief
     name: Layout Brief Generation (PDL)
-    agent: brand-strategist
+    agent: architect
     feature_flag: bss.personalityDrivenLayouts.enabled
-    depends_on: [visual-research]
+    depends_on: [visual-reference-research]
     description: "Resolve layout family via @bss/layout-engine, then synthesize visual references + brand profile into a layout-brief.md with structural recommendations for all 7 layout dimensions."
     inputs:
       - brand_profile
